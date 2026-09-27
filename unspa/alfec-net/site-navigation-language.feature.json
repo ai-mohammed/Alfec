@@ -1285,7 +1285,7 @@
           {
             "id": "a2694293",
             "name": "Go To Page",
-            "intent": "The header navigation, the drawer, the footer site map and in-page links (Les six métiers, Voir les réalisations, Découvrir l'entreprise) open Entreprise, Métiers, Réalisations or Contact. The header underlines the current section (aria-current=page). Choosing a link in the drawer also closes it.",
+            "intent": "The header navigation, the drawer, the footer site map and in-page links (Les métiers, Voir les réalisations, Découvrir l'entreprise) open Entreprise, Métiers, Réalisations or Contact. The header underlines the current section (aria-current=page). Choosing a link in the drawer also closes it.",
             "parameters": [
               {
                 "id": "b9a2ab44",
@@ -1821,7 +1821,7 @@
         "id": "383e8321",
         "name": "Home",
         "type": "screen",
-        "description": "Home page: an opening slideshow of four photos behind the headline « À chaque défi technique, la solution adaptée. », the six trades as photo panels (Génie climatique first and open), the design-to-maintenance cycle, the Oran network map with counters, the references and a call to action.",
+        "description": "Home page: an opening slideshow of four photos behind the headline « À chaque défi technique, la solution adaptée. », the six trades as photo panels under « Six métiers. Plusieurs équipes spécialisées. Une solution coordonnée. » (Génie climatique first and open), the Ingénierie, Réalisation, Maintenance cycle, the network map « Des réalisations à travers le territoire national. » with counters, the references and the call to action « Votre projet est unique. Construisons la solution technique qui lui correspond. ».",
         "stateDefinitions": [],
         "actions": [
           {
@@ -2395,7 +2395,7 @@
           {
             "id": "f07bcbd5",
             "target": "87d29428",
-            "label": "Les six métiers",
+            "label": "Les métiers",
             "description": "Link under the panels to the trades hub."
           },
           {
@@ -3750,7 +3750,7 @@
     "entities": [],
     "events": [],
     "createdAt": "2026-09-26T11:06:22.638Z",
-    "updatedAt": "2026-09-27T16:07:08.072Z",
+    "updatedAt": "2026-09-27T20:42:21.201Z",
     "tags": [
       {
         "type": "core",
@@ -3810,7 +3810,7 @@
       "scenario:20c0c03e": "2026-09-27T15:55:18.246Z",
       "action:df0b881c": "2026-09-27T15:55:18.246Z",
       "scenario:fcd79cde": "2026-09-27T15:55:18.246Z",
-      "action:a2694293": "2026-09-27T15:55:18.246Z",
+      "action:a2694293": "2026-09-27T20:42:21.170Z",
       "rule:ebda88ca": "2026-09-27T15:55:18.246Z",
       "rule:27e8c8ea": "2026-09-27T15:55:18.246Z",
       "rule:089eb420": "2026-09-27T15:55:18.246Z",
@@ -3825,10 +3825,10 @@
       "scenario:e4da407b": "2026-09-27T15:55:18.246Z",
       "scenario:2af9fbbd": "2026-09-27T15:55:18.246Z",
       "action:f7ae7206": "2026-09-27T15:57:17.828Z",
-      "surface:383e8321": "2026-09-27T15:51:52.785Z",
+      "surface:383e8321": "2026-09-27T20:42:21.201Z",
       "rule:eca1e9b1": "2026-09-27T16:07:08.072Z",
       "transition:be09e4fe": "2026-09-27T15:57:02.659Z",
-      "transition:f07bcbd5": "2026-09-27T15:57:02.659Z",
+      "transition:f07bcbd5": "2026-09-27T20:42:21.132Z",
       "transition:5b0298fd": "2026-09-27T15:57:02.659Z",
       "action:abc0235d": "2026-09-27T15:57:02.659Z",
       "rule:41f59c12": "2026-09-27T15:57:02.659Z",

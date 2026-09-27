@@ -13,8 +13,9 @@ const { lang, trade } = Astro.props;
 const href = `${pagePath('contact', lang)}${trade ? `?metier=${trade}` : ''}`;
 
 const copy = {
-  title: { fr: 'Parlons de votre', en: 'Let’s talk about your' },
-  titleEnd: { fr: 'prochain projet.', en: 'next project.' },
+  // Wording supplied by ALFEC (validation questionnaire, 2026-09-27).
+  title: { fr: 'Votre projet est unique.', en: 'Your project is unique.' },
+  titleEnd: { fr: 'Construisons la solution technique qui lui correspond.', en: 'Let’s build the technical solution that fits it.' },
   text: {
     fr: 'Installation neuve, rénovation ou contrat de maintenance : décrivez-nous votre besoin, pièces jointes à l’appui.',
     en: 'New installation, refurbishment or maintenance contract: tell us what you need, with documents attached.',
@@ -52,9 +53,9 @@ const copy = {
   }
 
   .title {
-    font-size: clamp(3.25rem, 1.6rem + 6vw, 8rem);
+    font-size: clamp(2.6rem, 1.4rem + 3.8vw, 5.5rem);
     font-weight: 800;
-    line-height: 0.88;
+    line-height: 0.92;
   }
 
   .title span {

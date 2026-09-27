@@ -65,14 +65,14 @@ export const presentation: Bilingual<string[]> = {
   ],
 };
 
-/** The three competences: the project cycle ALFEC covers. */
+/** The three competences: the project cycle ALFEC covers. Titles and short texts rewritten by ALFEC (2026-09-27). */
 export const competences: { key: string; title: Bilingual; short: Bilingual; text: Bilingual }[] = [
   {
     key: 'engineering',
-    title: { fr: 'Engineering', en: 'Engineering' },
+    title: { fr: 'Ingénierie', en: 'Engineering' },
     short: {
-      fr: 'Les études de vos projets, des premières idées jusqu’au meilleur concept, puis le suivi de l’exécution par des équipes multidisciplinaires.',
-      en: 'The studies for your projects, from first ideas to the best concept, then execution followed by multidisciplinary teams.',
+      fr: 'Nous étudions vos besoins et concevons la solution technique adaptée à votre projet.',
+      en: 'We study your needs and design the technical solution suited to your project.',
     },
     text: {
       fr: 'ALFEC accompagne ses clients pour les études relatives à leurs projets, en partant d’idées diverses jusqu’à aboutir au meilleur concept. Lorsque la phase d’exécution commence, ses équipes compétentes et multidisciplinaires mettent à profit tout leur savoir et leur savoir-faire pour un aboutissement concluant des projets.',
@@ -81,10 +81,10 @@ export const competences: { key: string; title: Bilingual; short: Bilingual; tex
   },
   {
     key: 'installation',
-    title: { fr: 'Réalisations', en: 'Installation' },
+    title: { fr: 'Réalisation', en: 'Installation' },
     short: {
-      fr: 'Des installations techniques conformes aux normes en vigueur, avec des équipes compétentes et des moyens matériels conséquents.',
-      en: 'Technical installations that comply with current standards, delivered by competent teams with substantial equipment.',
+      fr: 'Nos équipes concrétisent cette solution sur le terrain, dans le respect des exigences du projet.',
+      en: 'Our teams deliver that solution on site, in line with the project’s requirements.',
     },
     text: {
       fr: 'ALFEC réalise pour ses clients des installations techniques conformes aux normes en vigueur et qui répondent parfaitement à leurs besoins : génie climatique dans le bâtiment, le tertiaire et l’industrie, protection et détection incendie, froid industriel, installations techniques industrielles. Des équipes techniques compétentes ainsi que des moyens matériels conséquents sont mis à la disposition des projets.',
@@ -95,8 +95,8 @@ export const competences: { key: string; title: Bilingual; short: Bilingual; tex
     key: 'maintenance',
     title: { fr: 'Maintenance', en: 'Maintenance' },
     short: {
-      fr: 'L’entretien régulier des installations, dans le cadre de contrats de maintenance, pour réduire au maximum le risque de pannes.',
-      en: 'Regular servicing of installations under maintenance contracts, to keep the risk of breakdown to a minimum.',
+      fr: 'Nous entretenons vos installations pour préserver leur performance et leur disponibilité.',
+      en: 'We maintain your installations to preserve their performance and availability.',
     },
     text: {
       fr: 'ALFEC effectue l’entretien régulier de ses installations afin de réduire au maximum le risque de pannes. Des contrats de maintenance sont signés avec ses clients pour assurer le bon fonctionnement des installations et réunir les meilleures conditions pour leur maintenance.',

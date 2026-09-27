@@ -39,11 +39,12 @@ const copy = {
   slidesLabel: { fr: 'Photos d’ouverture', en: 'Opening photos' },
   photo: { fr: 'Photo', en: 'Photo' },
   tradesKicker: { fr: 'Nos métiers', en: 'Our trades' },
-  tradesTitle: { fr: 'Six métiers,', en: 'Six trades,' },
-  tradesTitleEnd: { fr: 'une seule équipe.', en: 'one team.' },
+  // Trades, cycle and network wording supplied by ALFEC (validation questionnaire, 2026-09-27).
+  tradesTitle: { fr: 'Six métiers. Plusieurs équipes spécialisées.', en: 'Six trades. Several specialist teams.' },
+  tradesTitleEnd: { fr: 'Une solution coordonnée.', en: 'One coordinated solution.' },
   tradesLead: {
-    fr: 'Née dans le génie climatique au début des années 2000, ALFEC prend aujourd’hui en charge des corps d’état complémentaires, du bâtiment à l’industrie.',
-    en: 'Founded in climate engineering in the early 2000s, ALFEC now takes charge of complementary trades, from buildings to industry.',
+    fr: 'Née dans le génie climatique, ALFEC mobilise aujourd’hui ses équipes spécialisées pour répondre aux besoins techniques des bâtiments et de l’industrie.',
+    en: 'Born in climate engineering, ALFEC now brings its specialist teams to the technical needs of buildings and industry.',
   },
   cycleKicker: { fr: 'Notre accompagnement', en: 'How we work' },
   cycleTitle: { fr: 'De l’étude', en: 'From design' },
@@ -54,11 +55,11 @@ const copy = {
   },
   sectorsLabel: { fr: 'Secteurs', en: 'Sectors' },
   networkKicker: { fr: 'Implantation', en: 'Locations' },
-  networkTitle: { fr: 'Depuis Oran,', en: 'From Oran,' },
-  networkTitleEnd: { fr: 'partout en Algérie.', en: 'across Algeria.' },
+  networkTitle: { fr: 'Des réalisations', en: 'Projects' },
+  networkTitleEnd: { fr: 'à travers le territoire national.', en: 'across the whole country.' },
   networkText: {
-    fr: 'Avec une direction basée à Oran, ALFEC intervient sur l’ensemble du territoire national, grâce à une force d’intervention appréciable et à des équipes de maintenance disponibles et efficaces.',
-    en: 'With its management based in Oran, ALFEC works across the whole country, backed by a substantial field force and available, effective maintenance teams.',
+    fr: 'Avec son siège à Oran, ALFEC déploie ses équipes sur l’ensemble du territoire national pour réaliser des projets techniques dans le bâtiment et l’industrie.',
+    en: 'With its head office in Oran, ALFEC deploys its teams across the whole country to deliver technical projects in buildings and industry.',
   },
   figures: [
     { n: 22, label: { fr: 'Wilayas', en: 'Wilayas' } },
@@ -165,7 +166,7 @@ const arrow = '<path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor"
       <div class="sec-head">
         <div>
           <p class="kicker" data-reveal>{tx(copy.tradesKicker, lang)}</p>
-          <h2 id="trades-title" data-reveal style="--d: 0.06s">{tx(copy.tradesTitle, lang)} <span class="dim">{tx(copy.tradesTitleEnd, lang)}</span></h2>
+          <h2 id="trades-title" class="h2-long" data-reveal style="--d: 0.06s">{tx(copy.tradesTitle, lang)} <span class="dim">{tx(copy.tradesTitleEnd, lang)}</span></h2>
         </div>
         <p class="lead" data-reveal style="--d: 0.12s">{tx(copy.tradesLead, lang)}</p>
       </div>
@@ -210,7 +211,7 @@ const arrow = '<path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor"
     <div class="wrap network">
       <div class="network-copy">
         <p class="kicker" data-reveal>{tx(copy.networkKicker, lang)}</p>
-        <h2 id="network-title" data-reveal style="--d: 0.06s">{tx(copy.networkTitle, lang)} <span class="dim">{tx(copy.networkTitleEnd, lang)}</span></h2>
+        <h2 id="network-title" class="h2-long" data-reveal style="--d: 0.06s">{tx(copy.networkTitle, lang)} <span class="dim">{tx(copy.networkTitleEnd, lang)}</span></h2>
         <p class="lead" data-reveal style="--d: 0.12s">{tx(copy.networkText, lang)}</p>
         <dl class="figures" data-reveal style="--d: 0.18s">
           {

@@ -271,6 +271,11 @@ ol {
   background: currentColor;
 }
 
+/* Section titles made of several short sentences: one step smaller so they hold in three or four lines. */
+.h2-long {
+  font-size: clamp(2.25rem, 1.3rem + 2.8vw, 4.25rem);
+}
+
 /* Second half of a two-tone heading */
 .dim {
   color: var(--dim);

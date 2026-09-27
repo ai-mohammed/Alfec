@@ -43,7 +43,7 @@ export const ui = {
   cta: {
     project: { fr: 'Parler de votre projet', en: 'Discuss your project' },
     call: { fr: 'Appeler', en: 'Call' },
-    allTrades: { fr: 'Les six métiers', en: 'All six trades' },
+    allTrades: { fr: 'Les métiers', en: 'All trades' },
     company: { fr: 'Découvrir l’entreprise', en: 'About the company' },
     projects: { fr: 'Voir les réalisations', en: 'See our projects' },
     tradeMore: { fr: 'En savoir plus', en: 'Learn more' },
