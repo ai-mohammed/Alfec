@@ -1,0 +1,103 @@
+---
+import { contact } from '../data/company';
+import { pagePath } from '../i18n/routes.mjs';
+import { tx, ui, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  /** Pre-select this trade in the enquiry form. */
+  trade?: string;
+}
+
+const { lang, trade } = Astro.props;
+const href = `${pagePath('contact', lang)}${trade ? `?metier=${trade}` : ''}`;
+
+const copy = {
+  title: { fr: 'Parlons de votre', en: 'Let’s talk about your' },
+  titleEnd: { fr: 'prochain projet.', en: 'next project.' },
+  text: {
+    fr: 'Installation neuve, rénovation ou contrat de maintenance : décrivez-nous votre besoin, pièces jointes à l’appui.',
+    en: 'New installation, refurbishment or maintenance contract: tell us what you need, with documents attached.',
+  },
+};
+---
+
+<section class="enquiry" aria-labelledby="enquiry-title">
+  <div class="wrap inner">
+    <h2 id="enquiry-title" class="title" data-reveal>{tx(copy.title, lang)} <span>{tx(copy.titleEnd, lang)}</span></h2>
+    <div class="side" data-reveal style="--d: 0.1s">
+      <p class="lead">{tx(copy.text, lang)}</p>
+      <a class="tel tnum" href={`tel:${contact.phones[0].tel}`}>{contact.phones[0].label}</a>
+      <a class="mail" href={`mailto:${contact.email}`}>{contact.email}</a>
+      <a class="btn" href={href}>
+        <span>{tx(ui.cta.project, lang)}</span>
+        <svg class="arrow" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square" /></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .enquiry {
+    padding-block: var(--section);
+    border-top: 1px solid var(--line);
+    background: var(--night);
+  }
+
+  .inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: var(--s-7) clamp(40px, 6vw, 96px);
+    align-items: end;
+  }
+
+  .title {
+    font-size: clamp(3.25rem, 1.6rem + 6vw, 8rem);
+    font-weight: 800;
+    line-height: 0.88;
+  }
+
+  .title span {
+    color: var(--accent);
+  }
+
+  .side {
+    display: grid;
+    gap: var(--s-4);
+    justify-items: start;
+  }
+
+  .tel {
+    margin-top: var(--s-2);
+    font-family: var(--cond);
+    font-size: clamp(1.9rem, 1.4rem + 1.4vw, 2.6rem);
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    line-height: 1.1;
+    text-decoration: none;
+  }
+
+  .tel:hover,
+  .mail:hover {
+    text-decoration: underline;
+  }
+
+  .mail {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--text-2);
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .btn {
+    margin-top: var(--s-3);
+  }
+
+  @media (max-width: 1023px) {
+    .inner {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

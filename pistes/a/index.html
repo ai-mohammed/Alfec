@@ -1,0 +1,708 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ALFEC · Piste A · Chantier</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="../assets/brand/alfec-mark.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@500;600;700;800;900&family=Red+Hat+Text:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../assets/shared.css">
+<style>
+  :root {
+    --white: #ffffff;
+    --soft: #f2f6fa;
+    --soft-2: #e6eef6;
+    --navy: #004080;
+    --navy-deep: #002a55;
+    --ink: #172433;
+    --ink-2: #4f5e6d;
+    --sky: #1a8fd0;
+    --sky-soft: #d9ecf8;
+    --orange: #f08a00;
+    --orange-text: #b35f00;
+    --rule: #dde5ee;
+    --shadow: 0 1px 2px rgba(0, 42, 85, .06), 0 12px 32px rgba(0, 42, 85, .08);
+    --shadow-lift: 0 2px 4px rgba(0, 42, 85, .06), 0 22px 48px rgba(0, 42, 85, .14);
+    --r-s: 10px;
+    --r: 18px;
+    --r-l: 28px;
+    --display: "Red Hat Display", "Segoe UI", system-ui, sans-serif;
+    --text: "Red Hat Text", "Segoe UI", system-ui, sans-serif;
+    --wrap: 1280px;
+    --gutter: clamp(20px, 5vw, 64px);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 96px; }
+  .reduce { scroll-behavior: auto; }
+  body {
+    margin: 0;
+    background: var(--white);
+    color: var(--ink);
+    font: 400 17px/1.6 var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+  img { display: block; max-width: 100%; height: auto; }
+  a { color: inherit; }
+  h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; color: var(--navy); }
+  p { margin: 0; }
+  :focus-visible { outline: 3px solid var(--sky); outline-offset: 3px; border-radius: 4px; }
+  .wrap { max-width: var(--wrap); margin-inline: auto; padding-inline: var(--gutter); }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font: 700 13px/1.2 var(--display);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--navy);
+  }
+  .eyebrow::before { content: ""; width: 28px; height: 4px; border-radius: 4px; background: var(--orange); }
+  .h2 { font-size: clamp(32px, 3.6vw, 48px); line-height: 1.08; font-weight: 800; letter-spacing: -.02em; }
+  .lead { font-size: 19px; color: var(--ink-2); max-width: 60ch; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 52px;
+    padding: 0 26px;
+    border-radius: 999px;
+    font: 700 16px/1 var(--display);
+    text-decoration: none;
+    background: var(--navy);
+    color: #fff;
+    border: 2px solid var(--navy);
+    transition: background-color .2s, color .2s, transform .2s, box-shadow .2s;
+  }
+  .btn svg { transition: transform .2s; }
+  .btn:hover { background: var(--navy-deep); border-color: var(--navy-deep); box-shadow: 0 10px 24px rgba(0, 42, 85, .22); transform: translateY(-1px); }
+  .btn:hover svg { transform: translateX(3px); }
+  .btn.ghost { background: transparent; color: var(--navy); }
+  .btn.ghost:hover { background: var(--soft); color: var(--navy); box-shadow: none; }
+  .btn.orange { background: var(--orange); border-color: var(--orange); color: #1a1206; }
+  .btn.orange:hover { background: #ffa12a; border-color: #ffa12a; box-shadow: none; }
+
+  .link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font: 700 15px/1.3 var(--display);
+    color: var(--navy);
+    text-decoration: none;
+  }
+  .link span { background: linear-gradient(var(--orange), var(--orange)) 0 100% / 0 2px no-repeat; transition: background-size .25s; padding-bottom: 2px; }
+  .link:hover span { background-size: 100% 2px; }
+  .link svg { transition: transform .2s; }
+  .link:hover svg { transform: translateX(4px); }
+
+  .slogan {
+    display: block;
+    width: min(100%, 330px);
+    aspect-ratio: 927 / 81;
+    background: var(--sky);
+    -webkit-mask: url(../assets/brand/slogan-fr.png) no-repeat left center / contain;
+    mask: url(../assets/brand/slogan-fr.png) no-repeat left center / contain;
+  }
+
+  /* Header */
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(255, 255, 255, .96);
+    backdrop-filter: blur(10px);
+    transition: box-shadow .25s;
+  }
+  .site-header.scrolled { box-shadow: 0 6px 24px rgba(0, 42, 85, .08); }
+  .bar { display: flex; align-items: center; gap: 28px; min-height: 84px; }
+  .logo img { width: 74px; height: auto; }
+  .nav { display: flex; gap: 6px; margin-inline: auto; }
+  .nav a {
+    position: relative;
+    padding: 10px 14px;
+    font: 600 15px/1 var(--display);
+    color: var(--ink);
+    text-decoration: none;
+    border-radius: 999px;
+    transition: background-color .2s, color .2s;
+  }
+  .nav a:hover { background: var(--soft); color: var(--navy); }
+  .bar-end { display: flex; align-items: center; gap: 18px; }
+  .lang { font: 700 13px/1 var(--display); color: var(--ink-2); display: flex; gap: 6px; }
+  .lang b { color: var(--navy); }
+  .phone { font: 700 15px/1 var(--display); color: var(--navy); text-decoration: none; white-space: nowrap; }
+  .bar .btn { min-height: 46px; padding: 0 22px; font-size: 15px; }
+  .menu-btn { display: none; }
+
+  /* Hero */
+  .hero { padding-block: clamp(32px, 5vw, 72px) clamp(56px, 7vw, 104px); }
+  .hero-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(32px, 5vw, 80px); align-items: center; }
+  .hero-copy { display: grid; gap: 26px; justify-items: start; }
+  .hero h1 { font-size: clamp(42px, 5.3vw, 76px); line-height: 1.02; font-weight: 800; letter-spacing: -.03em; }
+  .hero h1 em { font-style: normal; color: var(--sky); }
+  .hero .lead { font-size: 19px; }
+  .ctas { display: flex; flex-wrap: wrap; gap: 12px; }
+  .hero-photo { position: relative; }
+  .hero-photo .frame { border-radius: var(--r-l); overflow: hidden; box-shadow: var(--shadow-lift); aspect-ratio: 5 / 4; }
+  .hero-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 60% 40%; transform: scale(1.04); transition: transform 6s ease-out; }
+  .hero-photo.in img, .reduce .hero-photo img { transform: scale(1); }
+  .chip {
+    position: absolute;
+    left: -28px;
+    bottom: 36px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 20px 14px 14px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: var(--shadow-lift);
+  }
+  .chip i { width: 44px; height: 44px; border-radius: 12px; background: var(--sky-soft); display: grid; place-items: center; color: var(--navy); }
+  .chip b { display: block; font: 800 16px/1.2 var(--display); color: var(--navy); }
+  .chip span { font-size: 14px; color: var(--ink-2); }
+  .badge {
+    position: absolute;
+    right: 22px;
+    top: 22px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .92);
+    font: 700 12px/1 var(--display);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--navy);
+  }
+
+  /* Facts */
+  .facts { margin-top: clamp(-40px, -3vw, -24px); }
+  .facts-box {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    background: var(--soft);
+    border-radius: var(--r-l);
+    padding: 32px 12px;
+  }
+  .fact { padding: 4px 28px; border-left: 1px solid var(--soft-2); display: grid; gap: 6px; align-content: start; }
+  .fact:first-child { border-left: 0; }
+  .fact .n { font: 800 clamp(40px, 4vw, 56px)/1 var(--display); color: var(--navy); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+  .fact .n small { font-size: .5em; font-weight: 700; color: var(--orange-text); margin-left: 4px; }
+  .fact p { font-size: 15px; color: var(--ink-2); line-height: 1.45; }
+  .fact p b { color: var(--ink); font-weight: 600; }
+
+  section.block { padding-block: clamp(72px, 9vw, 128px); }
+  .head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px 40px; align-items: end; margin-bottom: 44px; }
+  .head > div { display: grid; gap: 16px; }
+
+  /* Trades */
+  .featured {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    background: var(--navy);
+    color: #fff;
+    border-radius: var(--r-l);
+    overflow: hidden;
+    margin-bottom: 28px;
+  }
+  .featured .ph { position: relative; min-height: 440px; overflow: hidden; }
+  .featured .ph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .8s cubic-bezier(.2, .7, .2, 1); }
+  .featured:hover .ph img { transform: scale(1.04); }
+  .featured .txt { padding: clamp(32px, 4vw, 56px); display: grid; gap: 20px; align-content: center; justify-items: start; }
+  .featured .tag { font: 700 12px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; background: var(--orange); color: #1a1206; padding: 8px 12px; border-radius: 999px; }
+  .featured h3 { color: #fff; font-size: clamp(30px, 3vw, 42px); line-height: 1.08; font-weight: 800; letter-spacing: -.02em; }
+  .featured p { color: #d3e2f1; font-size: 18px; max-width: 46ch; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 0; list-style: none; }
+  .chips li { font: 600 14px/1 var(--display); padding: 10px 14px; border-radius: 999px; background: rgba(255, 255, 255, .1); color: #fff; }
+  .featured .link { color: #fff; }
+
+  .head > .rail-ctl { display: flex; gap: 10px; }
+  .rail-ctl button {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 2px solid var(--navy);
+    background: #fff;
+    color: var(--navy);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: background-color .2s, color .2s, opacity .2s;
+  }
+  .rail-ctl button:hover:not(:disabled) { background: var(--navy); color: #fff; }
+  .rail-ctl button:disabled { opacity: .3; cursor: default; }
+  .rail {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: calc((100% - 3 * 22px) / 3.4);
+    gap: 22px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    padding-bottom: 12px;
+    margin-bottom: -12px;
+  }
+  .rail::-webkit-scrollbar { display: none; }
+  .card { scroll-snap-align: start; display: grid; gap: 16px; align-content: start; text-decoration: none; }
+  .card .ph { border-radius: var(--r); overflow: hidden; aspect-ratio: 4 / 5; box-shadow: var(--shadow); transition: box-shadow .3s, transform .3s; }
+  .card .ph img { width: 100%; height: 100%; object-fit: cover; transition: transform .8s cubic-bezier(.2, .7, .2, 1); }
+  .card:hover .ph { box-shadow: var(--shadow-lift); transform: translateY(-4px); }
+  .card:hover .ph img { transform: scale(1.06); }
+  .card h3 { font-size: 22px; line-height: 1.2; font-weight: 800; }
+  .card p { font-size: 15.5px; color: var(--ink-2); }
+  .card .link { margin-top: 2px; }
+
+  /* Cycle */
+  .cycle { background: var(--soft); }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; position: relative; }
+  .step {
+    position: relative;
+    background: #fff;
+    border-radius: var(--r);
+    padding: 34px 30px 32px;
+    box-shadow: var(--shadow);
+    display: grid;
+    gap: 14px;
+    align-content: start;
+    transition: transform .3s, box-shadow .3s;
+  }
+  .step:hover { transform: translateY(-4px); box-shadow: var(--shadow-lift); }
+  .step .ic { width: 60px; height: 60px; border-radius: 16px; background: var(--sky-soft); color: var(--navy); display: grid; place-items: center; }
+  .step .no { position: absolute; right: 28px; top: 28px; font: 800 15px/1 var(--display); color: var(--orange-text); letter-spacing: .08em; }
+  .step h3 { font-size: 24px; font-weight: 800; }
+  .step p { color: var(--ink-2); font-size: 16px; }
+  .sectors { margin-top: 36px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .sectors > span { font: 700 14px/1 var(--display); color: var(--ink-2); margin-right: 6px; }
+  .sectors li { list-style: none; font: 600 15px/1 var(--display); padding: 11px 16px; border-radius: 999px; background: #fff; color: var(--navy); box-shadow: 0 1px 2px rgba(0, 42, 85, .08); }
+  .sectors ul { display: contents; }
+
+  /* Presence and references */
+  .presence-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(32px, 5vw, 88px); align-items: center; }
+  .map svg { width: 100%; height: auto; overflow: visible; }
+  .map-outline { fill: var(--soft); stroke: #9fc4e3; stroke-width: 1.5; stroke-linejoin: round; }
+  .map-pt { fill: var(--navy); transform-box: fill-box; transform-origin: center; }
+  .js .map:not(.in) .map-pt { transform: scale(0); }
+  .map .map-pt { transition: transform .5s cubic-bezier(.3, 1.6, .5, 1); transition-delay: calc(var(--i) * 45ms + .2s); }
+  .map-hq { fill: var(--orange); }
+  .map-hq-ring { fill: none; stroke: var(--orange); stroke-width: 2; transform-box: fill-box; transform-origin: center; animation: pulse 2.4s ease-out infinite; }
+  .map-label { font: 800 26px var(--display); fill: var(--navy); }
+  @keyframes pulse { 0% { transform: scale(.7); opacity: 1; } 100% { transform: scale(2.2); opacity: 0; } }
+  .presence-copy { display: grid; gap: 22px; justify-items: start; }
+  .refs { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; margin-top: 10px; }
+  .ref { display: grid; gap: 12px; text-decoration: none; }
+  .ref .ph { border-radius: var(--r); overflow: hidden; aspect-ratio: 4 / 3; box-shadow: var(--shadow); }
+  .ref .ph img { width: 100%; height: 100%; object-fit: cover; transition: transform .8s cubic-bezier(.2, .7, .2, 1); }
+  .ref:hover .ph img { transform: scale(1.05); }
+  .ref b { font: 800 19px/1.2 var(--display); color: var(--navy); }
+  .ref span { font-size: 14.5px; color: var(--ink-2); }
+
+  /* Trust: testimonials and partners */
+  .trust { background: var(--soft); }
+  .quotes { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .quote { background: #fff; border-radius: var(--r); padding: 36px; box-shadow: var(--shadow); display: grid; gap: 22px; align-content: start; }
+  .quote .mark { font: 900 64px/0.6 var(--display); color: var(--orange); height: 28px; }
+  .quote p { font: 500 20px/1.5 var(--display); color: var(--ink); }
+  .quote footer { display: flex; align-items: center; gap: 14px; }
+  .quote .avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--soft-2); }
+  .quote footer b { display: block; font: 700 15px/1.3 var(--display); color: var(--navy); }
+  .quote footer span { font-size: 14px; color: var(--ink-2); }
+  .partners { margin-top: 56px; display: grid; gap: 20px; }
+  .partners-head { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+  .partners-head h3 { font-size: 20px; font-weight: 800; }
+  .logos { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; }
+  .logos .slot { height: 88px; border-radius: 14px; color: var(--ink-2); border-color: #9fb2c6; background: #fff; }
+
+  /* CTA */
+  .cta { padding-block: clamp(72px, 9vw, 120px); }
+  .cta-box {
+    position: relative;
+    overflow: hidden;
+    background: var(--navy);
+    border-radius: var(--r-l);
+    padding: clamp(40px, 6vw, 80px);
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    gap: 32px 64px;
+    align-items: center;
+    color: #fff;
+  }
+  .cta-box::after {
+    content: "";
+    position: absolute;
+    right: -120px;
+    top: -120px;
+    width: 420px;
+    height: 420px;
+    border-radius: 50%;
+    border: 70px solid rgba(255, 255, 255, .05);
+  }
+  .cta-box h2 { color: #fff; }
+  .cta-box .lead { color: #cfe0f1; margin-top: 16px; }
+  .cta-side { display: grid; gap: 18px; justify-items: start; position: relative; z-index: 1; }
+  .cta-side .tel { font: 800 clamp(24px, 2.4vw, 32px)/1.1 var(--display); color: #fff; text-decoration: none; }
+  .cta-side .mail { color: #cfe0f1; font-weight: 600; }
+
+  /* Footer */
+  .site-footer { background: var(--navy-deep); color: #c3d4e6; padding-block: 72px 110px; font-size: 15px; }
+  .foot { display: grid; grid-template-columns: 1.3fr 1fr 1fr 1fr; gap: 40px; }
+  .foot .brand { display: grid; gap: 20px; align-content: start; }
+  .foot .brand img { width: 120px; }
+  .foot .slogan { background: #fff; width: 260px; }
+  .foot h3 { font: 700 13px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: #fff; margin-bottom: 18px; }
+  .foot ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .foot a { color: #c3d4e6; text-decoration: none; }
+  .foot a:hover { color: #fff; text-decoration: underline; }
+  .foot address { font-style: normal; line-height: 1.6; }
+  .legal { margin-top: 56px; padding-top: 24px; border-top: 1px solid rgba(255, 255, 255, .12); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-size: 13.5px; color: #8fa7c1; }
+
+  /* Responsive */
+  @media (max-width: 1100px) {
+    .nav a { padding: 10px 10px; }
+    .phone { display: none; }
+    .rail { grid-auto-columns: calc((100% - 22px) / 2.3); }
+    .logos { grid-template-columns: repeat(3, 1fr); }
+    .foot { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 900px) {
+    .nav, .bar-end .btn, .lang { display: none; }
+    .menu-btn {
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 0;
+      background: var(--soft);
+      color: var(--navy);
+      cursor: pointer;
+    }
+    .bar { min-height: 70px; justify-content: space-between; }
+    .bar-end { gap: 10px; }
+    .call { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: var(--navy); color: #fff; }
+    .menu-open .nav {
+      display: grid;
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 100%;
+      background: #fff;
+      padding: 12px var(--gutter) 24px;
+      box-shadow: 0 20px 30px rgba(0, 42, 85, .12);
+      gap: 4px;
+    }
+    .menu-open .nav a { font-size: 20px; padding: 16px 12px; }
+    .hero-grid, .presence-grid, .cta-box, .featured { grid-template-columns: 1fr; }
+    .hero-photo { order: 2; }
+    .chip { left: 16px; bottom: 16px; }
+    .facts { margin-top: 0; }
+    .facts-box { grid-template-columns: 1fr 1fr; row-gap: 24px; padding: 24px 4px; }
+    .fact { padding: 4px 18px; }
+    .fact:nth-child(3) { border-left: 0; }
+    .featured .ph { min-height: 260px; }
+    .steps { grid-template-columns: 1fr; gap: 14px; }
+    .quotes { grid-auto-flow: column; grid-template-columns: none; grid-auto-columns: 86%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+    .quote { scroll-snap-align: start; }
+    .map { max-width: 420px; }
+  }
+  @media (min-width: 901px) { .call { display: none; } }
+  @media (max-width: 640px) {
+    body { font-size: 16px; }
+    .hero { padding-top: 20px; }
+    .hero h1 { font-size: 40px; }
+    .hero .lead, .lead { font-size: 17px; }
+    .ctas { display: grid; width: 100%; }
+    .ctas .btn { width: 100%; }
+    .head { grid-template-columns: 1fr; margin-bottom: 28px; }
+    .rail { grid-auto-columns: 78%; gap: 14px; }
+    .head > .rail-ctl { display: none; }
+    .card .ph { aspect-ratio: 4 / 3; }
+    .steps { grid-auto-flow: column; grid-template-columns: none; grid-auto-columns: 84%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding: 4px 2px 16px; margin: -4px -2px -16px; }
+    .steps::-webkit-scrollbar { display: none; }
+    .step { scroll-snap-align: start; padding: 24px 22px; }
+    .step .ic { width: 52px; height: 52px; }
+    .step .no { top: 22px; right: 20px; }
+    .sectors { margin-top: 24px; gap: 8px; }
+    .sectors li { padding: 9px 13px; font-size: 14px; }
+    .map { max-width: 280px; margin-inline: auto; }
+    .logos .slot:nth-child(n+4) { display: none; }
+    .eyebrow { font-size: 12px; letter-spacing: .1em; }
+    .refs { grid-template-columns: 1fr 1fr; gap: 12px; }
+    .ref b { font-size: 16px; }
+    .quote { padding: 26px; }
+    .quote p { font-size: 17px; }
+    .logos { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .logos .slot { height: 64px; font-size: 11px; }
+    .partners { margin-top: 36px; }
+    section.block { padding-block: 60px; }
+    .foot { grid-template-columns: 1fr; gap: 32px; }
+    .foot .map-col { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition-duration: 0s !important; animation: none !important; }
+  }
+</style>
+</head>
+<body data-piste="a">
+<a class="skip" href="#main">Aller au contenu</a>
+
+<header class="site-header" data-header>
+  <div class="wrap bar">
+    <a class="logo" href="#" aria-label="ALFEC, accueil"><img src="../assets/brand/alfec-mark.png" alt="ALFEC" width="665" height="435"></a>
+    <nav class="nav" data-menu aria-label="Navigation principale">
+      <a href="#entreprise">Entreprise</a>
+      <a href="#metiers">Métiers</a>
+      <a href="#realisations">Réalisations</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <div class="bar-end">
+      <span class="lang"><b>FR</b><span aria-hidden="true">/</span><a href="#" lang="en">EN</a></span>
+      <a class="phone" href="tel:+21341737337">+213 (0)41 73 73 37</a>
+      <a class="btn" href="#contact">Nous contacter</a>
+      <a class="call" href="tel:+21341737337" aria-label="Appeler ALFEC"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></a>
+      <button class="menu-btn" type="button" data-menu-toggle aria-expanded="false" aria-label="Ouvrir le menu"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18M3 12h18M3 17h18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow" data-reveal>Engineering · Procurement · Construction</span>
+        <h1 data-reveal style="--d:.08s">À chaque défi technique, <em>la solution adaptée.</em></h1>
+        <p class="lead" data-reveal style="--d:.16s">Climatisation, protection incendie, désenfumage, électricité, froid et génie industriel&#8239;: ALFEC étudie, réalise et maintient vos installations techniques, depuis Oran et partout en Algérie.</p>
+        <div class="ctas" data-reveal style="--d:.24s">
+          <a class="btn" href="#contact">Parler de votre projet <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+          <a class="btn ghost" href="#metiers">Découvrir nos métiers</a>
+        </div>
+        <span class="slogan" role="img" aria-label="Équilibre durable, continuité et innovation" data-reveal style="--d:.32s"></span>
+      </div>
+      <figure class="hero-photo" data-reveal style="--d:.1s; margin:0">
+        <div class="frame">
+          <img src="../assets/photos/sonelgaz-tiaret.jpg" srcset="../assets/photos/sonelgaz-tiaret-800.jpg 800w, ../assets/photos/sonelgaz-tiaret.jpg 1024w" sizes="(max-width: 900px) 100vw, 55vw" alt="Technicien d’ALFEC intervenant sur une unité de climatisation en toiture" width="1024" height="768" fetchpriority="high">
+        </div>
+        <span class="badge">Sur le terrain</span>
+        <figcaption class="chip">
+          <i aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="10" r="2.6" fill="currentColor"/></svg></i>
+          <span><b>Sonelgaz · Tiaret</b><span>Climatisation</span></span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="facts" aria-label="ALFEC en bref">
+    <div class="wrap">
+      <div class="facts-box" data-reveal>
+        <div class="fact"><span class="n"><span data-count="22">22</span></span><p><b>wilayas</b> où ALFEC intervient</p></div>
+        <div class="fact"><span class="n"><span data-count="6">6</span></span><p><b>métiers</b> complémentaires, une seule équipe</p></div>
+        <div class="fact"><span class="n"><span data-count="3">3</span></span><p><b>étapes</b>&#8239;: étude, réalisation, maintenance</p></div>
+        <div class="fact"><span class="n">Oran</span><p><b>siège</b> et direction, depuis le début des années 2000</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="metiers" aria-labelledby="metiers-title">
+    <div class="wrap">
+      <div class="head">
+        <div>
+          <span class="eyebrow" data-reveal>Nos métiers</span>
+          <h2 class="h2" id="metiers-title" data-reveal style="--d:.06s">Six métiers pour une prise en charge globale</h2>
+        </div>
+      </div>
+
+      <article class="featured" data-reveal>
+        <div class="ph"><img src="../assets/photos/groupe-froid-toiture.jpg" srcset="../assets/photos/groupe-froid-toiture-800.jpg 800w, ../assets/photos/groupe-froid-toiture.jpg 850w" sizes="(max-width: 900px) 100vw, 50vw" alt="Groupe de production d’eau glacée sur dalle extérieure, avec tuyauteries calorifugées" width="850" height="850" loading="lazy"></div>
+        <div class="txt">
+          <span class="tag">Notre métier d’origine</span>
+          <h3>Génie climatique et climatisation</h3>
+          <p>C’est dans le génie climatique qu’ALFEC est née, au début des années 2000. Climatisation, chauffage central et ventilation mécanique, avec des gaz réfrigérants écologiques.</p>
+          <ul class="chips"><li>Climatisation</li><li>Chauffage central</li><li>Ventilation mécanique</li></ul>
+          <a class="link" href="#"><span>Découvrir le génie climatique</span> <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        </div>
+      </article>
+
+      <div class="head" style="margin-bottom:24px">
+        <p class="lead">Autour de la climatisation, cinq métiers complémentaires, réunis dans une même équipe.</p>
+        <div class="rail-ctl">
+          <button type="button" data-rail-prev="trades" aria-label="Métiers précédents"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12H5M11 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button type="button" data-rail-next="trades" aria-label="Métiers suivants"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+      </div>
+      <div class="rail" id="trades" data-rail>
+        <a class="card" href="#" data-reveal>
+          <div class="ph"><img src="../assets/photos/pompes-incendie-800.jpg" alt="Groupes motopompes d’un réseau incendie, tuyauteries et manomètres rouges" width="800" height="532" loading="lazy"></div>
+          <h3>Protection &amp; détection incendie</h3>
+          <p>Protection conforme aux normes en vigueur en Algérie et détection alliant fiabilité et efficacité.</p>
+        </a>
+        <a class="card" href="#" data-reveal style="--d:.06s">
+          <div class="ph"><img src="../assets/photos/desenfumage-toiture-equipe-800.jpg" alt="Deux techniciens installent un équipement de désenfumage en toiture" width="800" height="492" loading="lazy"></div>
+          <h3>Désenfumage</h3>
+          <p>Des installations fiables et certifiées, obligatoires dans les ERP et les IGH.</p>
+        </a>
+        <a class="card" href="#" data-reveal style="--d:.12s">
+          <div class="ph"><img src="../assets/photos/techniciens-armoires-800.jpg" alt="Trois techniciens câblent des armoires électriques dans un local technique" width="800" height="600" loading="lazy"></div>
+          <h3>Électricité &amp; régulation</h3>
+          <p>Installations électriques et régulation, pour des solutions globales, automatisées et au moindre coût.</p>
+        </a>
+        <a class="card" href="#" data-reveal style="--d:.18s">
+          <div class="ph"><img src="../assets/photos/chambre-froide-evaporateurs-800.jpg" alt="Technicien sur échafaudage devant une rangée d’évaporateurs de chambre froide" width="800" height="800" loading="lazy"></div>
+          <h3>Froid industriel</h3>
+          <p>La maîtrise des technologies de réfrigération, pour l’agroalimentaire, la pharmacie et la pétrochimie.</p>
+        </a>
+        <a class="card" href="#" data-reveal style="--d:.24s">
+          <div class="ph"><img src="../assets/photos/reservoirs-sous-pression-800.jpg" alt="Réservoirs horizontaux sous pression et leurs tuyauteries dans un hall industriel" width="800" height="800" loading="lazy"></div>
+          <h3>Génie industriel</h3>
+          <p>Réservoirs de stockage, piping et serres multichapelles, avec des partenaires locaux et internationaux.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="block cycle" id="entreprise" aria-labelledby="cycle-title">
+    <div class="wrap">
+      <div class="head">
+        <div>
+          <span class="eyebrow" data-reveal>Notre accompagnement</span>
+          <h2 class="h2" id="cycle-title" data-reveal style="--d:.06s">De l’étude à la maintenance, un seul interlocuteur</h2>
+        </div>
+      </div>
+      <ol class="steps" style="list-style:none;margin:0;padding:0">
+        <li class="step" data-reveal>
+          <span class="ic" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V9l7-5 7 5v12"/><path d="M9 21v-6h6v6"/></svg></span>
+          <span class="no">01</span>
+          <h3>Étude</h3>
+          <p>Les études de vos projets, des premières idées jusqu’au meilleur concept, puis le suivi de l’exécution par des équipes multidisciplinaires.</p>
+        </li>
+        <li class="step" data-reveal style="--d:.08s">
+          <span class="ic" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18a8 8 0 0 1 16 0"/><path d="M2 18h20v3H2z"/><path d="M12 10V6"/></svg></span>
+          <span class="no">02</span>
+          <h3>Réalisation</h3>
+          <p>Des installations techniques conformes aux normes en vigueur, avec des équipes compétentes et des moyens matériels conséquents.</p>
+        </li>
+        <li class="step" data-reveal style="--d:.16s">
+          <span class="ic" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg></span>
+          <span class="no">03</span>
+          <h3>Maintenance</h3>
+          <p>L’entretien régulier des installations, dans le cadre de contrats de maintenance, pour réduire au maximum le risque de pannes.</p>
+        </li>
+      </ol>
+      <div class="sectors" data-reveal>
+        <span>Nos secteurs</span>
+        <ul><li>Bâtiment</li><li>Tertiaire</li><li>Hôpitaux</li><li>Hôtellerie</li><li>Industrie</li><li>Agroalimentaire</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="realisations" aria-labelledby="presence-title">
+    <div class="wrap presence-grid">
+      <div class="map" data-map data-map-label="Oran" data-reveal></div>
+      <div class="presence-copy">
+        <span class="eyebrow" data-reveal>Implantation et références</span>
+        <h2 class="h2" id="presence-title" data-reveal style="--d:.06s">Basée à Oran, présente dans 22 wilayas</h2>
+        <p class="lead" data-reveal style="--d:.12s">Avec une direction basée à Oran, ALFEC intervient sur l’ensemble du territoire national, grâce à une force d’intervention appréciable et à des équipes de maintenance disponibles et efficaces.</p>
+        <div class="refs">
+          <a class="ref" href="#" data-reveal>
+            <div class="ph"><img src="../assets/photos/sonelgaz-tiaret-800.jpg" alt="Technicien d’ALFEC intervenant sur une unité de climatisation en toiture" width="800" height="600" loading="lazy"></div>
+            <b>Sonelgaz</b><span>Tiaret · Climatisation</span>
+          </a>
+          <a class="ref" href="#" data-reveal style="--d:.08s">
+            <div class="ph"><img src="../assets/photos/banque-bea-oran-800.jpg" alt="Technicien d’ALFEC sur une armoire de climatisation dans le hall d’une agence bancaire" width="800" height="600" loading="lazy"></div>
+            <b>Banque BEA</b><span>Oran · Banques</span>
+          </a>
+        </div>
+        <a class="link" href="#" data-reveal><span>Voir toutes nos réalisations</span> <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="block trust" aria-labelledby="trust-title">
+    <div class="wrap">
+      <div class="head">
+        <div>
+          <span class="eyebrow" data-reveal>Ils nous font confiance</span>
+          <h2 class="h2" id="trust-title" data-reveal style="--d:.06s">Ce que disent nos clients</h2>
+        </div>
+        <span class="todo" data-reveal>Témoignages à fournir par ALFEC</span>
+      </div>
+      <div class="quotes">
+        <figure class="quote" data-reveal style="margin:0">
+          <span class="mark" aria-hidden="true">“</span>
+          <blockquote style="margin:0"><p>Emplacement réservé au témoignage d’un client d’ALFEC. Le texte, le nom et la fonction seront fournis par ALFEC.</p></blockquote>
+          <footer><span class="avatar" aria-hidden="true"></span><span><b>Nom du client</b><span>Fonction, organisme</span></span></footer>
+        </figure>
+        <figure class="quote" data-reveal style="margin:0;--d:.08s">
+          <span class="mark" aria-hidden="true">“</span>
+          <blockquote style="margin:0"><p>Emplacement réservé à un deuxième témoignage, idéalement d’un autre secteur&#8239;: industrie, santé ou tertiaire.</p></blockquote>
+          <footer><span class="avatar" aria-hidden="true"></span><span><b>Nom du client</b><span>Fonction, organisme</span></span></footer>
+        </figure>
+      </div>
+      <div class="partners">
+        <div class="partners-head"><h3>Nos marques partenaires</h3><span class="todo">Logos à fournir par ALFEC</span></div>
+        <div class="logos" data-reveal>
+          <span class="slot">Logo partenaire</span><span class="slot">Logo partenaire</span><span class="slot">Logo partenaire</span>
+          <span class="slot">Logo partenaire</span><span class="slot">Logo partenaire</span><span class="slot">Logo partenaire</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta" id="contact" aria-labelledby="cta-title">
+    <div class="wrap">
+      <div class="cta-box" data-reveal>
+        <div>
+          <h2 class="h2" id="cta-title">Un projet, une installation à maintenir&#8239;?</h2>
+          <p class="lead">Décrivez-nous votre besoin&#8239;: nos équipes vous répondent et vous orientent vers la bonne solution.</p>
+        </div>
+        <div class="cta-side">
+          <a class="tel" href="tel:+21341737337">+213 (0)41 73 73 37</a>
+          <span class="mail">contact@alfec.net</span>
+          <a class="btn orange" href="#">Parler de votre projet <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot">
+      <div class="brand">
+        <img src="../assets/brand/alfec-logo-white.png" alt="ALFEC Engineering Procurement Construction" width="675" height="507" loading="lazy">
+        <span class="slogan" role="img" aria-label="Équilibre durable, continuité et innovation"></span>
+      </div>
+      <div>
+        <h3>Siège</h3>
+        <address>38, Rue El Moudjahid Kacha Lahouari<br>Coopérative Tekkouk Adda, Canastel<br>31000 Oran, Algérie</address>
+      </div>
+      <div>
+        <h3>Contact</h3>
+        <ul>
+          <li><a href="tel:+21341737337">+213 (0)41 73 73 37</a></li>
+          <li><a href="tel:+21341737338">+213 (0)41 73 73 38</a></li>
+          <li><a href="tel:+213555071930">+213 (0)555 07 19 30</a></li>
+          <li><a href="mailto:contact@alfec.net">contact@alfec.net</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Le site</h3>
+        <ul>
+          <li><a href="#entreprise">Entreprise</a></li>
+          <li><a href="#metiers">Métiers</a></li>
+          <li><a href="#realisations">Réalisations</a></li>
+          <li><a href="#contact">Contact</a></li>
+          <li><a href="https://www.linkedin.com/company/alfec/" rel="noopener noreferrer" target="_blank">LinkedIn</a> · <a href="https://www.facebook.com/AlfecDZ" rel="noopener noreferrer" target="_blank">Facebook</a> · <a href="https://www.youtube.com/channel/UCDak7qYykMomAYEgwSPs89w/" rel="noopener noreferrer" target="_blank">YouTube</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="legal"><span>© ALFEC Engineering Procurement Construction</span><span>Maquette · Piste A « Chantier »</span></div>
+  </div>
+</footer>
+
+<script src="../assets/map.js"></script>
+<script src="../assets/shared.js"></script>
+</body>
+</html>

@@ -1,0 +1,308 @@
+---
+// The six trades as photo panels. On wide screens the hovered or focused panel opens; the first trade,
+// ALFEC's founding one, is open by default. On narrow screens the panels become a swipeable rail.
+import { Picture } from 'astro:assets';
+import { trades, type TradeKey } from '../data/trades';
+import { photos, type PhotoKey } from '../data/photos';
+import { tradePath } from '../i18n/routes.mjs';
+import { tx, type Bilingual, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+
+// Photos chosen for the panels: each shows the trade's equipment at a size that holds up in a tall crop.
+const panelPhoto: Record<TradeKey, PhotoKey> = {
+  climatique: 'groupeFroidToiture',
+  incendie: 'pompesIncendie',
+  desenfumage: 'exutoireToiture',
+  electricite: 'coffretsRegulation',
+  froid: 'chambreFroideEvaporateurs',
+  industriel: 'reservoirsSousPression',
+};
+
+// Short names for the vertical labels of closed panels.
+const short: Record<TradeKey, Bilingual> = {
+  climatique: { fr: 'Génie climatique', en: 'HVAC' },
+  incendie: { fr: 'Incendie', en: 'Fire protection' },
+  desenfumage: { fr: 'Désenfumage', en: 'Smoke control' },
+  electricite: { fr: 'Électricité', en: 'Electrical' },
+  froid: { fr: 'Froid industriel', en: 'Refrigeration' },
+  industriel: { fr: 'Génie industriel', en: 'Industrial' },
+};
+
+const t = {
+  origin: { fr: 'Notre métier d’origine', en: 'Our founding trade' },
+  more: { fr: 'Découvrir', en: 'Discover' },
+};
+---
+
+<ul class="panels" role="list" data-panels>
+  {
+    trades.map((trade, i) => {
+      const photo = photos[panelPhoto[trade.key]];
+      return (
+        <li class:list={['panel', { open: i === 0 }]} data-k={trade.key}>
+          <a class="link" href={tradePath(trade.key, lang)}>
+            <Picture
+              class="img"
+              src={photo.src}
+              formats={['avif', 'webp']}
+              fallbackFormat="jpg"
+              widths={[480, 720, photo.src.width].filter((w, k, a) => w <= photo.src.width && a.indexOf(w) === k)}
+              sizes="(min-width: 1024px) 50vw, 82vw"
+              alt=""
+              loading="lazy"
+            />
+            <span class="vt" aria-hidden="true">{tx(short[trade.key], lang)}</span>
+            <span class="body">
+              {i === 0 && <span class="flag">{tx(t.origin, lang)}</span>}
+              <h3 class="name">{tx(trade.name, lang)}</h3>
+              <span class="sum">{tx(trade.summary, lang)}</span>
+              {
+                i === 0 && (
+                  <span class="scope">
+                    {tx(trade.scope, lang).map((s) => (
+                      <span>{s}</span>
+                    ))}
+                  </span>
+                )
+              }
+              <span class="more">{tx(t.more, lang)} <span aria-hidden="true">→</span></span>
+            </span>
+          </a>
+        </li>
+      );
+    })
+  }
+</ul>
+
+<script>
+  const panels = [...document.querySelectorAll<HTMLElement>('[data-panels] .panel')];
+  const wide = matchMedia('(min-width: 1024px)');
+  const open = (panel: HTMLElement) => panels.forEach((p) => p.classList.toggle('open', p === panel));
+  for (const panel of panels) {
+    panel.addEventListener('mouseenter', () => wide.matches && open(panel));
+    panel.addEventListener('focusin', () => wide.matches && open(panel));
+  }
+</script>
+
+<style>
+  .panels {
+    display: flex;
+    gap: 10px;
+    height: clamp(520px, 44vw, 620px);
+    list-style: none;
+  }
+
+  .panel {
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: hidden;
+    background: var(--night-2);
+    transition: flex-grow 0.7s var(--ease-out);
+  }
+
+  .panel.open {
+    flex-grow: 5;
+  }
+
+  .link {
+    position: absolute;
+    inset: 0;
+    isolation: isolate;
+    display: block;
+    color: var(--white);
+    text-decoration: none;
+  }
+
+  .link:focus-visible {
+    outline-offset: -3px;
+  }
+
+  .link :global(picture) {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+  }
+
+  .link :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(0.6) brightness(0.7);
+    transform: scale(1.08);
+    transition:
+      filter 0.7s,
+      transform 1.2s var(--ease-out);
+  }
+
+  .open .link :global(img) {
+    filter: none;
+    transform: scale(1);
+  }
+
+  .link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(0deg, rgb(5 22 41 / 0.95) 0%, rgb(5 22 41 / 0.35) 55%, rgb(5 22 41 / 0.15) 100%);
+  }
+
+  .vt {
+    position: absolute;
+    left: 50%;
+    bottom: 28px;
+    transform: translateX(-50%) rotate(180deg);
+    writing-mode: vertical-rl;
+    font-family: var(--cond);
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition: opacity 0.3s;
+  }
+
+  .open .vt {
+    opacity: 0;
+  }
+
+  .body {
+    position: absolute;
+    left: 36px;
+    right: 36px;
+    bottom: 34px;
+    display: grid;
+    gap: 14px;
+    justify-items: start;
+    min-width: 340px;
+    opacity: 0;
+    transform: translateY(16px);
+    transition:
+      opacity 0.35s,
+      transform 0.5s var(--ease-out);
+  }
+
+  .open .body {
+    opacity: 1;
+    transform: none;
+    transition-delay: 0.3s;
+  }
+
+  .flag {
+    padding: 7px 10px;
+    background: var(--accent);
+    color: var(--night);
+    font-family: var(--cond);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .name {
+    font-size: clamp(2.4rem, 1.6rem + 1.8vw, 3.5rem);
+    font-weight: 800;
+    line-height: 0.95;
+  }
+
+  .sum {
+    max-width: 44ch;
+    color: #d2deea;
+  }
+
+  .scope {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .scope span {
+    padding: 8px 10px;
+    border: 1px solid rgb(255 255 255 / 0.35);
+    font-family: var(--cond);
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .more {
+    font-family: var(--cond);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .link:hover .more {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+
+  /* Narrow screens: every panel open, side by side in a swipeable rail. */
+  @media (max-width: 1023px) {
+    .panels {
+      height: auto;
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: min(82%, 420px);
+      gap: 12px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      margin-inline: calc(var(--gutter) * -1);
+      padding-inline: var(--gutter);
+      scroll-padding-inline: var(--gutter);
+    }
+
+    .panels::-webkit-scrollbar {
+      display: none;
+    }
+
+    .panel {
+      height: 460px;
+      scroll-snap-align: start;
+    }
+
+    .link :global(img) {
+      filter: none;
+      transform: none;
+    }
+
+    .vt {
+      display: none;
+    }
+
+    .body {
+      left: 22px;
+      right: 22px;
+      bottom: 24px;
+      min-width: 0;
+      opacity: 1;
+      transform: none;
+    }
+
+    .name {
+      font-size: 2.25rem;
+    }
+
+    .sum {
+      font-size: var(--fs-small);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .panel,
+    .link :global(img),
+    .body {
+      transition: none;
+    }
+  }
+</style>

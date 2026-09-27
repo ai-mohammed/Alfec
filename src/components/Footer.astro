@@ -1,0 +1,218 @@
+---
+import { Image } from 'astro:assets';
+import logoWhite from '../assets/brand/alfec-logo-white.png';
+import sloganFr from '../assets/brand/slogan-fr.png';
+import sloganEn from '../assets/brand/slogan-en.png';
+import { alternatesFor, pagePath, tradePath, TRADE_KEYS } from '../i18n/routes.mjs';
+import { tx, ui, type Lang } from '../i18n/ui';
+import { contact, slogan } from '../data/company';
+import { tradesByKey } from '../data/trades';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const other: Lang = lang === 'fr' ? 'en' : 'fr';
+const alt = alternatesFor(Astro.url.pathname);
+const year = new Date().getFullYear();
+const a = contact.address;
+const sloganArt = lang === 'fr' ? sloganFr : sloganEn;
+---
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="top">
+      <a class="logo" href={pagePath('home', lang)} aria-label={tx(ui.nav.homeLink, lang)}>
+        <Image src={logoWhite} alt="" width={124} height={93} />
+      </a>
+      <span class="slogan" role="img" aria-label={tx(slogan, lang)} style={`--slogan:url(${sloganArt.src})`}></span>
+    </div>
+
+    <div class="grid cols">
+      <section class="col address" aria-labelledby="f-office">
+        <h2 id="f-office" class="f-title">{tx(ui.footer.headOffice, lang)}</h2>
+        <address>
+          {a.street}<br />
+          {a.locality}, {a.postalCode} {a.city}<br />
+          {tx(a.country, lang)}
+        </address>
+      </section>
+
+      <section class="col reach" aria-labelledby="f-reach">
+        <h2 id="f-reach" class="f-title">{tx(ui.nav.contact, lang)}</h2>
+        <dl class="tnum">
+          <div><dt>{tx(ui.footer.phone, lang)}</dt><dd class="stack">{contact.phones.map((p) => <a href={`tel:${p.tel}`}>{p.label}</a>)}</dd></div>
+          <div><dt>{tx(ui.footer.mobile, lang)}</dt><dd><a href={`tel:${contact.mobile.tel}`}>{contact.mobile.label}</a></dd></div>
+          <div><dt>{tx(ui.footer.fax, lang)}</dt><dd>{contact.fax.label}</dd></div>
+          <div><dt>{tx(ui.footer.email, lang)}</dt><dd><a href={`mailto:${contact.email}`}>{contact.email}</a></dd></div>
+        </dl>
+      </section>
+
+      <nav class="col map" aria-labelledby="f-map">
+        <h2 id="f-map" class="f-title">{tx(ui.footer.sitemap, lang)}</h2>
+        <ul>
+          <li><a href={pagePath('company', lang)}>{tx(ui.nav.company, lang)}</a></li>
+          <li><a href={pagePath('trades', lang)}>{tx(ui.nav.trades, lang)}</a></li>
+          <li><a href={pagePath('projects', lang)}>{tx(ui.nav.projects, lang)}</a></li>
+          <li><a href={pagePath('contact', lang)}>{tx(ui.nav.contact, lang)}</a></li>
+        </ul>
+        <ul class="trades">
+          {TRADE_KEYS.map((k) => <li><a href={tradePath(k, lang)}>{tx(tradesByKey[k].name, lang)}</a></li>)}
+        </ul>
+      </nav>
+
+      <section class="col follow" aria-labelledby="f-follow">
+        <h2 id="f-follow" class="f-title">{tx(ui.footer.follow, lang)}</h2>
+        <ul>
+          {contact.social.map((s) => <li><a href={s.href} rel="noopener noreferrer" target="_blank">{s.label}</a></li>)}
+        </ul>
+        <a class="lang" href={alt ? alt[other] : pagePath('home', other)} hreflang={other} lang={other}>{tx(ui.lang.switchTo, lang)}</a>
+      </section>
+    </div>
+
+    <div class="bottom">
+      <p>© {year} ALFEC. {tx(ui.footer.rights, lang)}</p>
+      <p>Engineering · Procurement · Construction</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--line);
+    background: var(--night);
+    padding-block: var(--s-9) var(--s-6);
+    font-size: var(--fs-small);
+    color: var(--text-2);
+  }
+
+  .top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--s-6);
+    padding-bottom: var(--s-7);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .logo img {
+    width: 124px;
+  }
+
+  .slogan {
+    width: min(100%, 380px);
+    color: var(--white);
+  }
+
+  .cols {
+    row-gap: var(--s-7);
+    padding-block: var(--s-7) var(--s-8);
+  }
+
+  .col {
+    grid-column: span 3;
+  }
+
+  .f-title {
+    margin-bottom: var(--s-4);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    line-height: 1.2;
+    color: var(--white);
+  }
+
+  address {
+    font-style: normal;
+    line-height: 1.7;
+  }
+
+  dl {
+    margin: 0;
+    display: grid;
+    gap: var(--s-2);
+  }
+
+  dl div {
+    display: grid;
+    grid-template-columns: 4.5em 1fr;
+    gap: var(--s-3);
+  }
+
+  dd {
+    margin: 0;
+  }
+
+  dd.stack {
+    display: grid;
+  }
+
+  dd a {
+    white-space: nowrap;
+  }
+
+  .col ul {
+    list-style: none;
+    display: grid;
+    gap: var(--s-2);
+  }
+
+  .col ul + ul {
+    margin-top: var(--s-5);
+    padding-top: var(--s-5);
+    border-top: 1px solid var(--line);
+  }
+
+  .col a {
+    color: var(--white);
+    text-decoration: none;
+  }
+
+  .col a:hover {
+    text-decoration: underline;
+  }
+
+  .trades a {
+    color: var(--text-2);
+  }
+
+  .lang {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin-top: var(--s-5);
+  }
+
+  .bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--s-3) var(--s-6);
+    padding-top: var(--s-5);
+    border-top: 1px solid var(--line);
+    font-size: var(--fs-meta);
+  }
+
+  .bottom p {
+    margin: 0;
+  }
+
+  @media (max-width: 1023px) {
+    .col {
+      grid-column: span 6;
+    }
+  }
+
+  @media (max-width: 599px) {
+    .top {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .col {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

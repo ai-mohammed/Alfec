@@ -1,0 +1,11 @@
+[mcp_servers.unspa]
+command = "cmd"
+args = [
+    "/c",
+    "npx",
+    "--no-install",
+    "unspa-mcp",
+]
+
+[mcp_servers.unspa.env]
+UNSPA_SNAPSHOTS = "unspa"

@@ -1,0 +1,2 @@
+# Apache: never serve or execute library files directly (nginx: see docs/deploy.md)
+Require all denied

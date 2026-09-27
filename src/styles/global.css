@@ -1,0 +1,408 @@
+/* ALFEC design system, "Grands projets" direction: night-blue ground, condensed uppercase display,
+   sky-blue accent taken from the logo swoosh. Sections are dark by default; .light switches a section
+   to the paper palette through the contextual tokens (--fg, --fg-2, --edge, --acc-text, --dim, --surface). */
+
+:root {
+  /* Brand */
+  --night: #051629;
+  --night-2: #0a2340;
+  --night-3: #0f2e52;
+  --sky: #29a8e8;
+  --accent: #4cbcf4;
+  --accent-2: #74ccf7;
+  --accent-dark: #11689f;
+  --dim-light: #146fa8;
+
+  /* Neutrals */
+  --white: #ffffff;
+  --text-2: #a9bfd6;
+  --line: rgb(255 255 255 / 0.12);
+  --line-strong: rgb(255 255 255 / 0.3);
+  --paper: #f3f5f8;
+  --ink: #0b1b2d;
+  --ink-2: #4b5d71;
+  --rule: #d5dde6;
+  /* Form-control borders need 3:1 against white (WCAG 1.4.11): #7d8c9b is 3.4:1. */
+  --field-border: #7d8c9b;
+  --danger: #b3261e;
+  --danger-ink: #a4231b;
+
+  /* Contextual tokens: dark by default */
+  --fg: var(--white);
+  --fg-2: var(--text-2);
+  --edge: var(--line);
+  --acc-text: var(--accent);
+  --dim: var(--sky);
+  --surface: var(--night-2);
+  --focus: var(--accent);
+
+  /* Type */
+  --cond: 'Barlow Condensed', 'Arial Narrow', 'Segoe UI', sans-serif;
+  --sans: 'Barlow', 'Segoe UI', system-ui, sans-serif;
+
+  --fs-display: clamp(3.25rem, 1.5rem + 6.6vw, 8.5rem);
+  --fs-h1: clamp(2.75rem, 1.4rem + 4.6vw, 6.25rem);
+  --fs-h2: clamp(2.5rem, 1.3rem + 4vw, 5.75rem);
+  --fs-h3: clamp(1.6rem, 1.25rem + 1.1vw, 2.4rem);
+  --fs-lead: clamp(1.125rem, 1.05rem + 0.3vw, 1.25rem);
+  --fs-body: 1.0625rem;
+  --fs-small: 0.9375rem;
+  --fs-meta: 0.8125rem;
+
+  /* Space: one rhythm */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+  --s-9: 96px;
+  --s-10: 128px;
+  --section: clamp(80px, 4rem + 6vw, 150px);
+
+  /* Layout */
+  --wrap: 1320px;
+  --gutter: clamp(20px, 4.4vw, 64px);
+  --col-gap: clamp(16px, 2.2vw, 32px);
+  --header-h: 84px;
+
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@media (max-width: 1023px) {
+  :root {
+    --header-h: 70px;
+  }
+}
+
+.light {
+  --fg: var(--ink);
+  --fg-2: var(--ink-2);
+  --edge: var(--rule);
+  --acc-text: var(--accent-dark);
+  --dim: var(--dim-light);
+  --surface: var(--white);
+  --focus: var(--accent-dark);
+  background: var(--paper);
+  color: var(--fg);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--header-h) + 16px);
+  scrollbar-color: var(--night-3) var(--night);
+  background: var(--night);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  color: var(--fg);
+  background: var(--night);
+  font-kerning: normal;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  caret-color: var(--accent);
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--night);
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+img,
+svg,
+picture {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-family: var(--cond);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.005em;
+  line-height: 0.92;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--fs-h1);
+  font-weight: 800;
+  line-height: 0.9;
+}
+
+h2 {
+  font-size: var(--fs-h2);
+}
+
+h3 {
+  font-size: var(--fs-h3);
+  line-height: 1;
+}
+
+p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+p + p {
+  margin-top: 1em;
+}
+
+a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* ---------- Layout primitives ---------- */
+
+.wrap {
+  width: 100%;
+  max-width: calc(var(--wrap) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--col-gap);
+}
+
+.section {
+  padding-block: var(--section);
+}
+
+.band {
+  background: var(--night-2);
+}
+
+.lead {
+  font-size: var(--fs-lead);
+  line-height: 1.55;
+  color: var(--fg-2);
+}
+
+.measure {
+  max-width: 62ch;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Section label: a short rule and an uppercase condensed word. */
+.kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--cond);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--acc-text);
+}
+
+.kicker::before {
+  content: '';
+  flex: none;
+  width: 34px;
+  height: 2px;
+  background: currentColor;
+}
+
+/* Second half of a two-tone heading */
+.dim {
+  color: var(--dim);
+}
+
+/* Head of a content section: title and kicker on the left, lead on the right. */
+.sec-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: var(--s-5) clamp(32px, 5vw, 64px);
+  align-items: end;
+  margin-bottom: clamp(40px, 5vw, 64px);
+}
+
+.sec-head > div {
+  display: grid;
+  gap: 22px;
+  justify-items: start;
+}
+
+@media (max-width: 1023px) {
+  .sec-head {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Actions ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 56px;
+  padding: 0 28px;
+  border: 0;
+  background: var(--accent);
+  color: var(--night);
+  font-family: var(--cond);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%);
+  transition: background-color 0.25s var(--ease-out);
+}
+
+.btn:hover {
+  background: var(--accent-2);
+}
+
+.btn .arrow {
+  flex: none;
+  transition: transform 0.35s var(--ease-out);
+}
+
+.btn:hover .arrow {
+  transform: translateX(5px);
+}
+
+.btn--line {
+  background: transparent;
+  color: var(--fg);
+  box-shadow: inset 0 0 0 2px var(--line-strong);
+  clip-path: none;
+}
+
+.light .btn--line {
+  box-shadow: inset 0 0 0 2px var(--field-border);
+}
+
+.btn--line:hover {
+  background: transparent;
+  box-shadow: inset 0 0 0 2px currentColor;
+}
+
+.link-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  font-family: var(--cond);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--acc-text);
+}
+
+.link-arrow:hover span:first-child {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.25em;
+}
+
+.link-arrow .arrow {
+  flex: none;
+  transition: transform 0.35s var(--ease-out);
+}
+
+.link-arrow:hover .arrow {
+  transform: translateX(4px);
+}
+
+/* Handwritten slogan: the original artwork used as a mask, so it takes any colour. */
+.slogan {
+  display: block;
+  width: min(100%, 360px);
+  aspect-ratio: 927 / 81;
+  background: currentColor;
+  -webkit-mask: var(--slogan) no-repeat left center / contain;
+  mask: var(--slogan) no-repeat left center / contain;
+}
+
+/* ---------- Motion ---------- */
+
+/* Elements rise in once when scrolled into view. They stay visible without JavaScript,
+   and Base.astro drops the .js class if the motion script never starts. */
+@media (prefers-reduced-motion: no-preference) {
+  .js [data-reveal] {
+    transition:
+      opacity 0.8s var(--ease-out),
+      transform 0.8s var(--ease-out);
+    transition-delay: var(--d, 0s);
+  }
+
+  .js [data-reveal]:not(.in) {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+}

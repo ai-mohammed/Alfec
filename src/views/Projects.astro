@@ -1,0 +1,250 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import { Picture } from 'astro:assets';
+import Gallery from '../components/Gallery.astro';
+import EnquiryBand from '../components/EnquiryBand.astro';
+import { photos, type PhotoKey } from '../data/photos';
+import { tx, type Bilingual, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+
+const copy = {
+  title: { fr: 'Réalisations · ALFEC Oran', en: 'Projects · ALFEC Oran' },
+  description: {
+    fr: 'Installations réalisées par ALFEC : climatisation, désenfumage, câblage, industrie. Références : Sonelgaz (Tiaret), Banque BEA (Oran).',
+    en: 'Installations delivered by ALFEC: air conditioning, smoke control, wiring, industry. References: Sonelgaz (Tiaret), Banque BEA (Oran).',
+  },
+  h1: { fr: 'Réalisations', en: 'Projects' },
+  lead: {
+    fr: 'Des installations photographiées sur les chantiers d’ALFEC, dans le bâtiment, le tertiaire et l’industrie.',
+    en: 'Installations photographed on ALFEC’s sites, in buildings, offices and industry.',
+  },
+  refsTitle: { fr: 'Références', en: 'References' },
+  galleryKicker: { fr: 'Sur le terrain', en: 'On site' },
+  galleryTitle: { fr: 'Galerie', en: 'Gallery' },
+  napecKicker: { fr: 'Actualités', en: 'News' },
+  napecTitle: { fr: 'Salon NAPEC 2018', en: 'NAPEC 2018' },
+  napecDate: { fr: '25–28 mars 2018 · Centre de conventions d’Oran', en: '25–28 March 2018 · Oran Convention Centre' },
+  napecText: {
+    fr: 'ALFEC a participé au salon international NAPEC (North Africa Petroleum Exhibition & Conference) sur le stand B4-16/B4-17. Le stand a reçu la visite du ministre de l’Énergie et du wali de la wilaya d’Oran le 28 mars 2018.',
+    en: 'ALFEC exhibited at the international NAPEC show (North Africa Petroleum Exhibition & Conference) on stand B4-16/B4-17. The stand was visited by the Minister of Energy and the Wali of Oran on 28 March 2018.',
+  },
+  napecVideo: { fr: 'Voir la vidéo sur YouTube', en: 'Watch the video on YouTube' },
+} satisfies Record<string, Bilingual>;
+
+const references: { key: PhotoKey; client: string; place: string; field: Bilingual }[] = [
+  { key: 'sonelgazTiaret', client: 'Sonelgaz', place: 'Tiaret', field: { fr: 'Climatisation', en: 'Air conditioning' } },
+  { key: 'banqueBeaOran', client: 'Banque BEA', place: 'Oran', field: { fr: 'Banques', en: 'Banks' } },
+];
+
+const groups: { title: Bilingual; items: PhotoKey[] }[] = [
+  { title: { fr: 'Climatisation', en: 'Air conditioning' }, items: ['plateauBureaux', 'splitsFacade', 'couloirClimatise'] },
+  { title: { fr: 'Désenfumage', en: 'Smoke control' }, items: ['desenfumageEquipe', 'plafondGaines', 'gainePlafond'] },
+  { title: { fr: 'Câblage', en: 'Wiring' }, items: ['armoiresBasseTension', 'tableauDivisionnaire', 'armoirePuissance'] },
+  { title: { fr: 'Industrie', en: 'Industry' }, items: ['centraleDePression', 'reservoirsT14b', 'reservoirsSousPression'] },
+  { title: { fr: 'Banques et établissements publics', en: 'Banks and public buildings' }, items: ['plateauBureaux2', 'etablissementHospitalier'] },
+];
+const widthsFor = (w: number) => [...new Set([640, 960, 1280, 1520].filter((x) => x < w).concat(w))];
+---
+
+<Base lang={lang} title={tx(copy.title, lang)} description={tx(copy.description, lang)} current="projects" shareImage={photos.sonelgazTiaret.src}>
+  <PageHead lang={lang} title={tx(copy.h1, lang)} lead={tx(copy.lead, lang)} image={photos.centraleDePression.src} />
+
+  <section class="section" aria-labelledby="refs-title">
+    <div class="wrap">
+      <h2 id="refs-title" class="visually-hidden">{tx(copy.refsTitle, lang)}</h2>
+      <ul class="refs" role="list">
+        {
+          references.map((r, i) => (
+            <li class="ref" data-reveal style={`--d: ${i * 0.08}s`}>
+              <Picture
+                src={photos[r.key].src}
+                formats={['avif', 'webp']}
+                fallbackFormat="jpg"
+                widths={widthsFor(photos[r.key].src.width)}
+                sizes={i === 0 ? '(min-width: 1024px) 58vw, 100vw' : '(min-width: 1024px) 40vw, 100vw'}
+                alt={tx(photos[r.key].alt, lang)}
+                loading={i === 0 ? 'eager' : 'lazy'}
+              />
+              <p class="cap">
+                <b>{r.client}</b>
+                <span>{r.place} · {tx(r.field, lang)}</span>
+              </p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="section light" aria-labelledby="gallery-title">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <p class="kicker">{tx(copy.galleryKicker, lang)}</p>
+          <h2 id="gallery-title">{tx(copy.galleryTitle, lang)}</h2>
+        </div>
+      </div>
+      <div class="groups">
+        {
+          groups.map((g) => (
+            <section class="group" aria-label={tx(g.title, lang)}>
+              <h3 class="group-title">{tx(g.title, lang)}</h3>
+              <Gallery lang={lang} items={g.items} label={tx(g.title, lang)} context={tx(g.title, lang)} />
+            </section>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section band" aria-labelledby="napec-title">
+    <div class="wrap grid">
+      <div class="napec-text">
+        <p class="kicker">{tx(copy.napecKicker, lang)}</p>
+        <h2 id="napec-title">{tx(copy.napecTitle, lang)}</h2>
+        <p class="napec-date">{tx(copy.napecDate, lang)}</p>
+        <p>{tx(copy.napecText, lang)}</p>
+        <a class="link-arrow" href="https://www.youtube.com/watch?v=oizwMYIQ8Vs" rel="noopener noreferrer" target="_blank">
+          <span>{tx(copy.napecVideo, lang)}</span>
+          <svg class="arrow" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square" /></svg>
+        </a>
+      </div>
+      <div class="napec-media">
+        <Gallery lang={lang} items={['napecVisite', 'napecStand', 'napecStand2']} label={tx(copy.napecTitle, lang)} context="NAPEC 2018" />
+      </div>
+    </div>
+  </section>
+
+  <EnquiryBand lang={lang} />
+</Base>
+
+<style>
+  .refs {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+    gap: 16px;
+    list-style: none;
+  }
+
+  .ref {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-items: flex-end;
+    min-height: 520px;
+    overflow: hidden;
+    background: var(--night-2);
+  }
+
+  .ref :global(picture) {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+  }
+
+  .ref :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ref::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(0deg, rgb(5 22 41 / 0.9), rgb(5 22 41 / 0) 60%);
+  }
+
+  .cap {
+    display: grid;
+    gap: 6px;
+    padding: 28px;
+  }
+
+  .cap b {
+    font-family: var(--cond);
+    font-size: 2.5rem;
+    font-weight: 800;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .cap span {
+    font-family: var(--cond);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .groups {
+    display: grid;
+    gap: clamp(48px, 6vw, 88px);
+  }
+
+  .group-title {
+    margin-bottom: var(--s-5);
+    padding-top: var(--s-4);
+    border-top: 1px solid var(--edge);
+    font-size: clamp(1.8rem, 1.4rem + 1vw, 2.5rem);
+  }
+
+  .napec-text {
+    grid-column: 1 / span 5;
+    display: grid;
+    gap: var(--s-4);
+    align-content: start;
+    justify-items: start;
+    color: var(--fg-2);
+  }
+
+  .napec-text h2 {
+    color: var(--fg);
+  }
+
+  .napec-date {
+    font-family: var(--cond);
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .napec-media {
+    grid-column: 7 / span 6;
+  }
+
+  @media (max-width: 1023px) {
+    .napec-text,
+    .napec-media {
+      grid-column: 1 / -1;
+    }
+
+    .napec-media {
+      margin-top: var(--s-7);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .refs {
+      grid-template-columns: 1fr;
+    }
+
+    .ref {
+      min-height: 320px;
+    }
+
+    .cap b {
+      font-size: 2rem;
+    }
+  }
+</style>

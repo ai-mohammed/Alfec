@@ -1,0 +1,216 @@
+---
+// Algeria outline (Natural Earth 1:50m via world-atlas, public domain) with the 22 wilayas
+// published on alfec.net's "Nos implantations" map. Rendered to static SVG at build time.
+import { feature } from 'topojson-client';
+import type { Topology, GeometryCollection } from 'topojson-specification';
+import world from 'world-atlas/countries-50m.json';
+import { wilayas } from '../data/company';
+import { tx, type Bilingual, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  /** Show the list of wilaya names under the map. */
+  names?: boolean;
+  /** 'locator' draws only the outline and the head office (contact page). */
+  variant?: 'full' | 'locator';
+  /** Draw the network: a line from the Oran head office to each wilaya, traced when scrolled into view. */
+  lines?: boolean;
+}
+
+const { lang, names = true, variant = 'full', lines = false } = Astro.props;
+
+const topo = world as unknown as Topology<{ countries: GeometryCollection }>;
+const countries = feature(topo, topo.objects.countries);
+const algeria = countries.features.find((f) => f.id === '012');
+if (!algeria || algeria.geometry.type !== 'Polygon') throw new Error('Algeria outline not found in world-atlas');
+const ring = algeria.geometry.coordinates[0] as [number, number][];
+
+// Equirectangular projection corrected for latitude: accurate enough at this scale.
+const lons = ring.map(([x]) => x);
+const lats = ring.map(([, y]) => y);
+const minLon = Math.min(...lons);
+const maxLon = Math.max(...lons);
+const minLat = Math.min(...lats);
+const maxLat = Math.max(...lats);
+const k = Math.cos((((minLat + maxLat) / 2) * Math.PI) / 180);
+const W = 600;
+const scale = W / ((maxLon - minLon) * k);
+const H = Math.round((maxLat - minLat) * scale);
+const project = (lon: number, lat: number) => [(lon - minLon) * k * scale, (maxLat - lat) * scale] as const;
+
+const outline =
+  ring
+    .map(([lon, lat], i) => {
+      const [x, y] = project(lon, lat);
+      return `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`;
+    })
+    .join('') + 'Z';
+
+const points = wilayas
+  .map((w) => {
+    const [x, y] = project(w.lng, w.lat);
+    return { ...w, x, y, hq: w.name === 'Oran' };
+  })
+  .filter((p) => variant === 'full' || p.hq);
+
+const label: Bilingual =
+  variant === 'full'
+    ? {
+        fr: 'Carte de l’Algérie montrant les 22 wilayas d’implantation d’ALFEC, dont le siège à Oran',
+        en: 'Map of Algeria showing ALFEC’s 22 wilayas, including the Oran head office',
+      }
+    : { fr: 'Carte de l’Algérie situant le siège d’ALFEC à Oran', en: 'Map of Algeria locating ALFEC’s head office in Oran' };
+const hq = points.find((p) => p.hq);
+// A gentle arc from the head office to each wilaya, bowing upward so the lines read as a network.
+const links =
+  lines && hq
+    ? points
+        .filter((p) => !p.hq)
+        .map((p) => {
+          const mx = (hq.x + p.x) / 2;
+          const my = Math.min(hq.y, p.y) - 30 - Math.abs(p.x - hq.x) * 0.08;
+          return `M${hq.x.toFixed(1)} ${hq.y.toFixed(1)}Q${mx.toFixed(1)} ${my.toFixed(1)} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`;
+        })
+    : [];
+---
+
+<figure class:list={['wilaya-map', { network: lines }]} data-reveal={lines ? '' : undefined}>
+  <svg viewBox={`-20 -40 ${W + 40} ${H + 60}`} role="img" aria-label={tx(label, lang)}>
+    <path class="land" d={outline} />
+    {links.map((d, i) => <path class="link" d={d} pathLength="1" style={`--i:${i}`} />)}
+    {
+      points.map((p, i) => (
+        <g class:list={['pt', { hq: p.hq }]} style={`--i:${i}`}>
+          {p.hq && <circle cx={p.x} cy={p.y} r="14" class="ring" />}
+          <circle cx={p.x} cy={p.y} r={p.hq ? 7 : 5} class="dot" />
+        </g>
+      ))
+    }
+    {hq && <text x={hq.x + 20} y={hq.y - 18} class="hq-label">Oran</text>}
+  </svg>
+  {
+    names && variant === 'full' && (
+      <figcaption>
+        <ul class="names" role="list">
+          {points.map((p) => <li class:list={{ hq: p.hq }}>{p.name}</li>)}
+        </ul>
+      </figcaption>
+    )
+  }
+</figure>
+
+<style>
+  .wilaya-map {
+    --land: rgb(41 168 232 / 0.06);
+    --stroke: rgb(41 168 232 / 0.7);
+    --pt: var(--white);
+    --hq: var(--accent);
+    margin: 0;
+  }
+
+  :global(.light) .wilaya-map {
+    --land: #e2eaf2;
+    --stroke: var(--accent-dark);
+    --pt: var(--ink);
+    --hq: var(--accent-dark);
+  }
+
+  svg {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .land {
+    fill: var(--land);
+    stroke: var(--stroke);
+    stroke-width: 1.2;
+    stroke-linejoin: round;
+  }
+
+  .link {
+    fill: none;
+    stroke: rgb(41 168 232 / 0.55);
+    stroke-width: 1.1;
+  }
+
+  .dot {
+    fill: var(--pt);
+  }
+
+  .hq .dot {
+    fill: var(--hq);
+  }
+
+  .ring {
+    fill: none;
+    stroke: var(--hq);
+    stroke-width: 2;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .hq-label {
+    font-family: var(--cond);
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    fill: var(--hq);
+  }
+
+  .names {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-1) var(--s-4);
+    margin-top: var(--s-6);
+    list-style: none;
+    font-size: var(--fs-small);
+    color: var(--fg-2);
+  }
+
+  .names .hq {
+    font-weight: 700;
+    color: var(--fg);
+  }
+
+  /* The network draws itself once, then the head office keeps pulsing. */
+  @media (prefers-reduced-motion: no-preference) {
+    .ring {
+      animation: pulse 2.4s ease-out infinite;
+    }
+
+    .network .link {
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      transition: stroke-dashoffset 1.4s var(--ease-out);
+      transition-delay: calc(var(--i) * 70ms + 0.2s);
+    }
+
+    .network .pt:not(.hq) {
+      transform-box: fill-box;
+      transform-origin: center;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      transition-delay: calc(var(--i) * 70ms + 1s);
+    }
+
+    :global(.js) .network:not(:global(.in)) .pt:not(.hq) {
+      transform: scale(0);
+    }
+
+    .network:global(.in) .link {
+      stroke-dashoffset: 0;
+    }
+
+    @keyframes pulse {
+      from {
+        transform: scale(0.7);
+        opacity: 1;
+      }
+      to {
+        transform: scale(2.4);
+        opacity: 0;
+      }
+    }
+  }
+</style>

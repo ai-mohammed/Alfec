@@ -1,0 +1,87 @@
+---
+import { Picture } from 'astro:assets';
+import { captionOf, type Photo } from '../data/photos';
+import { tx, type Lang } from '../i18n/ui';
+
+interface Props {
+  photo: Photo;
+  lang: Lang;
+  /** CSS sizes attribute: how wide the image renders at each breakpoint. */
+  sizes: string;
+  /** Crop to an aspect ratio (object-fit: cover). Omit to keep the file's own ratio. */
+  ratio?: string;
+  caption?: boolean;
+  /** Heading the photo sits under: its category is dropped from the caption when it repeats it. */
+  context?: string;
+  loading?: 'lazy' | 'eager';
+  priority?: boolean;
+  class?: string;
+  imgClass?: string;
+  /** Focal point for the crop, e.g. "50% 40%". */
+  position?: string;
+}
+
+const {
+  photo,
+  lang,
+  sizes,
+  ratio,
+  caption = true,
+  context,
+  loading = 'lazy',
+  priority = false,
+  class: className,
+  imgClass,
+  position = '50% 50%',
+} = Astro.props;
+
+// Never ask for a rendition wider than the file: these photos are at most ~1500px wide.
+const candidates = [360, 480, 640, 800, 960, 1133, 1280, 1520];
+const widths = [...new Set(candidates.filter((w) => w < photo.src.width).concat(photo.src.width))];
+---
+
+<figure class:list={['photo', className]} style={ratio ? `--ratio:${ratio};--pos:${position}` : undefined}>
+  <Picture
+    src={photo.src}
+    formats={['avif', 'webp']}
+    fallbackFormat="jpg"
+    widths={widths}
+    sizes={sizes}
+    alt={tx(photo.alt, lang)}
+    loading={priority ? 'eager' : loading}
+    fetchpriority={priority ? 'high' : undefined}
+    decoding="async"
+    class:list={[imgClass, ratio && 'is-cropped']}
+  />
+  {caption && <figcaption>{captionOf(photo, lang, context)}</figcaption>}
+</figure>
+
+<style>
+  .photo {
+    margin: 0;
+  }
+
+  .photo :global(picture),
+  .photo :global(img) {
+    width: 100%;
+  }
+
+  .photo :global(img) {
+    background: var(--surface);
+  }
+
+  .photo :global(img.is-cropped) {
+    aspect-ratio: var(--ratio);
+    height: auto;
+    object-fit: cover;
+    object-position: var(--pos);
+  }
+
+  figcaption {
+    margin-top: var(--s-3);
+    font-size: var(--fs-meta);
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--fg-2);
+  }
+</style>

@@ -1,0 +1,36 @@
+# Raw capture of the production site (third-party code, reference only; not covered by this repo's license)
+/.snapshot/
+
+# Dependencies and build output
+node_modules/
+dist/
+.astro/
+
+# Test artifacts
+test-results/
+playwright-report/
+
+# Local env
+.env
+.env.*
+!.env.example
+
+# >>> unspa
+# Unspaghettit scratch / hot-reload artefacts
+unspa/*.implementation-status.json
+stdout.tmp
+stderr.tmp
+# <<< unspa
+
+# Impeccable runtime (decision pages, review captures)
+.impeccable/questions/
+.impeccable/review/
+
+# Unspaghettit provenance sources are verbatim copies of the legacy site code (third-party); kept local
+unspa/*/sources/
+
+# Real server configuration for the enquiry form (contains secrets)
+alfec-config.php
+
+# Local toolchains (portable PHP for tests)
+.tools/

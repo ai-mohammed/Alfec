@@ -1,0 +1,140 @@
+---
+import '@fontsource/barlow/400.css';
+import '@fontsource/barlow/500.css';
+import '@fontsource/barlow/600.css';
+import '@fontsource/barlow/700.css';
+import '@fontsource/barlow-condensed/600.css';
+import '@fontsource/barlow-condensed/700.css';
+import '@fontsource/barlow-condensed/800.css';
+import '../styles/global.css';
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { alternatesFor, SITE } from '../i18n/routes.mjs';
+import { tx, ui, type Lang } from '../i18n/ui';
+import { contact } from '../data/company';
+import logo from '../assets/brand/alfec-logo.png';
+import defaultShare from '../assets/photos/salle-des-pompes.jpg';
+
+export type NavKey = 'home' | 'company' | 'trades' | 'projects' | 'contact';
+
+interface Props {
+  lang: Lang;
+  title: string;
+  description: string;
+  current?: NavKey;
+  shareImage?: ImageMetadata;
+  noindex?: boolean;
+  jsonLd?: Record<string, unknown>[];
+}
+
+const { lang, title, description, current, shareImage = defaultShare, noindex = false, jsonLd = [] } = Astro.props;
+const pathname = Astro.url.pathname;
+const canonical = new URL(pathname, SITE).href;
+const alternates = alternatesFor(pathname);
+const share = await getImage({ src: shareImage, width: 1200, format: 'jpg' });
+const logoImg = await getImage({ src: logo, width: 675, format: 'png' });
+
+const organization = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  '@id': `${SITE}/#organization`,
+  name: 'ALFEC',
+  legalName: contact.legalName,
+  url: `${SITE}/`,
+  logo: new URL(logoImg.src, SITE).href,
+  email: contact.email,
+  telephone: contact.phones.map((p) => p.tel),
+  faxNumber: contact.fax.tel,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: contact.address.street,
+    addressLocality: `${contact.address.locality}, ${contact.address.city}`,
+    postalCode: contact.address.postalCode,
+    addressCountry: 'DZ',
+  },
+  sameAs: contact.social.map((s) => s.href),
+};
+const graph = [organization, ...jsonLd];
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
+    {
+      alternates && !noindex && (
+        <>
+          <link rel="alternate" hreflang="fr" href={SITE + alternates.fr} />
+          <link rel="alternate" hreflang="en" href={SITE + alternates.en} />
+          <link rel="alternate" hreflang="x-default" href={SITE + alternates.fr} />
+        </>
+      )
+    }
+    <meta name="theme-color" content="#051629" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="ALFEC" />
+    <meta property="og:locale" content={lang === 'fr' ? 'fr_DZ' : 'en_GB'} />
+    <meta property="og:locale:alternate" content={lang === 'fr' ? 'en_GB' : 'fr_DZ'} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL(share.src, SITE).href} />
+    <meta property="og:image:width" content={String(share.attributes.width)} />
+    <meta property="og:image:height" content={String(share.attributes.height)} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json" set:html={JSON.stringify(graph.length === 1 ? graph[0] : graph)} />
+    <script is:inline>
+      // Reveal animations only apply once JavaScript runs; if the motion module never starts, show everything.
+      (function (d) {
+        d.classList.add('js');
+        setTimeout(function () {
+          if (!d.classList.contains('motion')) d.classList.remove('js');
+        }, 2500);
+      })(document.documentElement);
+    </script>
+  </head>
+  <body>
+    <a class="skip" href="#main">{tx(ui.skip, lang)}</a>
+    <Header lang={lang} current={current} />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <Footer lang={lang} />
+    <script>
+      import '../scripts/motion';
+    </script>
+  </body>
+</html>
+
+<style>
+  .skip {
+    position: absolute;
+    left: var(--gutter);
+    top: 8px;
+    z-index: 100;
+    padding: 10px 16px;
+    background: var(--accent);
+    color: var(--night);
+    font-weight: 700;
+    transform: translateY(-160%);
+    transition: transform 0.2s var(--ease-out);
+  }
+
+  .skip:focus {
+    transform: none;
+  }
+
+  main:focus {
+    outline: none;
+  }
+</style>

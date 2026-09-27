@@ -1,0 +1,674 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import WilayaMap from '../components/WilayaMap.astro';
+import { contact } from '../data/company';
+import { accept, activities, countries, errors, labels, roles, tradeOptions, works, type Option } from '../data/form';
+import { pagePath } from '../i18n/routes.mjs';
+import { tx, ui, type Bilingual, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const a = contact.address;
+const L = (b: Bilingual) => tx(b, lang);
+const opt = (o: Option) => ({ value: o.value, label: L(o.label) });
+
+const copy = {
+  title: { fr: 'Contact · ALFEC Oran', en: 'Contact · ALFEC Oran' },
+  description: {
+    fr: 'Contactez ALFEC à Oran : téléphone, e-mail, adresse du siège à Canastel, et formulaire de demande de projet avec pièce jointe.',
+    en: 'Contact ALFEC in Oran: phone, e-mail, head-office address in Canastel, and a project enquiry form with attachment.',
+  },
+  h1: { fr: 'Parlons de votre projet.', en: 'Let’s talk about your project.' },
+  lead: {
+    fr: 'Décrivez-nous votre projet et vos besoins. Nous vous répondrons dès que possible.',
+    en: 'Tell us about your project and your needs. We will answer you as soon as possible.',
+  },
+  direct: { fr: 'Nous joindre directement', en: 'Reach us directly' },
+  mapShow: { fr: 'Afficher la carte', en: 'Show the map' },
+  mapNote: {
+    fr: 'La carte est fournie par OpenStreetMap et ne se charge qu’à votre demande.',
+    en: 'The map is provided by OpenStreetMap and only loads when you ask for it.',
+  },
+  mapTitle: { fr: 'Carte du siège d’ALFEC à Canastel, Oran', en: 'Map of ALFEC’s head office in Canastel, Oran' },
+  directions: { fr: 'Itinéraire', en: 'Directions' },
+  formTitle: { fr: 'Demande de projet', en: 'Project enquiry' },
+  required: { fr: 'Tous les champs sont obligatoires, sauf mention contraire.', en: 'All fields are required unless marked optional.' },
+} satisfies Record<string, Bilingual>;
+
+const { lat, lng } = contact.geo;
+const d = 0.006;
+const osmEmbed = `https://www.openstreetmap.org/export/embed.html?bbox=${lng - d}%2C${lat - d / 2}%2C${lng + d}%2C${lat + d / 2}&layer=mapnik&marker=${lat}%2C${lng}`;
+const osmLink = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=17/${lat}/${lng}`;
+const gmapsDir = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+
+const clientText = {
+  lang,
+  errors: Object.fromEntries(Object.entries(errors).map(([k, v]) => [k, L(v)])),
+  sending: L(labels.sending),
+  submit: L(labels.submit),
+  thanks: pagePath('thanks', lang),
+  maxBytes: accept.maxBytes,
+  extensions: accept.extensions,
+};
+---
+
+<Base lang={lang} title={L(copy.title)} description={L(copy.description)} current="contact">
+  <PageHead lang={lang} title={L(copy.h1)} lead={L(copy.lead)} crumb={L(ui.nav.contact)} />
+
+  <section class="contact section light" aria-label={L(copy.formTitle)}>
+    <div class="wrap grid">
+      <aside class="details" aria-labelledby="direct-title">
+        <h2 id="direct-title" class="d-title">{L(copy.direct)}</h2>
+        <dl class="tnum">
+          <div>
+            <dt>{L(ui.footer.phone)}</dt>
+            <dd class="stack">{contact.phones.map((p) => <a href={`tel:${p.tel}`}>{p.label}</a>)}</dd>
+          </div>
+          <div>
+            <dt>{L(ui.footer.mobile)}</dt>
+            <dd><a href={`tel:${contact.mobile.tel}`}>{contact.mobile.label}</a></dd>
+          </div>
+          <div>
+            <dt>{L(ui.footer.fax)}</dt>
+            <dd>{contact.fax.label}</dd>
+          </div>
+          <div>
+            <dt>{L(ui.footer.email)}</dt>
+            <dd><a href={`mailto:${contact.email}`}>{contact.email}</a></dd>
+          </div>
+          <div>
+            <dt>{L(ui.footer.headOffice)}</dt>
+            <dd>
+              <address>
+                {a.street}<br />{a.locality}, {a.postalCode} {a.city}<br />{L(a.country)}
+              </address>
+            </dd>
+          </div>
+        </dl>
+
+        <div class="map" data-map data-src={osmEmbed} data-title={L(copy.mapTitle)}>
+          <div class="map-placeholder" data-map-slot>
+            <div class="locator"><WilayaMap lang={lang} variant="locator" /></div>
+            <div class="map-cta">
+              <p>{L(copy.mapNote)}</p>
+              <button type="button" class="btn btn--line map-btn" data-map-load>{L(copy.mapShow)}</button>
+            </div>
+          </div>
+        </div>
+        <p class="map-links">
+          <a href={gmapsDir} rel="noopener noreferrer" target="_blank">{L(copy.directions)} (Google Maps)</a>
+          <a href={osmLink} rel="noopener noreferrer" target="_blank">OpenStreetMap</a>
+        </p>
+      </aside>
+
+      <div class="form-col">
+        <h2 id="form-title" class="visually-hidden">{L(copy.formTitle)}</h2>
+        <p class="direct-mobile tnum">
+          <span>{L(labels.direct)}</span>
+          <a href={`tel:${contact.phones[0].tel}`}>{contact.phones[0].label}</a>
+          <a href={`mailto:${contact.email}`}>{contact.email}</a>
+        </p>
+        <form
+          class="enquiry-form"
+          action="/contact/send.php"
+          method="post"
+          enctype="multipart/form-data"
+          novalidate
+          aria-labelledby="form-title"
+          data-form
+        >
+          <p class="req-note">{L(copy.required)}</p>
+          <div class="summary" role="alert" tabindex="-1" data-summary hidden></div>
+
+          <input type="hidden" name="lang" value={lang} />
+          <input type="hidden" name="token" value="" data-token />
+          <div class="hp" aria-hidden="true">
+            <label for="website">{L(labels.honeypot)}</label>
+            <input type="text" id="website" name="website" tabindex="-1" autocomplete="off" />
+          </div>
+
+          <fieldset>
+            <legend>{L(labels.fsYou)}</legend>
+            <div class="row">
+              <div class="field">
+                <label for="nom">{L(labels.nom)}</label>
+                <input id="nom" name="nom" type="text" required maxlength="120" autocomplete="name" aria-describedby="err-nom" />
+                <p class="error" id="err-nom" hidden></p>
+              </div>
+              <div class="field">
+                <label for="organisme">{L(labels.organisme)} <span class="opt">({L(labels.optional)})</span></label>
+                <input id="organisme" name="organisme" type="text" maxlength="160" autocomplete="organization" aria-describedby="err-organisme" />
+                <p class="error" id="err-organisme" hidden></p>
+              </div>
+            </div>
+            <div class="row">
+              <div class="field">
+                <label for="role">{L(labels.role)}</label>
+                <select id="role" name="role" required aria-describedby="err-role" data-other="role_autre">
+                  <option value="">{L(labels.choose)}</option>
+                  {roles.map(opt).map((o) => <option value={o.value}>{o.label}</option>)}
+                </select>
+                <p class="error" id="err-role" hidden></p>
+              </div>
+              <div class="field other" data-other-field="role_autre">
+                <label for="role_autre">{L(labels.roleAutre)}</label>
+                <input id="role_autre" name="role_autre" type="text" maxlength="120" aria-describedby="err-role_autre" />
+                <p class="error" id="err-role_autre" hidden></p>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>{L(labels.fsReach)}</legend>
+            <div class="row">
+              <div class="field">
+                <label for="email">{L(labels.email)}</label>
+                <input id="email" name="email" type="email" required maxlength="254" autocomplete="email" inputmode="email" spellcheck="false" aria-describedby="err-email" />
+                <p class="error" id="err-email" hidden></p>
+              </div>
+              <div class="field">
+                <label for="tel">{L(labels.tel)}</label>
+                <input id="tel" name="tel" type="tel" required maxlength="30" autocomplete="tel" inputmode="tel" aria-describedby="err-tel" />
+                <p class="error" id="err-tel" hidden></p>
+              </div>
+            </div>
+            <div class="row">
+              <div class="field">
+                <label for="ville">{L(labels.ville)} <span class="opt">({L(labels.optional)})</span></label>
+                <input id="ville" name="ville" type="text" maxlength="120" autocomplete="address-level2" aria-describedby="err-ville" />
+                <p class="error" id="err-ville" hidden></p>
+              </div>
+              <div class="field">
+                <label for="pays">{L(labels.pays)} <span class="opt">({L(labels.optional)})</span></label>
+                <select id="pays" name="pays" autocomplete="country" aria-describedby="err-pays">
+                  {countries(lang).map((c) => <option value={c.value} selected={c.value === 'DZ'}>{c.label}</option>)}
+                </select>
+                <p class="error" id="err-pays" hidden></p>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>{L(labels.fsProject)}</legend>
+            <div class="field wide">
+              <label for="metier">{L(labels.metier)} <span class="opt">({L(labels.optional)})</span></label>
+              <select id="metier" name="metier" aria-describedby="err-metier" data-prefill="metier">
+                <option value="">{L(labels.metierAny)}</option>
+                {tradeOptions.map(opt).map((o) => <option value={o.value}>{o.label}</option>)}
+              </select>
+              <p class="error" id="err-metier" hidden></p>
+            </div>
+            <div class="row">
+              <div class="field">
+                <label for="travaux">{L(labels.travaux)}</label>
+                <select id="travaux" name="travaux" required aria-describedby="err-travaux" data-other="travaux_autre">
+                  <option value="">{L(labels.choose)}</option>
+                  {works.map(opt).map((o) => <option value={o.value}>{o.label}</option>)}
+                </select>
+                <p class="error" id="err-travaux" hidden></p>
+              </div>
+              <div class="field other" data-other-field="travaux_autre">
+                <label for="travaux_autre">{L(labels.travauxAutre)}</label>
+                <input id="travaux_autre" name="travaux_autre" type="text" maxlength="120" aria-describedby="err-travaux_autre" />
+                <p class="error" id="err-travaux_autre" hidden></p>
+              </div>
+            </div>
+            <div class="row">
+              <div class="field">
+                <label for="activite">{L(labels.activite)}</label>
+                <select id="activite" name="activite" required aria-describedby="err-activite" data-other="activite_autre">
+                  <option value="">{L(labels.choose)}</option>
+                  {activities.map(opt).map((o) => <option value={o.value}>{o.label}</option>)}
+                </select>
+                <p class="error" id="err-activite" hidden></p>
+              </div>
+              <div class="field other" data-other-field="activite_autre">
+                <label for="activite_autre">{L(labels.activiteAutre)}</label>
+                <input id="activite_autre" name="activite_autre" type="text" maxlength="120" aria-describedby="err-activite_autre" />
+                <p class="error" id="err-activite_autre" hidden></p>
+              </div>
+            </div>
+            <div class="field wide">
+              <label for="message">{L(labels.message)}</label>
+              <p class="hint" id="hint-message">{L(labels.messageHint)}</p>
+              <textarea id="message" name="message" required minlength="10" maxlength="5000" rows="7" aria-describedby="hint-message err-message"></textarea>
+              <p class="error" id="err-message" hidden></p>
+            </div>
+            <div class="field wide file-field" data-file>
+              <span class="label-like" id="piece-label">{L(labels.piece)} <span class="opt">({L(labels.optional)})</span></span>
+              <div class="file-row">
+                <label class="btn btn--line file-btn" for="piece">{L(labels.pieceButton)}</label>
+                <input
+                  id="piece"
+                  name="piece"
+                  type="file"
+                  class="file-input"
+                  accept=".pdf,.jpg,.jpeg,.png,.docx,.xlsx,application/pdf,image/jpeg,image/png,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                  aria-describedby="hint-piece err-piece"
+                  aria-labelledby="piece-label"
+                />
+                <p class="file-name" data-file-name hidden></p>
+                <button type="button" class="file-remove" data-file-remove hidden>{L(labels.pieceRemove)}</button>
+              </div>
+              <p class="hint" id="hint-piece">{L(labels.pieceHint)}</p>
+              <p class="error" id="err-piece" hidden></p>
+            </div>
+          </fieldset>
+
+          <div class="submit-row">
+            <button class="btn submit" type="submit" data-submit>
+              <span data-submit-label>{L(labels.submit)}</span>
+              <svg class="arrow" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" /></svg>
+            </button>
+            <p class="status" role="status" aria-live="polite" data-status></p>
+          </div>
+          <p class="recipient">{L(labels.recipient)}</p>
+        </form>
+        <script type="application/json" id="form-text" set:html={JSON.stringify(clientText)} />
+      </div>
+    </div>
+  </section>
+</Base>
+
+<script>
+  import { initEnquiryForm, initMap } from '../scripts/enquiry';
+  initEnquiryForm();
+  initMap();
+</script>
+
+<style>
+  .details {
+    grid-column: 1 / span 4;
+    align-self: start;
+  }
+
+  /* Stay pinned beside the long form only where the whole column fits on screen. */
+  @media (min-width: 1024px) and (min-height: 920px) {
+    .details {
+      position: sticky;
+      top: calc(var(--header-h) + var(--s-6));
+    }
+  }
+
+  .direct-mobile {
+    display: none;
+  }
+
+  .recipient {
+    margin-top: var(--s-4);
+    font-size: var(--fs-meta);
+    color: var(--ink-2);
+  }
+
+  .d-title {
+    margin-bottom: var(--s-5);
+    font-size: 2rem;
+  }
+
+  dl {
+    margin: 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  dl div {
+    display: grid;
+    grid-template-columns: 6.5em 1fr;
+    gap: var(--s-4);
+    padding-block: var(--s-3);
+    border-bottom: 1px solid var(--rule);
+    font-size: var(--fs-small);
+  }
+
+  dt {
+    color: var(--ink-2);
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 500;
+  }
+
+  dd a {
+    color: var(--accent-dark);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  dd a:hover {
+    text-decoration: underline;
+  }
+
+  dd.stack {
+    display: grid;
+  }
+
+  address {
+    font-style: normal;
+  }
+
+  .map {
+    margin-top: var(--s-6);
+    aspect-ratio: 1 / 1;
+    background: var(--white);
+    border: 1px solid var(--rule);
+  }
+
+  .map :global(iframe) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .map-placeholder {
+    height: 100%;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: var(--s-4);
+    padding: var(--s-5);
+    font-size: var(--fs-small);
+    color: var(--ink-2);
+  }
+
+  .locator {
+    min-height: 0;
+    display: grid;
+    place-items: center;
+  }
+
+  .locator :global(.wilaya-map) {
+    height: 100%;
+    max-width: 100%;
+  }
+
+  .locator :global(svg) {
+    height: 100%;
+    width: auto;
+    max-width: 100%;
+  }
+
+  .map-cta {
+    display: grid;
+    justify-items: start;
+    gap: var(--s-3);
+  }
+
+  .map-btn {
+    color: var(--accent-dark);
+    min-height: 44px;
+    font-size: var(--fs-small);
+  }
+
+  .map-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2) var(--s-5);
+    margin-top: var(--s-3);
+    font-size: var(--fs-small);
+  }
+
+  .map-links a {
+    color: var(--accent-dark);
+  }
+
+  .form-col {
+    grid-column: 6 / span 7;
+  }
+
+  .req-note {
+    margin-bottom: var(--s-6);
+    font-size: var(--fs-small);
+    color: var(--ink-2);
+  }
+
+  .summary {
+    margin-bottom: var(--s-6);
+    padding: var(--s-4) var(--s-5);
+    border: 1px solid #b3261e;
+    background: #fdf1f0;
+    color: #8c1d18;
+    font-weight: 500;
+  }
+
+  .summary:focus {
+    outline: 2px solid #b3261e;
+    outline-offset: 2px;
+  }
+
+  .summary :global(ul) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-1) var(--s-4);
+    margin-top: var(--s-2);
+    list-style: none;
+    font-weight: 400;
+  }
+
+  .summary :global(a) {
+    color: inherit;
+  }
+
+  fieldset {
+    margin: 0 0 var(--s-8);
+    padding: 0;
+    border: 0;
+  }
+
+  legend {
+    width: 100%;
+    margin-bottom: var(--s-5);
+    padding: 0 0 var(--s-3);
+    border-bottom: 2px solid var(--ink);
+    font-family: var(--cond);
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 var(--s-5);
+  }
+
+  .field {
+    display: grid;
+    align-content: start;
+    gap: var(--s-2);
+    margin-bottom: var(--s-5);
+  }
+
+  .field.wide {
+    grid-column: 1 / -1;
+  }
+
+  label,
+  .label-like {
+    font-size: var(--fs-small);
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .opt {
+    font-weight: 400;
+    color: var(--ink-2);
+  }
+
+  .hint {
+    font-size: var(--fs-meta);
+    color: var(--ink-2);
+  }
+
+  input[type='text'],
+  input[type='email'],
+  input[type='tel'],
+  select,
+  textarea {
+    width: 100%;
+    min-height: 52px;
+    padding: 12px 14px;
+    border: 1px solid var(--field-border);
+    border-radius: 0;
+    background: var(--white);
+    color: var(--ink);
+    font: inherit;
+    font-size: 1rem;
+    transition: border-color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
+  }
+
+  select {
+    appearance: none;
+    padding-right: 44px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath d='M6 9l6 6 6-6' fill='none' stroke='%2311689f' stroke-width='2'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 180px;
+    line-height: 1.55;
+  }
+
+  input:hover,
+  select:hover,
+  textarea:hover {
+    border-color: var(--ink-2);
+  }
+
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: none;
+    border-color: var(--accent-dark);
+    box-shadow: 0 0 0 1px var(--accent-dark);
+  }
+
+  [aria-invalid='true'] {
+    border-color: #b3261e !important;
+  }
+
+  .error {
+    font-size: var(--fs-meta);
+    font-weight: 500;
+    color: #a4231b;
+  }
+
+  .hp {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .file-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-3) var(--s-5);
+  }
+
+  .file-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+  }
+
+  .file-btn {
+    color: var(--accent-dark);
+    font-size: var(--fs-small);
+  }
+
+  .file-input:focus-visible + .file-name,
+  .file-field:focus-within .file-btn {
+    outline: 3px solid var(--accent-dark);
+    outline-offset: 3px;
+  }
+
+  .file-name {
+    font-size: var(--fs-small);
+    font-weight: 600;
+    word-break: break-word;
+  }
+
+  .file-remove {
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--accent-dark);
+    font: inherit;
+    font-size: var(--fs-small);
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  .submit-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-4) var(--s-5);
+  }
+
+  .submit[disabled] {
+    opacity: 0.7;
+    cursor: progress;
+  }
+
+  .status {
+    font-size: var(--fs-small);
+    color: var(--ink-2);
+  }
+
+  @media (max-width: 1023px) {
+    .details,
+    .form-col {
+      grid-column: 1 / -1;
+      position: static;
+    }
+
+    .form-col {
+      order: -1;
+    }
+
+    .direct-mobile {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--s-2) var(--s-4);
+      margin-bottom: var(--s-6);
+      padding: var(--s-4) 0;
+      border-block: 1px solid var(--rule);
+      font-size: var(--fs-small);
+      color: var(--ink-2);
+    }
+
+    .direct-mobile a {
+      color: var(--accent-dark);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .details {
+      order: 1;
+      margin-top: var(--s-8);
+    }
+  }
+
+  @media (max-width: 599px) {
+    .row {
+      grid-template-columns: 1fr;
+    }
+
+    .submit {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+</style>

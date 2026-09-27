@@ -1,0 +1,20 @@
+# Local test stack: the built site (dist/) on PHP + Apache, and Mailpit catching outgoing mail.
+#   npm run build && npm run test:stack   then   npm test
+services:
+  web:
+    image: php:8.3-apache
+    ports:
+      - '127.0.0.1:8080:80'
+    volumes:
+      - ./dist:/var/www/html:ro
+      - ./tests/fixtures/alfec-config.test.php:/var/www/alfec-config.php:ro
+      - ./tests/fixtures/php-test.ini:/usr/local/etc/php/conf.d/zz-alfec-test.ini:ro
+      - ./tests/fixtures/apache-alfec.conf:/etc/apache2/conf-enabled/zz-alfec.conf:ro
+      - ./tests/php:/tests:ro
+      - ./public/contact/lib:/lib:ro
+    depends_on:
+      - mailpit
+  mailpit:
+    image: axllent/mailpit:v1.27
+    ports:
+      - '127.0.0.1:8025:8025'

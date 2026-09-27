@@ -1,0 +1,13 @@
+---
+import TradeView from '../../views/Trade.astro';
+import { trades } from '../../data/trades';
+import { TRADE_SLUGS } from '../../i18n/routes.mjs';
+
+export function getStaticPaths() {
+  return trades.map((trade) => ({ params: { slug: TRADE_SLUGS[trade.key].fr }, props: { trade } }));
+}
+
+const { trade } = Astro.props;
+---
+
+<TradeView lang="fr" trade={trade} />

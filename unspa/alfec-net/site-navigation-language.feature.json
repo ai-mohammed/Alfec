@@ -1,0 +1,4099 @@
+{
+  "format": "unspaghettit",
+  "version": 1,
+  "feature": {
+    "id": "63df9922",
+    "name": "Site Navigation & Language",
+    "description": "How a visitor enters the site by URL, moves between its sections (home, company, sectors, commitments, contact), browses the six trades (metiers) and the company sub-pages, enlarges photos, opens social profiles, and switches between French and English. Captured from the production single-page site: five panels driven by js/custom.js, AJAX fragments re-bound by js/innercustom.js, and a CSS hover menu.",
+    "surfaces": [
+      {
+        "id": "6c0c0b52",
+        "name": "Page Request",
+        "type": "route",
+        "description": "The HTTP request that loads the single page (index.php). Query parameters lg and msg decide language and starting section; hosting redirects http and www variants.",
+        "stateDefinitions": [],
+        "actions": [
+          {
+            "id": "14d34753",
+            "name": "Open Page",
+            "intent": "Load index.php. lg=en gives English, anything else (fr, missing, or an unknown value such as contact) gives French. Any msg value opens the contact section; without msg the page starts at home.",
+            "parameters": [
+              {
+                "id": "1f318fce",
+                "name": "lg",
+                "type": "enum",
+                "required": true,
+                "description": "The lg query parameter: fr, en, another value, or absent.",
+                "enumValues": [
+                  "fr",
+                  "en",
+                  "other",
+                  "absent"
+                ]
+              },
+              {
+                "id": "f08fb369",
+                "name": "msg",
+                "type": "enum",
+                "required": true,
+                "description": "The msg query parameter set after a form submission: absent (none), success, success_en or any other value.",
+                "enumValues": [
+                  "none",
+                  "success",
+                  "success_en",
+                  "other"
+                ]
+              }
+            ],
+            "requiredStates": [],
+            "rules": [
+              {
+                "id": "225aeb1d",
+                "category": "data",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "lg"
+                  },
+                  "operator": "equals",
+                  "right": "en"
+                },
+                "effect": {
+                  "type": "set_state",
+                  "path": "site.language",
+                  "value": "en",
+                  "description": "Serve English.",
+                  "id": "82cc6a38"
+                },
+                "description": "lg=en selects English."
+              },
+              {
+                "id": "9b7686a8",
+                "category": "data",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "lg"
+                  },
+                  "operator": "not_equals",
+                  "right": "en"
+                },
+                "effect": {
+                  "type": "set_state",
+                  "path": "site.language",
+                  "value": "fr",
+                  "description": "Serve French.",
+                  "id": "2e26ecf3"
+                },
+                "description": "Every other lg value, or none, falls back to French."
+              },
+              {
+                "id": "89d4cf99",
+                "category": "business",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "msg"
+                  },
+                  "operator": "equals",
+                  "right": "none"
+                },
+                "effect": {
+                  "type": "set_state",
+                  "path": "site.section",
+                  "value": "home",
+                  "description": "Start on the home panel.",
+                  "id": "4e07ff39"
+                },
+                "description": "Without msg the page opens on home."
+              },
+              {
+                "id": "89f21968",
+                "category": "business",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "msg"
+                  },
+                  "operator": "not_equals",
+                  "right": "none"
+                },
+                "effect": {
+                  "type": "set_state",
+                  "path": "site.section",
+                  "value": "contact",
+                  "description": "Start on the contact panel.",
+                  "id": "33715458"
+                },
+                "description": "Any msg value opens the contact panel on load."
+              }
+            ],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "nav.menuOpen",
+                "value": false,
+                "description": "Menu starts hidden.",
+                "id": "802cd6c8"
+              },
+              {
+                "type": "set_state",
+                "path": "trades.overlayOpen",
+                "value": false,
+                "description": "Trades overlay starts closed.",
+                "id": "c12e8862"
+              },
+              {
+                "type": "set_state",
+                "path": "trades.selected",
+                "value": "intro",
+                "description": "Overlay starts on the introduction.",
+                "id": "1992a37f"
+              },
+              {
+                "type": "set_state",
+                "path": "company.subpage",
+                "value": "story",
+                "description": "Company panel starts on the story.",
+                "id": "f24bd34b"
+              },
+              {
+                "type": "set_state",
+                "path": "company.photo",
+                "value": 1,
+                "description": "First story photo is shown.",
+                "id": "77305941"
+              },
+              {
+                "type": "set_state",
+                "path": "company.openMarker",
+                "value": "none",
+                "description": "No map info window open.",
+                "id": "b0c957e5"
+              },
+              {
+                "type": "set_state",
+                "path": "home.teaser",
+                "value": "none",
+                "description": "No teaser revealed.",
+                "id": "ffabe12f"
+              },
+              {
+                "type": "set_state",
+                "path": "commitments.slide",
+                "value": 1,
+                "description": "Slider starts on the first photo.",
+                "id": "7f300d60"
+              },
+              {
+                "type": "set_state",
+                "path": "viewer.open",
+                "value": false,
+                "description": "Viewer starts closed.",
+                "id": "c820c4ea"
+              },
+              {
+                "type": "set_state",
+                "path": "viewer.set",
+                "value": "none",
+                "description": "No photo set loaded.",
+                "id": "b598fd92"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "scenarios": [
+              {
+                "id": "67230ca7",
+                "name": "English URL",
+                "description": "index.php?lg=en opens the English site at home.",
+                "stateOverrides": [],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "lg",
+                    "value": "en"
+                  },
+                  {
+                    "parameterName": "msg",
+                    "value": "none"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "site.language",
+                    "operator": "equals",
+                    "value": "en",
+                    "description": "site.language is en"
+                  },
+                  {
+                    "path": "site.section",
+                    "operator": "equals",
+                    "value": "home",
+                    "description": "site.section is home"
+                  }
+                ]
+              },
+              {
+                "id": "52b3a5e8",
+                "name": "Unknown language falls back to French",
+                "description": "index.php?lg=contact is served in French.",
+                "stateOverrides": [
+                  {
+                    "path": "site.language",
+                    "value": "en"
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "lg",
+                    "value": "other"
+                  },
+                  {
+                    "parameterName": "msg",
+                    "value": "none"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "site.language",
+                    "operator": "equals",
+                    "value": "fr",
+                    "description": "site.language is fr"
+                  }
+                ]
+              },
+              {
+                "id": "14f4124d",
+                "name": "Root URL",
+                "description": "https://alfec.net/ is French at home.",
+                "stateOverrides": [],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "lg",
+                    "value": "absent"
+                  },
+                  {
+                    "parameterName": "msg",
+                    "value": "none"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "site.language",
+                    "operator": "equals",
+                    "value": "fr",
+                    "description": "site.language is fr"
+                  },
+                  {
+                    "path": "site.section",
+                    "operator": "equals",
+                    "value": "home",
+                    "description": "site.section is home"
+                  }
+                ]
+              },
+              {
+                "id": "858e692b",
+                "name": "Message opens contact",
+                "description": "index.php?msg=success lands on the contact panel.",
+                "stateOverrides": [],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "lg",
+                    "value": "absent"
+                  },
+                  {
+                    "parameterName": "msg",
+                    "value": "success"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "site.section",
+                    "operator": "equals",
+                    "value": "contact",
+                    "description": "site.section is contact"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "bf713687",
+            "name": "Request Non-Canonical Address",
+            "intent": "A request to http:// or www.alfec.net is answered with a 301 to https://alfec.net, keeping path and query string.",
+            "parameters": [
+              {
+                "id": "b384b8c3",
+                "name": "variant",
+                "type": "enum",
+                "required": true,
+                "description": "Which non-canonical form was requested.",
+                "enumValues": [
+                  "http",
+                  "www"
+                ]
+              }
+            ],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "request.redirected",
+                "value": true,
+                "description": "Answered with a permanent redirect to the canonical address.",
+                "id": "ed5e3ef6"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "actor": "system",
+            "scenarios": [
+              {
+                "id": "816dc426",
+                "name": "www redirect",
+                "description": "www.alfec.net redirects permanently.",
+                "stateOverrides": [],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "variant",
+                    "value": "www"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "request.redirected",
+                    "operator": "equals",
+                    "value": true,
+                    "description": "request.redirected is true"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "rules": [],
+        "invariants": [],
+        "transitions": [
+          {
+            "id": "ef17dde8",
+            "target": "58347ae9",
+            "label": "Page shown",
+            "description": "Every successful page request renders the site chrome around the current panel."
+          }
+        ]
+      },
+      {
+        "id": "58347ae9",
+        "name": "Site Chrome",
+        "type": "screen",
+        "description": "Persistent frame around every section: desktop left sidebar (logo, current-section label, contact button, social links, language flags) and right-edge hover menu; mobile top bar and blue section bar with the same hover menu.",
+        "stateDefinitions": [
+          {
+            "id": "df980537",
+            "path": "site.language",
+            "type": "enum",
+            "defaultValue": "fr",
+            "enumValues": [
+              "fr",
+              "en"
+            ],
+            "description": "Active language. French unless the lg query parameter is exactly en.",
+            "sharedWith": [
+              "6c0c0b52",
+              "383e8321",
+              "c436a8c1",
+              "564f641f",
+              "c05e9dd3",
+              "9109f67f",
+              "59f1acf4"
+            ]
+          },
+          {
+            "id": "7deb815e",
+            "path": "site.section",
+            "type": "enum",
+            "defaultValue": "home",
+            "enumValues": [
+              "home",
+              "company",
+              "sectors",
+              "commitments",
+              "contact"
+            ],
+            "description": "The one panel currently shown (desktop and mobile alike).",
+            "sharedWith": [
+              "6c0c0b52",
+              "383e8321",
+              "c436a8c1",
+              "564f641f",
+              "c05e9dd3",
+              "9109f67f",
+              "59f1acf4"
+            ]
+          },
+          {
+            "id": "fe3c19fd",
+            "path": "nav.menuOpen",
+            "type": "boolean",
+            "defaultValue": false,
+            "description": "Whether the six-entry menu is revealed (CSS :hover on the menu trigger).",
+            "sharedWith": [
+              "6c0c0b52",
+              "383e8321",
+              "c436a8c1",
+              "564f641f",
+              "c05e9dd3",
+              "9109f67f",
+              "59f1acf4"
+            ]
+          },
+          {
+            "id": "5f29182e",
+            "path": "trades.overlayOpen",
+            "type": "boolean",
+            "defaultValue": false,
+            "description": "Whether the full-screen trades overlay is open.",
+            "sharedWith": [
+              "6c0c0b52",
+              "383e8321",
+              "c436a8c1",
+              "564f641f",
+              "c05e9dd3",
+              "9109f67f",
+              "59f1acf4"
+            ]
+          },
+          {
+            "id": "9dddf584",
+            "path": "trades.selected",
+            "type": "enum",
+            "defaultValue": "intro",
+            "enumValues": [
+              "intro",
+              "climatique",
+              "incendie",
+              "desenfumage",
+              "electricite",
+              "froid",
+              "industriel"
+            ],
+            "description": "What the overlay shows: the introduction or one trade (name, description, photos).",
+            "sharedWith": [
+              "6c0c0b52",
+              "383e8321",
+              "c436a8c1",
+              "564f641f",
+              "c05e9dd3",
+              "9109f67f",
+              "59f1acf4"
+            ]
+          },
+          {
+            "id": "ccb1a105",
+            "path": "company.subpage",
+            "type": "enum",
+            "defaultValue": "story",
+            "enumValues": [
+              "story",
+              "identity",
+              "locations",
+              "gallery",
+              "news"
+            ],
+            "description": "Content of the company panel: the story (quisommesnous.php) or a sub-page fragment.",
+            "sharedWith": [
+              "6c0c0b52",
+              "383e8321",
+              "c436a8c1",
+              "564f641f",
+              "c05e9dd3",
+              "9109f67f",
+              "59f1acf4"
+            ]
+          },
+          {
+            "id": "fd8b97eb",
+            "path": "company.photo",
+            "type": "number",
+            "defaultValue": 1,
+            "description": "Which of the company story photos is shown large (1 to 4).",
+            "sharedWith": [
+              "6c0c0b52",
+              "383e8321",
+              "c436a8c1",
+              "564f641f",
+              "c05e9dd3",
+              "9109f67f",
+              "59f1acf4"
+            ]
+          },
+          {
+            "id": "08e73b1d",
+            "path": "company.openMarker",
+            "type": "enum",
+            "defaultValue": "none",
+            "description": "Wilaya whose info window is open on the Nos implantations map, or none.",
+            "sharedWith": [
+              "6c0c0b52",
+              "383e8321",
+              "c436a8c1",
+              "564f641f",
+              "c05e9dd3",
+              "9109f67f",
+              "59f1acf4"
+            ],
+            "enumValues": [
+              "none",
+              "ORAN",
+              "ALGER",
+              "ADRAR",
+              "ANNABA",
+              "CONSTANTINE",
+              "LAGHOUAT",
+              "TLEMCEN",
+              "EL OUED",
+              "BECHAR",
+              "SAIDA",
+              "MOSTAGANEM",
+              "MASCARA",
+              "TISSEMSILT",
+              "NAAMA",
+              "JIJEL",
+              "BOUIRA",
+              "TIARET",
+              "CHLEF",
+              "BOUMERDES",
+              "MILA",
+              "BEJAIA",
+              "GUELMA"
+            ]
+          },
+          {
+            "id": "d8a536aa",
+            "path": "home.teaser",
+            "type": "enum",
+            "defaultValue": "none",
+            "enumValues": [
+              "none",
+              "company",
+              "trades",
+              "sectors",
+              "commitments"
+            ],
+            "description": "Home card whose teaser text is revealed by hover.",
+            "sharedWith": [
+              "6c0c0b52",
+              "383e8321",
+              "c436a8c1",
+              "564f641f",
+              "c05e9dd3",
+              "9109f67f",
+              "59f1acf4"
+            ]
+          },
+          {
+            "id": "d9bf15f4",
+            "path": "commitments.slide",
+            "type": "number",
+            "defaultValue": 1,
+            "description": "Current slide of the commitments slider (1 to 4).",
+            "sharedWith": [
+              "6c0c0b52",
+              "383e8321",
+              "c436a8c1",
+              "564f641f",
+              "c05e9dd3",
+              "9109f67f",
+              "59f1acf4"
+            ]
+          },
+          {
+            "id": "b1895cfd",
+            "path": "viewer.open",
+            "type": "boolean",
+            "defaultValue": false,
+            "description": "Whether the photo viewer is open.",
+            "sharedWith": [
+              "6c0c0b52",
+              "383e8321",
+              "c436a8c1",
+              "564f641f",
+              "c05e9dd3",
+              "9109f67f",
+              "59f1acf4"
+            ]
+          },
+          {
+            "id": "ec1aec62",
+            "path": "viewer.set",
+            "type": "enum",
+            "defaultValue": "none",
+            "enumValues": [
+              "none",
+              "sectors",
+              "commitments",
+              "trade",
+              "company"
+            ],
+            "description": "Which photo set the viewer pages through.",
+            "sharedWith": [
+              "6c0c0b52",
+              "383e8321",
+              "c436a8c1",
+              "564f641f",
+              "c05e9dd3",
+              "9109f67f",
+              "59f1acf4"
+            ]
+          },
+          {
+            "id": "cfef124e",
+            "path": "viewer.lastStep",
+            "type": "enum",
+            "defaultValue": "none",
+            "enumValues": [
+              "none",
+              "next",
+              "previous"
+            ],
+            "description": "Last direction the visitor paged in the viewer.",
+            "sharedWith": [
+              "6c0c0b52",
+              "383e8321",
+              "c436a8c1",
+              "564f641f",
+              "c05e9dd3",
+              "9109f67f",
+              "59f1acf4"
+            ]
+          },
+          {
+            "id": "08879d26",
+            "path": "external.lastOpened",
+            "type": "enum",
+            "defaultValue": "none",
+            "enumValues": [
+              "none",
+              "facebook",
+              "youtube",
+              "linkedin"
+            ],
+            "description": "Last social profile opened in a new tab.",
+            "sharedWith": [
+              "6c0c0b52",
+              "383e8321",
+              "c436a8c1",
+              "564f641f",
+              "c05e9dd3",
+              "9109f67f",
+              "59f1acf4"
+            ]
+          },
+          {
+            "id": "7a2b5ab0",
+            "path": "request.redirected",
+            "type": "boolean",
+            "defaultValue": false,
+            "description": "Whether the request was answered with a permanent redirect to the canonical https://alfec.net address.",
+            "sharedWith": [
+              "6c0c0b52",
+              "383e8321",
+              "c436a8c1",
+              "564f641f",
+              "c05e9dd3",
+              "9109f67f",
+              "59f1acf4"
+            ]
+          }
+        ],
+        "actions": [
+          {
+            "id": "7599a07e",
+            "name": "Open Menu",
+            "intent": "Hovering the three-line trigger (tap-emulated hover on touch screens) slides in the six-entry menu. Pure CSS :hover: no click handler, no keyboard access, no ARIA state.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "nav.menuOpen",
+                "value": true,
+                "description": "Menu revealed.",
+                "id": "844d34c7"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "Nothing happens while an overlay covers the chrome.",
+                "description": "Nothing happens while an overlay covers the chrome.",
+                "id": "f381138d"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "69b4ea8c",
+                "name": "Hover reveals menu",
+                "description": "Hovering the trigger reveals the menu.",
+                "stateOverrides": [],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "nav.menuOpen",
+                    "operator": "equals",
+                    "value": true,
+                    "description": "nav.menuOpen is true"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "52ae5b96",
+            "name": "Close Menu",
+            "intent": "Moving the pointer away (tapping elsewhere on touch screens) hides the menu. There is no close control.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "nav.menuOpen",
+                "value": false,
+                "description": "Menu hidden.",
+                "id": "193e8cca"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "Nothing happens while an overlay covers the chrome.",
+                "description": "Nothing happens while an overlay covers the chrome.",
+                "id": "f3f85f5b"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "20c0c03e",
+                "name": "Pointer leaves",
+                "description": "Leaving the menu hides it.",
+                "stateOverrides": [
+                  {
+                    "path": "nav.menuOpen",
+                    "value": true
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "nav.menuOpen",
+                    "operator": "equals",
+                    "value": false,
+                    "description": "nav.menuOpen is false"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "1f378fe9",
+            "name": "Choose Menu Entry",
+            "intent": "Accueil, Qui sommes-nous, Nos Secteurs d'Intervention, Nos Engagements and Nous contacter show their panel; Nos Metiers opens the trades overlay. Choosing the panel already shown does nothing. Changing panel reloads the company story into panel 2.",
+            "parameters": [
+              {
+                "id": "940a4ffb",
+                "name": "entry",
+                "type": "enum",
+                "required": true,
+                "description": "The menu entry chosen.",
+                "enumValues": [
+                  "home",
+                  "company",
+                  "trades",
+                  "sectors",
+                  "commitments",
+                  "contact"
+                ]
+              }
+            ],
+            "requiredStates": [],
+            "rules": [
+              {
+                "id": "d46554d1",
+                "category": "ux_feedback",
+                "condition": {
+                  "left": "nav.menuOpen",
+                  "operator": "equals",
+                  "right": false
+                },
+                "effect": {
+                  "type": "block_action",
+                  "reason": "The menu entries are hidden until the menu is revealed.",
+                  "description": "Entries are not reachable while the menu is hidden.",
+                  "id": "c06d9792"
+                },
+                "description": "Entries can only be chosen while the menu is revealed."
+              },
+              {
+                "id": "41fa721f",
+                "category": "business",
+                "condition": {
+                  "kind": "all",
+                  "conditions": [
+                    {
+                      "left": {
+                        "kind": "param",
+                        "name": "entry"
+                      },
+                      "operator": "not_equals",
+                      "right": "trades"
+                    },
+                    {
+                      "left": {
+                        "kind": "param",
+                        "name": "entry"
+                      },
+                      "operator": "not_equals",
+                      "right": {
+                        "kind": "state",
+                        "path": "site.section"
+                      }
+                    }
+                  ]
+                },
+                "effect": {
+                  "type": "set_state",
+                  "path": "company.subpage",
+                  "value": "story",
+                  "description": "Panel 2 is reloaded with the company story.",
+                  "id": "c3e6daea"
+                },
+                "description": "A panel change reloads quisommesnous.php into the company panel, dropping any open sub-page."
+              },
+              {
+                "id": "a9b7a3e3",
+                "category": "business",
+                "condition": {
+                  "kind": "all",
+                  "conditions": [
+                    {
+                      "left": {
+                        "kind": "param",
+                        "name": "entry"
+                      },
+                      "operator": "not_equals",
+                      "right": "trades"
+                    },
+                    {
+                      "left": {
+                        "kind": "param",
+                        "name": "entry"
+                      },
+                      "operator": "not_equals",
+                      "right": {
+                        "kind": "state",
+                        "path": "site.section"
+                      }
+                    }
+                  ]
+                },
+                "effect": {
+                  "type": "set_state",
+                  "path": "company.openMarker",
+                  "value": "none",
+                  "description": "The reloaded story has no map.",
+                  "id": "be886442"
+                },
+                "description": "The reload also removes any open map info window."
+              },
+              {
+                "id": "a282808d",
+                "category": "business",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "entry"
+                  },
+                  "operator": "not_equals",
+                  "right": "trades"
+                },
+                "effect": {
+                  "type": "set_state",
+                  "path": "site.section",
+                  "value": {
+                    "kind": "switch",
+                    "cases": [
+                      {
+                        "when": {
+                          "left": {
+                            "kind": "param",
+                            "name": "entry"
+                          },
+                          "operator": "equals",
+                          "right": "home"
+                        },
+                        "then": {
+                          "kind": "literal",
+                          "value": "home"
+                        }
+                      },
+                      {
+                        "when": {
+                          "left": {
+                            "kind": "param",
+                            "name": "entry"
+                          },
+                          "operator": "equals",
+                          "right": "company"
+                        },
+                        "then": {
+                          "kind": "literal",
+                          "value": "company"
+                        }
+                      },
+                      {
+                        "when": {
+                          "left": {
+                            "kind": "param",
+                            "name": "entry"
+                          },
+                          "operator": "equals",
+                          "right": "sectors"
+                        },
+                        "then": {
+                          "kind": "literal",
+                          "value": "sectors"
+                        }
+                      },
+                      {
+                        "when": {
+                          "left": {
+                            "kind": "param",
+                            "name": "entry"
+                          },
+                          "operator": "equals",
+                          "right": "commitments"
+                        },
+                        "then": {
+                          "kind": "literal",
+                          "value": "commitments"
+                        }
+                      },
+                      {
+                        "when": {
+                          "left": {
+                            "kind": "param",
+                            "name": "entry"
+                          },
+                          "operator": "equals",
+                          "right": "contact"
+                        },
+                        "then": {
+                          "kind": "literal",
+                          "value": "contact"
+                        }
+                      }
+                    ],
+                    "default": {
+                      "kind": "state",
+                      "path": "site.section"
+                    }
+                  },
+                  "description": "Show the chosen panel.",
+                  "id": "cc347ac6"
+                },
+                "description": "Section entries switch the visible panel (skipped when it is already shown)."
+              },
+              {
+                "id": "e3af05ef",
+                "category": "business",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "entry"
+                  },
+                  "operator": "equals",
+                  "right": "trades"
+                },
+                "effect": {
+                  "type": "set_state",
+                  "path": "trades.overlayOpen",
+                  "value": true,
+                  "description": "Open the trades overlay.",
+                  "id": "b8289754"
+                },
+                "description": "Nos Metiers opens the full-screen trades overlay without changing panel."
+              }
+            ],
+            "invariants": [],
+            "effects": [],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "Nothing to click: the entries are hidden or covered.",
+                "description": "Nothing to click: the entries are hidden or covered.",
+                "id": "aa893b25"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "113153a0",
+                "name": "Hidden menu",
+                "description": "Entries cannot be chosen while the menu is hidden.",
+                "stateOverrides": [
+                  {
+                    "path": "nav.menuOpen",
+                    "value": false
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "entry",
+                    "value": "sectors"
+                  }
+                ],
+                "expectedStatus": "blocked"
+              },
+              {
+                "id": "4fa162f9",
+                "name": "Go to sectors from a sub-page",
+                "description": "Leaving the company panel from Galerie resets it to the story.",
+                "stateOverrides": [
+                  {
+                    "path": "nav.menuOpen",
+                    "value": true
+                  },
+                  {
+                    "path": "site.section",
+                    "value": "company"
+                  },
+                  {
+                    "path": "company.subpage",
+                    "value": "gallery"
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "entry",
+                    "value": "sectors"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "site.section",
+                    "operator": "equals",
+                    "value": "sectors",
+                    "description": "site.section is sectors"
+                  },
+                  {
+                    "path": "company.subpage",
+                    "operator": "equals",
+                    "value": "story",
+                    "description": "company.subpage is story"
+                  }
+                ]
+              },
+              {
+                "id": "7abadf32",
+                "name": "Current panel is a no-op",
+                "description": "Choosing the panel already shown keeps its sub-page.",
+                "stateOverrides": [
+                  {
+                    "path": "nav.menuOpen",
+                    "value": true
+                  },
+                  {
+                    "path": "site.section",
+                    "value": "company"
+                  },
+                  {
+                    "path": "company.subpage",
+                    "value": "gallery"
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "entry",
+                    "value": "company"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "site.section",
+                    "operator": "equals",
+                    "value": "company",
+                    "description": "site.section is company"
+                  },
+                  {
+                    "path": "company.subpage",
+                    "operator": "equals",
+                    "value": "gallery",
+                    "description": "company.subpage is gallery"
+                  }
+                ]
+              },
+              {
+                "id": "5f60c80b",
+                "name": "Trades entry opens overlay",
+                "description": "Nos Metiers opens the overlay and keeps the panel.",
+                "stateOverrides": [
+                  {
+                    "path": "nav.menuOpen",
+                    "value": true
+                  },
+                  {
+                    "path": "site.section",
+                    "value": "home"
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "entry",
+                    "value": "trades"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "trades.overlayOpen",
+                    "operator": "equals",
+                    "value": true,
+                    "description": "trades.overlayOpen is true"
+                  },
+                  {
+                    "path": "site.section",
+                    "operator": "equals",
+                    "value": "home",
+                    "description": "site.section is home"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "cd88ed0b",
+            "name": "Go To Next Section",
+            "intent": "The labelled arrow on each panel leads to the next one: Accueil, Qui sommes-nous, Secteurs, Engagements, Contact. The contact panel has no arrow. This path does not reload the company story.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [
+              {
+                "id": "b76cdc5a",
+                "category": "ux_feedback",
+                "condition": {
+                  "left": "site.section",
+                  "operator": "equals",
+                  "right": "contact"
+                },
+                "effect": {
+                  "type": "block_action",
+                  "reason": "The contact panel is the last one and has no next arrow.",
+                  "description": "No arrow on the last panel.",
+                  "id": "21431f3f"
+                },
+                "description": "The tour ends on the contact panel."
+              }
+            ],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "site.section",
+                "value": {
+                  "kind": "switch",
+                  "cases": [
+                    {
+                      "when": {
+                        "left": "site.section",
+                        "operator": "equals",
+                        "right": "home"
+                      },
+                      "then": {
+                        "kind": "literal",
+                        "value": "company"
+                      }
+                    },
+                    {
+                      "when": {
+                        "left": "site.section",
+                        "operator": "equals",
+                        "right": "company"
+                      },
+                      "then": {
+                        "kind": "literal",
+                        "value": "sectors"
+                      }
+                    },
+                    {
+                      "when": {
+                        "left": "site.section",
+                        "operator": "equals",
+                        "right": "sectors"
+                      },
+                      "then": {
+                        "kind": "literal",
+                        "value": "commitments"
+                      }
+                    }
+                  ],
+                  "default": {
+                    "kind": "literal",
+                    "value": "contact"
+                  }
+                },
+                "description": "Advance one panel along the tour.",
+                "id": "386bcff5"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "There is no arrow to click.",
+                "description": "There is no arrow to click.",
+                "id": "651a5fa3"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "0a628947",
+                "name": "Home to company",
+                "description": "The home arrow opens the company panel.",
+                "stateOverrides": [
+                  {
+                    "path": "site.section",
+                    "value": "home"
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "site.section",
+                    "operator": "equals",
+                    "value": "company",
+                    "description": "site.section is company"
+                  }
+                ]
+              },
+              {
+                "id": "fdb9b228",
+                "name": "Commitments to contact",
+                "description": "The commitments arrow opens contact.",
+                "stateOverrides": [
+                  {
+                    "path": "site.section",
+                    "value": "commitments"
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "site.section",
+                    "operator": "equals",
+                    "value": "contact",
+                    "description": "site.section is contact"
+                  }
+                ]
+              },
+              {
+                "id": "8a01636a",
+                "name": "No arrow on contact",
+                "description": "The tour stops at contact.",
+                "stateOverrides": [
+                  {
+                    "path": "site.section",
+                    "value": "contact"
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "blocked"
+              }
+            ]
+          },
+          {
+            "id": "0b34aee4",
+            "name": "Select Logo",
+            "intent": "The logo always returns to the home panel and reloads the company story, even when home is already shown.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "site.section",
+                "value": "home",
+                "description": "Show home.",
+                "id": "cdc35d15"
+              },
+              {
+                "type": "set_state",
+                "path": "company.subpage",
+                "value": "story",
+                "description": "Reload the company story.",
+                "id": "59316496"
+              },
+              {
+                "type": "set_state",
+                "path": "company.openMarker",
+                "value": "none",
+                "description": "The reloaded story has no map.",
+                "id": "767c2275"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "Nothing happens while an overlay covers the chrome.",
+                "description": "Nothing happens while an overlay covers the chrome.",
+                "id": "ea920324"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "45c76979",
+                "name": "Logo from contact",
+                "description": "The logo returns home from contact.",
+                "stateOverrides": [
+                  {
+                    "path": "site.section",
+                    "value": "contact"
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "site.section",
+                    "operator": "equals",
+                    "value": "home",
+                    "description": "site.section is home"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "2525c416",
+            "name": "Select Contact Button",
+            "intent": "The Nous contacter button (desktop sidebar) shows the contact panel.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [
+              {
+                "id": "75a9ae5c",
+                "category": "business",
+                "condition": {
+                  "left": "site.section",
+                  "operator": "not_equals",
+                  "right": "contact"
+                },
+                "effect": {
+                  "type": "set_state",
+                  "path": "company.subpage",
+                  "value": "story",
+                  "description": "Panel change reloads the company story.",
+                  "id": "0bd7bf16"
+                },
+                "description": "Changing panel reloads the company story."
+              },
+              {
+                "id": "cc129660",
+                "category": "business",
+                "condition": {
+                  "left": "site.section",
+                  "operator": "not_equals",
+                  "right": "contact"
+                },
+                "effect": {
+                  "type": "set_state",
+                  "path": "company.openMarker",
+                  "value": "none",
+                  "description": "The reloaded story has no map.",
+                  "id": "d4080f0a"
+                },
+                "description": "The reload removes any open map info window."
+              }
+            ],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "site.section",
+                "value": "contact",
+                "description": "Show the contact panel.",
+                "id": "cd1f3940"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "Nothing happens while an overlay covers the chrome.",
+                "description": "Nothing happens while an overlay covers the chrome.",
+                "id": "6d639ecb"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "c6eacfbc",
+                "name": "Contact from sectors",
+                "description": "The button opens contact.",
+                "stateOverrides": [
+                  {
+                    "path": "site.section",
+                    "value": "sectors"
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "site.section",
+                    "operator": "equals",
+                    "value": "contact",
+                    "description": "site.section is contact"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "e0441884",
+            "name": "Switch Language",
+            "intent": "The inactive language flag links to index.php?lg=<code>: the page reloads in that language, back at home, with every panel reset. The active flag is not a link.",
+            "parameters": [
+              {
+                "id": "afb494e5",
+                "name": "target",
+                "type": "enum",
+                "required": true,
+                "description": "Language of the flag chosen.",
+                "enumValues": [
+                  "fr",
+                  "en"
+                ]
+              }
+            ],
+            "requiredStates": [],
+            "rules": [
+              {
+                "id": "b3cb2efe",
+                "category": "ux_feedback",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "target"
+                  },
+                  "operator": "equals",
+                  "right": {
+                    "kind": "state",
+                    "path": "site.language"
+                  }
+                },
+                "effect": {
+                  "type": "block_action",
+                  "reason": "The active language flag is not a link.",
+                  "description": "Only the inactive language can be chosen.",
+                  "id": "5621159a"
+                },
+                "description": "Choosing the active language does nothing."
+              }
+            ],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "site.language",
+                "value": {
+                  "kind": "param",
+                  "name": "target"
+                },
+                "description": "Reload in the chosen language.",
+                "id": "9e08e69b"
+              },
+              {
+                "type": "set_state",
+                "path": "site.section",
+                "value": "home",
+                "description": "The reload starts at home: the current panel is lost.",
+                "id": "52615caa"
+              },
+              {
+                "type": "set_state",
+                "path": "nav.menuOpen",
+                "value": false,
+                "description": "Menu starts hidden.",
+                "id": "f4ba16d9"
+              },
+              {
+                "type": "set_state",
+                "path": "trades.overlayOpen",
+                "value": false,
+                "description": "Trades overlay starts closed.",
+                "id": "065a920a"
+              },
+              {
+                "type": "set_state",
+                "path": "trades.selected",
+                "value": "intro",
+                "description": "Overlay starts on the introduction.",
+                "id": "87c5e6d2"
+              },
+              {
+                "type": "set_state",
+                "path": "company.subpage",
+                "value": "story",
+                "description": "Company panel starts on the story.",
+                "id": "199551c0"
+              },
+              {
+                "type": "set_state",
+                "path": "company.photo",
+                "value": 1,
+                "description": "First story photo is shown.",
+                "id": "d83853e6"
+              },
+              {
+                "type": "set_state",
+                "path": "company.openMarker",
+                "value": "none",
+                "description": "No map info window open.",
+                "id": "f7bc34a3"
+              },
+              {
+                "type": "set_state",
+                "path": "home.teaser",
+                "value": "none",
+                "description": "No teaser revealed.",
+                "id": "8e39ba75"
+              },
+              {
+                "type": "set_state",
+                "path": "commitments.slide",
+                "value": 1,
+                "description": "Slider starts on the first photo.",
+                "id": "f883e993"
+              },
+              {
+                "type": "set_state",
+                "path": "viewer.open",
+                "value": false,
+                "description": "Viewer starts closed.",
+                "id": "90902ec0"
+              },
+              {
+                "type": "set_state",
+                "path": "viewer.set",
+                "value": "none",
+                "description": "No photo set loaded.",
+                "id": "a226bf11"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The active flag is plain, or an overlay covers the chrome.",
+                "description": "The active flag is plain, or an overlay covers the chrome.",
+                "id": "7957efd1"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "feaa9ffb",
+                "name": "French to English from sectors",
+                "description": "Switching language returns to home in English.",
+                "stateOverrides": [
+                  {
+                    "path": "site.language",
+                    "value": "fr"
+                  },
+                  {
+                    "path": "site.section",
+                    "value": "sectors"
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "target",
+                    "value": "en"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "site.language",
+                    "operator": "equals",
+                    "value": "en",
+                    "description": "site.language is en"
+                  },
+                  {
+                    "path": "site.section",
+                    "operator": "equals",
+                    "value": "home",
+                    "description": "site.section is home"
+                  }
+                ]
+              },
+              {
+                "id": "0e48bdf6",
+                "name": "Active flag",
+                "description": "The active language flag does nothing.",
+                "stateOverrides": [
+                  {
+                    "path": "site.language",
+                    "value": "fr"
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "target",
+                    "value": "fr"
+                  }
+                ],
+                "expectedStatus": "blocked"
+              }
+            ]
+          },
+          {
+            "id": "df0b881c",
+            "name": "Open Social Profile",
+            "intent": "Opens ALFEC on Facebook (AlfecDZ), YouTube or LinkedIn in a new tab (target=_blank, no rel=noopener). The site stays as it was.",
+            "parameters": [
+              {
+                "id": "5328d1b2",
+                "name": "network",
+                "type": "enum",
+                "required": true,
+                "description": "Which profile.",
+                "enumValues": [
+                  "facebook",
+                  "youtube",
+                  "linkedin"
+                ]
+              }
+            ],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "external.lastOpened",
+                "value": {
+                  "kind": "param",
+                  "name": "network"
+                },
+                "description": "Profile opened in a new tab.",
+                "id": "3693bff5"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "Nothing happens while an overlay covers the chrome.",
+                "description": "Nothing happens while an overlay covers the chrome.",
+                "id": "7732c7cc"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "1ca05a9e",
+                "name": "LinkedIn",
+                "description": "LinkedIn opens in a new tab without moving the site.",
+                "stateOverrides": [
+                  {
+                    "path": "site.section",
+                    "value": "commitments"
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "network",
+                    "value": "linkedin"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "external.lastOpened",
+                    "operator": "equals",
+                    "value": "linkedin",
+                    "description": "external.lastOpened is linkedin"
+                  },
+                  {
+                    "path": "site.section",
+                    "operator": "equals",
+                    "value": "commitments",
+                    "description": "site.section is commitments"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "8ae3c5eb",
+            "name": "Give every section its own web address",
+            "intent": "Each section and trade gets a real URL in both languages, so it can be linked, bookmarked, shared and indexed.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [],
+            "emittedEvents": [],
+            "transitions": [],
+            "evolution": {
+              "rationale": "Today every link lands on the home panel and search engines only see one page per language.",
+              "category": "ux",
+              "source": "audit B04"
+            }
+          },
+          {
+            "id": "9eaad388",
+            "name": "Open the menu with a real button",
+            "intent": "A labelled button opens and closes the menu, works with keyboard and touch, and announces its state.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [],
+            "emittedEvents": [],
+            "transitions": [],
+            "evolution": {
+              "rationale": "The menu currently appears only on hover, so keyboard users cannot reach it and touch users rely on browser quirks.",
+              "category": "accessibility",
+              "source": "WCAG 2.2"
+            }
+          },
+          {
+            "id": "278452d4",
+            "name": "Keep the visitor on the same page when switching language",
+            "intent": "Switching language opens the same section or trade in the other language.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [],
+            "emittedEvents": [],
+            "transitions": [],
+            "evolution": {
+              "rationale": "A visitor reading about smoke control in French should not be sent back to the English home page.",
+              "category": "ux",
+              "source": "audit B14"
+            }
+          }
+        ],
+        "rules": [
+          {
+            "id": "8082548a",
+            "category": "ux_feedback",
+            "condition": {
+              "kind": "any",
+              "conditions": [
+                {
+                  "left": "trades.overlayOpen",
+                  "operator": "equals",
+                  "right": true
+                },
+                {
+                  "left": "viewer.open",
+                  "operator": "equals",
+                  "right": true
+                }
+              ]
+            },
+            "effect": {
+              "type": "block_action",
+              "reason": "The trades overlay or photo viewer covers the site chrome.",
+              "description": "The trades overlay or photo viewer covers the site chrome.",
+              "id": "ecb270ab"
+            },
+            "description": "The trades overlay or photo viewer covers the site chrome."
+          }
+        ],
+        "invariants": [],
+        "transitions": [
+          {
+            "id": "93eac42c",
+            "target": "383e8321",
+            "label": "Accueil, logo or language flag",
+            "description": "Menu entry Accueil, the logo and a language switch show the home panel."
+          },
+          {
+            "id": "19b5961a",
+            "target": "c436a8c1",
+            "label": "Qui sommes-nous ?",
+            "description": "Menu entry to the company panel."
+          },
+          {
+            "id": "7e38afe3",
+            "target": "c05e9dd3",
+            "label": "Nos Secteurs d'Intervention",
+            "description": "Menu entry to the sectors panel."
+          },
+          {
+            "id": "ac8660ad",
+            "target": "9109f67f",
+            "label": "Nos Engagements",
+            "description": "Menu entry to the commitments panel."
+          },
+          {
+            "id": "b07128d5",
+            "target": "564f641f",
+            "label": "Nos Metiers",
+            "description": "Menu entry opening the trades overlay."
+          }
+        ]
+      },
+      {
+        "id": "383e8321",
+        "name": "Home",
+        "type": "screen",
+        "description": "Panel 1 (Accueil): slogan and four entry cards (Qui sommes-nous, Nos metiers, Nos Secteurs, Nos Engagements), each with a hover-revealed teaser.",
+        "stateDefinitions": [],
+        "actions": [
+          {
+            "id": "25896187",
+            "name": "Reveal Card Teaser",
+            "intent": "Hovering a home card reveals its teaser text. Hover only: no keyboard or touch equivalent, so the teasers are unreachable without a mouse.",
+            "parameters": [
+              {
+                "id": "b0d5c97a",
+                "name": "card",
+                "type": "enum",
+                "required": true,
+                "description": "Card hovered.",
+                "enumValues": [
+                  "company",
+                  "trades",
+                  "sectors",
+                  "commitments"
+                ]
+              }
+            ],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "home.teaser",
+                "value": {
+                  "kind": "param",
+                  "name": "card"
+                },
+                "description": "Teaser shown.",
+                "id": "d1126d54"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The home panel is not on screen.",
+                "description": "The home panel is not on screen.",
+                "id": "abe90cc4"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "341c1b6a",
+                "name": "Hover sectors card",
+                "description": "The sectors teaser appears.",
+                "stateOverrides": [],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "card",
+                    "value": "sectors"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "home.teaser",
+                    "operator": "equals",
+                    "value": "sectors",
+                    "description": "home.teaser is sectors"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "7c2da67a",
+            "name": "Hide Card Teaser",
+            "intent": "Moving the pointer off a card hides every teaser.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "home.teaser",
+                "value": "none",
+                "description": "Teasers hidden.",
+                "id": "52a64ae0"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The home panel is not on screen.",
+                "description": "The home panel is not on screen.",
+                "id": "d47eba85"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "c2ed9543",
+                "name": "Pointer leaves card",
+                "description": "Teasers hide.",
+                "stateOverrides": [
+                  {
+                    "path": "home.teaser",
+                    "value": "company"
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "home.teaser",
+                    "operator": "equals",
+                    "value": "none",
+                    "description": "home.teaser is none"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "97dcdb00",
+            "name": "Open Entry Card",
+            "intent": "Clicking a card opens its panel (company, sectors, commitments); the Nos metiers card opens the trades overlay.",
+            "parameters": [
+              {
+                "id": "dfcdf05e",
+                "name": "card",
+                "type": "enum",
+                "required": true,
+                "description": "Card clicked.",
+                "enumValues": [
+                  "company",
+                  "trades",
+                  "sectors",
+                  "commitments"
+                ]
+              }
+            ],
+            "requiredStates": [],
+            "rules": [
+              {
+                "id": "554dafdd",
+                "category": "business",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "card"
+                  },
+                  "operator": "not_equals",
+                  "right": "trades"
+                },
+                "effect": {
+                  "type": "set_state",
+                  "path": "company.subpage",
+                  "value": "story",
+                  "description": "Panel change reloads the company story.",
+                  "id": "386bb126"
+                },
+                "description": "Opening a panel reloads the company story."
+              },
+              {
+                "id": "d519b7c2",
+                "category": "business",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "card"
+                  },
+                  "operator": "not_equals",
+                  "right": "trades"
+                },
+                "effect": {
+                  "type": "set_state",
+                  "path": "company.openMarker",
+                  "value": "none",
+                  "description": "The reloaded story has no map.",
+                  "id": "4260030c"
+                },
+                "description": "The reload removes any open map info window."
+              },
+              {
+                "id": "e9b00b79",
+                "category": "business",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "card"
+                  },
+                  "operator": "not_equals",
+                  "right": "trades"
+                },
+                "effect": {
+                  "type": "set_state",
+                  "path": "site.section",
+                  "value": {
+                    "kind": "switch",
+                    "cases": [
+                      {
+                        "when": {
+                          "left": {
+                            "kind": "param",
+                            "name": "card"
+                          },
+                          "operator": "equals",
+                          "right": "company"
+                        },
+                        "then": {
+                          "kind": "literal",
+                          "value": "company"
+                        }
+                      },
+                      {
+                        "when": {
+                          "left": {
+                            "kind": "param",
+                            "name": "card"
+                          },
+                          "operator": "equals",
+                          "right": "sectors"
+                        },
+                        "then": {
+                          "kind": "literal",
+                          "value": "sectors"
+                        }
+                      },
+                      {
+                        "when": {
+                          "left": {
+                            "kind": "param",
+                            "name": "card"
+                          },
+                          "operator": "equals",
+                          "right": "commitments"
+                        },
+                        "then": {
+                          "kind": "literal",
+                          "value": "commitments"
+                        }
+                      }
+                    ],
+                    "default": {
+                      "kind": "state",
+                      "path": "site.section"
+                    }
+                  },
+                  "description": "Show the card's panel.",
+                  "id": "2d2a44cc"
+                },
+                "description": "Company, sectors and commitments cards open their panel."
+              },
+              {
+                "id": "609f16ce",
+                "category": "business",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "card"
+                  },
+                  "operator": "equals",
+                  "right": "trades"
+                },
+                "effect": {
+                  "type": "set_state",
+                  "path": "trades.overlayOpen",
+                  "value": true,
+                  "description": "Open the trades overlay.",
+                  "id": "082fb3ff"
+                },
+                "description": "The Nos metiers card opens the overlay."
+              }
+            ],
+            "invariants": [],
+            "effects": [],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The home panel is not on screen.",
+                "description": "The home panel is not on screen.",
+                "id": "fcb7f472"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "b35897f2",
+                "name": "Commitments card",
+                "description": "The commitments card opens its panel.",
+                "stateOverrides": [],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "card",
+                    "value": "commitments"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "site.section",
+                    "operator": "equals",
+                    "value": "commitments",
+                    "description": "site.section is commitments"
+                  }
+                ]
+              },
+              {
+                "id": "8fb1767a",
+                "name": "Trades card",
+                "description": "The metiers card opens the overlay and stays on home.",
+                "stateOverrides": [],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "card",
+                    "value": "trades"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "trades.overlayOpen",
+                    "operator": "equals",
+                    "value": true,
+                    "description": "trades.overlayOpen is true"
+                  },
+                  {
+                    "path": "site.section",
+                    "operator": "equals",
+                    "value": "home",
+                    "description": "site.section is home"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "15b5b155",
+            "name": "Show teasers without needing a mouse",
+            "intent": "Card teasers are visible or reachable by focus and tap, not only by hover.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [],
+            "emittedEvents": [],
+            "transitions": [],
+            "evolution": {
+              "rationale": "Touch and keyboard visitors never see the teaser text today.",
+              "category": "accessibility",
+              "source": "WCAG 2.2"
+            }
+          }
+        ],
+        "rules": [
+          {
+            "id": "eca1e9b1",
+            "category": "ux_feedback",
+            "condition": {
+              "kind": "any",
+              "conditions": [
+                {
+                  "left": "site.section",
+                  "operator": "not_equals",
+                  "right": "home"
+                },
+                {
+                  "left": "trades.overlayOpen",
+                  "operator": "equals",
+                  "right": true
+                },
+                {
+                  "left": "viewer.open",
+                  "operator": "equals",
+                  "right": true
+                }
+              ]
+            },
+            "effect": {
+              "type": "block_action",
+              "reason": "The home panel is not the one on screen.",
+              "description": "The home panel is not the one on screen.",
+              "id": "6d6be00a"
+            },
+            "description": "The home panel is not the one on screen."
+          }
+        ],
+        "invariants": [],
+        "transitions": [
+          {
+            "id": "1dba6c05",
+            "target": "c436a8c1",
+            "label": "Qui sommes-nous ? card",
+            "description": "Home card to the company panel."
+          },
+          {
+            "id": "296883a9",
+            "target": "564f641f",
+            "label": "Nos metiers card",
+            "description": "Home card opening the trades overlay."
+          },
+          {
+            "id": "c926d261",
+            "target": "c05e9dd3",
+            "label": "Nos Secteurs card",
+            "description": "Home card to the sectors panel."
+          },
+          {
+            "id": "ff30a753",
+            "target": "9109f67f",
+            "label": "Nos Engagements card",
+            "description": "Home card to the commitments panel."
+          }
+        ],
+        "parentSurfaceId": "58347ae9"
+      },
+      {
+        "id": "c436a8c1",
+        "name": "Company",
+        "type": "screen",
+        "description": "Panel 2 (Qui sommes-nous): company story with a four-photo switcher, and a sub-menu loading Notre Identite, Nos implantations, Galerie and Actualites via AJAX.",
+        "stateDefinitions": [],
+        "actions": [
+          {
+            "id": "29a1ae84",
+            "name": "Open Sub-page",
+            "intent": "The sub-menu loads Notre Identite (presentation.php), Nos implantations (domaines.php), Galerie (galerie.php) or Actualites (actualites.php) into the panel. Each fragment re-binds its handlers through js/innercustom.js.",
+            "parameters": [
+              {
+                "id": "b20052a9",
+                "name": "subpage",
+                "type": "enum",
+                "required": true,
+                "description": "Sub-page chosen.",
+                "enumValues": [
+                  "identity",
+                  "locations",
+                  "gallery",
+                  "news"
+                ]
+              }
+            ],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "company.subpage",
+                "value": {
+                  "kind": "param",
+                  "name": "subpage"
+                },
+                "description": "Fragment loaded into the panel.",
+                "id": "27ced655"
+              },
+              {
+                "type": "set_state",
+                "path": "company.openMarker",
+                "value": "none",
+                "description": "Any map info window disappears with the old fragment.",
+                "id": "6ec2dfcc"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The company panel is not on screen.",
+                "description": "The company panel is not on screen.",
+                "id": "36067aa0"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "8fe41244",
+                "name": "Open gallery",
+                "description": "Galerie replaces the story.",
+                "stateOverrides": [
+                  {
+                    "path": "site.section",
+                    "value": "company"
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "subpage",
+                    "value": "gallery"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "company.subpage",
+                    "operator": "equals",
+                    "value": "gallery",
+                    "description": "company.subpage is gallery"
+                  }
+                ]
+              },
+              {
+                "id": "de3c2d40",
+                "name": "Sub-menu keeps working after a reload",
+                "description": "From Notre Identite, Actualites still loads (innercustom.js re-binds the sub-menu).",
+                "stateOverrides": [
+                  {
+                    "path": "site.section",
+                    "value": "company"
+                  },
+                  {
+                    "path": "company.subpage",
+                    "value": "identity"
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "subpage",
+                    "value": "news"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "company.subpage",
+                    "operator": "equals",
+                    "value": "news",
+                    "description": "company.subpage is news"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "6bce2b26",
+            "name": "Select Story Photo",
+            "intent": "Thumbnails under the story swap the large photo. Four thumbnails exist but only the first three are wired.",
+            "parameters": [
+              {
+                "id": "c8899c13",
+                "name": "index",
+                "type": "number",
+                "required": true,
+                "description": "Thumbnail position, 1 to 4.",
+                "validations": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "min",
+                    "value": 1
+                  },
+                  {
+                    "type": "max",
+                    "value": 4
+                  }
+                ]
+              }
+            ],
+            "requiredStates": [],
+            "rules": [
+              {
+                "id": "4b7eea7a",
+                "category": "ux_feedback",
+                "condition": {
+                  "left": "company.subpage",
+                  "operator": "not_equals",
+                  "right": "story"
+                },
+                "effect": {
+                  "type": "block_action",
+                  "reason": "Sub-pages have no photo switcher.",
+                  "description": "No thumbnails outside the story.",
+                  "id": "913f94f7"
+                },
+                "description": "Only the story has thumbnails."
+              },
+              {
+                "id": "7f7cd87f",
+                "category": "ux_feedback",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "index"
+                  },
+                  "operator": "equals",
+                  "right": 4
+                },
+                "effect": {
+                  "type": "block_action",
+                  "reason": "The fourth thumbnail has no click handler.",
+                  "description": "Fourth thumbnail is not wired.",
+                  "id": "8bf4c1bd"
+                },
+                "description": "Only thumbnails 1 to 3 are wired (defect)."
+              }
+            ],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "company.photo",
+                "value": {
+                  "kind": "param",
+                  "name": "index"
+                },
+                "description": "Large photo swapped.",
+                "id": "1b934e8d"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The click does nothing.",
+                "description": "The click does nothing.",
+                "id": "16a33085"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "e2a99655",
+                "name": "Third thumbnail",
+                "description": "Thumbnail 3 swaps the photo.",
+                "stateOverrides": [
+                  {
+                    "path": "site.section",
+                    "value": "company"
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "index",
+                    "value": 3
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "company.photo",
+                    "operator": "equals",
+                    "value": 3,
+                    "description": "company.photo is 3"
+                  }
+                ]
+              },
+              {
+                "id": "7741129b",
+                "name": "Fourth thumbnail is dead",
+                "description": "Thumbnail 4 does nothing.",
+                "stateOverrides": [
+                  {
+                    "path": "site.section",
+                    "value": "company"
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "index",
+                    "value": 4
+                  }
+                ],
+                "expectedStatus": "blocked"
+              }
+            ]
+          },
+          {
+            "id": "348b47af",
+            "name": "Open Location Marker",
+            "intent": "On Nos implantations, clicking one of the 22 wilaya markers opens its info window (city name and a city photo) and closes the others.",
+            "parameters": [
+              {
+                "id": "01884e38",
+                "name": "wilaya",
+                "type": "enum",
+                "required": true,
+                "description": "Marker clicked: one of the 22 wilayas on the map.",
+                "validations": [
+                  {
+                    "type": "non_empty"
+                  }
+                ],
+                "enumValues": [
+                  "ORAN",
+                  "ALGER",
+                  "ADRAR",
+                  "ANNABA",
+                  "CONSTANTINE",
+                  "LAGHOUAT",
+                  "TLEMCEN",
+                  "EL OUED",
+                  "BECHAR",
+                  "SAIDA",
+                  "MOSTAGANEM",
+                  "MASCARA",
+                  "TISSEMSILT",
+                  "NAAMA",
+                  "JIJEL",
+                  "BOUIRA",
+                  "TIARET",
+                  "CHLEF",
+                  "BOUMERDES",
+                  "MILA",
+                  "BEJAIA",
+                  "GUELMA"
+                ]
+              }
+            ],
+            "requiredStates": [],
+            "rules": [
+              {
+                "id": "345f6e05",
+                "category": "ux_feedback",
+                "condition": {
+                  "left": "company.subpage",
+                  "operator": "not_equals",
+                  "right": "locations"
+                },
+                "effect": {
+                  "type": "block_action",
+                  "reason": "The map is only on Nos implantations.",
+                  "description": "No map elsewhere.",
+                  "id": "bf9f9a2d"
+                },
+                "description": "Markers exist only on the locations sub-page."
+              }
+            ],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "company.openMarker",
+                "value": {
+                  "kind": "param",
+                  "name": "wilaya"
+                },
+                "description": "That info window is open, others closed.",
+                "id": "b6ac282c"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "There is no map on screen.",
+                "description": "There is no map on screen.",
+                "id": "fca5bb5e"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "ced0b59e",
+                "name": "Open Tiaret",
+                "description": "The Tiaret info window opens.",
+                "stateOverrides": [
+                  {
+                    "path": "site.section",
+                    "value": "company"
+                  },
+                  {
+                    "path": "company.subpage",
+                    "value": "locations"
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "wilaya",
+                    "value": "TIARET"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "company.openMarker",
+                    "operator": "equals",
+                    "value": "TIARET",
+                    "description": "company.openMarker is TIARET"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "a494ceae",
+            "name": "Open Gallery Photo",
+            "intent": "In Galerie and Actualites, a photo opens the viewer on its set.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [
+              {
+                "id": "940213b2",
+                "category": "ux_feedback",
+                "condition": {
+                  "kind": "all",
+                  "conditions": [
+                    {
+                      "left": "company.subpage",
+                      "operator": "not_equals",
+                      "right": "gallery"
+                    },
+                    {
+                      "left": "company.subpage",
+                      "operator": "not_equals",
+                      "right": "news"
+                    }
+                  ]
+                },
+                "effect": {
+                  "type": "block_action",
+                  "reason": "Only Galerie and Actualites have enlargeable photos.",
+                  "description": "No photo set here.",
+                  "id": "5e01f919"
+                },
+                "description": "Photo sets exist on the gallery and news sub-pages."
+              }
+            ],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "viewer.open",
+                "value": true,
+                "description": "Viewer opens.",
+                "id": "5624e0f7"
+              },
+              {
+                "type": "set_state",
+                "path": "viewer.set",
+                "value": "company",
+                "description": "Paging through the sub-page's photos.",
+                "id": "d85f286a"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "There is no photo to enlarge.",
+                "description": "There is no photo to enlarge.",
+                "id": "45de0d73"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "c20e0366",
+                "name": "Gallery photo",
+                "description": "A gallery photo opens the viewer.",
+                "stateOverrides": [
+                  {
+                    "path": "site.section",
+                    "value": "company"
+                  },
+                  {
+                    "path": "company.subpage",
+                    "value": "gallery"
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "viewer.open",
+                    "operator": "equals",
+                    "value": true,
+                    "description": "viewer.open is true"
+                  },
+                  {
+                    "path": "viewer.set",
+                    "operator": "equals",
+                    "value": "company",
+                    "description": "viewer.set is company"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "rules": [
+          {
+            "id": "12ae6032",
+            "category": "ux_feedback",
+            "condition": {
+              "kind": "any",
+              "conditions": [
+                {
+                  "left": "site.section",
+                  "operator": "not_equals",
+                  "right": "company"
+                },
+                {
+                  "left": "trades.overlayOpen",
+                  "operator": "equals",
+                  "right": true
+                },
+                {
+                  "left": "viewer.open",
+                  "operator": "equals",
+                  "right": true
+                }
+              ]
+            },
+            "effect": {
+              "type": "block_action",
+              "reason": "The company panel is not the one on screen.",
+              "description": "The company panel is not the one on screen.",
+              "id": "e62475b2"
+            },
+            "description": "The company panel is not the one on screen."
+          }
+        ],
+        "invariants": [],
+        "transitions": [
+          {
+            "id": "3f51c715",
+            "target": "59f1acf4",
+            "label": "Enlarge photo",
+            "description": "Galerie and Actualites photos open the viewer."
+          }
+        ],
+        "parentSurfaceId": "58347ae9"
+      },
+      {
+        "id": "564f641f",
+        "name": "Trades Overlay",
+        "type": "dialog",
+        "description": "Full-screen overlay (Nos metiers) listing the six trades: introduction text, trade list, and a strip of photos for the selected trade.",
+        "stateDefinitions": [],
+        "actions": [
+          {
+            "id": "9003aa65",
+            "name": "Select Trade",
+            "intent": "Loads the trade's name, description and photos from metiers.php (JSON) and marks it active. Up to four photos show as thumbnails; the rest are reachable in the viewer. If the request fails nothing changes (the error only reaches the console).",
+            "parameters": [
+              {
+                "id": "8d29bb28",
+                "name": "trade",
+                "type": "enum",
+                "required": true,
+                "description": "Trade chosen: Genie Climatique, Protection & Detection Incendie, Desenfumage, Electricite & Regulation, Froid Industriel, Genie Industriel.",
+                "enumValues": [
+                  "climatique",
+                  "incendie",
+                  "desenfumage",
+                  "electricite",
+                  "froid",
+                  "industriel"
+                ]
+              }
+            ],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "trades.selected",
+                "value": {
+                  "kind": "param",
+                  "name": "trade"
+                },
+                "description": "Trade content shown.",
+                "id": "6ebdedde"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The overlay is closed or covered.",
+                "description": "The overlay is closed or covered.",
+                "id": "1125d1b0"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "b276bad3",
+                "name": "Show desenfumage",
+                "description": "Selecting Desenfumage shows it.",
+                "stateOverrides": [
+                  {
+                    "path": "trades.overlayOpen",
+                    "value": true
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "trade",
+                    "value": "desenfumage"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "trades.selected",
+                    "operator": "equals",
+                    "value": "desenfumage",
+                    "description": "trades.selected is desenfumage"
+                  }
+                ]
+              },
+              {
+                "id": "7cc99f85",
+                "name": "Overlay closed",
+                "description": "Trades cannot be selected with the overlay closed.",
+                "stateOverrides": [
+                  {
+                    "path": "trades.overlayOpen",
+                    "value": false
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "trade",
+                    "value": "froid"
+                  }
+                ],
+                "expectedStatus": "blocked"
+              }
+            ]
+          },
+          {
+            "id": "fb2999f7",
+            "name": "Show Trades Introduction",
+            "intent": "Clicking the Nos metiers title restores the introduction text and clears the active trade.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "trades.selected",
+                "value": "intro",
+                "description": "Introduction shown.",
+                "id": "ca5c8aa9"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The overlay is closed or covered.",
+                "description": "The overlay is closed or covered.",
+                "id": "6c415be2"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "45b9cff1",
+                "name": "Back to introduction",
+                "description": "The title restores the intro.",
+                "stateOverrides": [
+                  {
+                    "path": "trades.overlayOpen",
+                    "value": true
+                  },
+                  {
+                    "path": "trades.selected",
+                    "value": "froid"
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "trades.selected",
+                    "operator": "equals",
+                    "value": "intro",
+                    "description": "trades.selected is intro"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "36a900ac",
+            "name": "Close Trades Overlay",
+            "intent": "The close control hides the overlay; the default photo set and introduction are restored for next time.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "trades.overlayOpen",
+                "value": false,
+                "description": "Overlay closed.",
+                "id": "62c7798e"
+              },
+              {
+                "type": "set_state",
+                "path": "trades.selected",
+                "value": "intro",
+                "description": "Introduction restored.",
+                "id": "338229c3"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The overlay is closed or covered.",
+                "description": "The overlay is closed or covered.",
+                "id": "20256ea9"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "454dc026",
+                "name": "Close",
+                "description": "Closing returns to the page underneath.",
+                "stateOverrides": [
+                  {
+                    "path": "trades.overlayOpen",
+                    "value": true
+                  },
+                  {
+                    "path": "trades.selected",
+                    "value": "incendie"
+                  },
+                  {
+                    "path": "site.section",
+                    "value": "sectors"
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "trades.overlayOpen",
+                    "operator": "equals",
+                    "value": false,
+                    "description": "trades.overlayOpen is false"
+                  },
+                  {
+                    "path": "trades.selected",
+                    "operator": "equals",
+                    "value": "intro",
+                    "description": "trades.selected is intro"
+                  },
+                  {
+                    "path": "site.section",
+                    "operator": "equals",
+                    "value": "sectors",
+                    "description": "site.section is sectors"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "63f5388e",
+            "name": "Open Trade Photo",
+            "intent": "A thumbnail opens the viewer on the selected trade's photos.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "viewer.open",
+                "value": true,
+                "description": "Viewer opens.",
+                "id": "4f0650e5"
+              },
+              {
+                "type": "set_state",
+                "path": "viewer.set",
+                "value": "trade",
+                "description": "Paging through the trade photos.",
+                "id": "aa036e48"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The overlay is closed or covered.",
+                "description": "The overlay is closed or covered.",
+                "id": "a116a3c7"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "da5152a0",
+                "name": "Trade photo",
+                "description": "A thumbnail opens the viewer.",
+                "stateOverrides": [
+                  {
+                    "path": "trades.overlayOpen",
+                    "value": true
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "viewer.open",
+                    "operator": "equals",
+                    "value": true,
+                    "description": "viewer.open is true"
+                  },
+                  {
+                    "path": "viewer.set",
+                    "operator": "equals",
+                    "value": "trade",
+                    "description": "viewer.set is trade"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "rules": [
+          {
+            "id": "964d2b40",
+            "category": "ux_feedback",
+            "condition": {
+              "kind": "any",
+              "conditions": [
+                {
+                  "left": "trades.overlayOpen",
+                  "operator": "equals",
+                  "right": false
+                },
+                {
+                  "left": "viewer.open",
+                  "operator": "equals",
+                  "right": true
+                }
+              ]
+            },
+            "effect": {
+              "type": "block_action",
+              "reason": "The trades overlay is closed or covered by the photo viewer.",
+              "description": "The trades overlay is closed or covered by the photo viewer.",
+              "id": "dee9d30e"
+            },
+            "description": "The trades overlay is closed or covered by the photo viewer."
+          }
+        ],
+        "invariants": [],
+        "transitions": [
+          {
+            "id": "90e71e72",
+            "target": "59f1acf4",
+            "label": "Enlarge photo",
+            "description": "Trade thumbnails open the viewer."
+          },
+          {
+            "id": "47d17084",
+            "target": "58347ae9",
+            "label": "Close overlay",
+            "description": "Closing the trades overlay returns to the current panel."
+          }
+        ],
+        "parentSurfaceId": "58347ae9"
+      },
+      {
+        "id": "c05e9dd3",
+        "name": "Sectors",
+        "type": "screen",
+        "description": "Panel 3 (Nos Secteurs): six sector tiles (Batiment, Tertiaire, Hopitaux, Hotellerie, Industrie, Agro-alimentaire), each opening its photo.",
+        "stateDefinitions": [],
+        "actions": [
+          {
+            "id": "dc8bf7d9",
+            "name": "Open Sector Photo",
+            "intent": "Each sector tile opens its photo in the viewer, which pages through all six sectors. Hovering a tile only previews the photo.",
+            "parameters": [
+              {
+                "id": "1cbfde1b",
+                "name": "sector",
+                "type": "enum",
+                "required": true,
+                "description": "Sector chosen.",
+                "enumValues": [
+                  "batiment",
+                  "tertiaire",
+                  "hopitaux",
+                  "hotellerie",
+                  "industrie",
+                  "agroalimentaire"
+                ]
+              }
+            ],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "viewer.open",
+                "value": true,
+                "description": "Viewer opens.",
+                "id": "673df09e"
+              },
+              {
+                "type": "set_state",
+                "path": "viewer.set",
+                "value": "sectors",
+                "description": "Paging through the six sectors.",
+                "id": "3ca3d59d"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The sectors panel is not on screen.",
+                "description": "The sectors panel is not on screen.",
+                "id": "0809efd0"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "55bbec27",
+                "name": "Hospitals",
+                "description": "The hospitals tile opens the viewer.",
+                "stateOverrides": [
+                  {
+                    "path": "site.section",
+                    "value": "sectors"
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "sector",
+                    "value": "hopitaux"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "viewer.open",
+                    "operator": "equals",
+                    "value": true,
+                    "description": "viewer.open is true"
+                  },
+                  {
+                    "path": "viewer.set",
+                    "operator": "equals",
+                    "value": "sectors",
+                    "description": "viewer.set is sectors"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "rules": [
+          {
+            "id": "9e29d589",
+            "category": "ux_feedback",
+            "condition": {
+              "kind": "any",
+              "conditions": [
+                {
+                  "left": "site.section",
+                  "operator": "not_equals",
+                  "right": "sectors"
+                },
+                {
+                  "left": "trades.overlayOpen",
+                  "operator": "equals",
+                  "right": true
+                },
+                {
+                  "left": "viewer.open",
+                  "operator": "equals",
+                  "right": true
+                }
+              ]
+            },
+            "effect": {
+              "type": "block_action",
+              "reason": "The sectors panel is not the one on screen.",
+              "description": "The sectors panel is not the one on screen.",
+              "id": "46b78141"
+            },
+            "description": "The sectors panel is not the one on screen."
+          }
+        ],
+        "invariants": [],
+        "transitions": [
+          {
+            "id": "44ff1aa8",
+            "target": "59f1acf4",
+            "label": "Enlarge photo",
+            "description": "Sector tiles open the viewer."
+          }
+        ],
+        "parentSurfaceId": "58347ae9"
+      },
+      {
+        "id": "9109f67f",
+        "name": "Commitments",
+        "type": "screen",
+        "description": "Panel 4 (Nos Engagements): commitments text and a four-photo slider (not infinite).",
+        "stateDefinitions": [],
+        "actions": [
+          {
+            "id": "412611cd",
+            "name": "Show Next Slide",
+            "intent": "The slider arrow moves to the next of four photos; it stops at the last one.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [
+              {
+                "id": "a25b414e",
+                "category": "ux_feedback",
+                "condition": {
+                  "left": "commitments.slide",
+                  "operator": "greater_or_equal",
+                  "right": 4
+                },
+                "effect": {
+                  "type": "block_action",
+                  "reason": "Last slide reached.",
+                  "description": "Slider is not infinite.",
+                  "id": "bb869d88"
+                },
+                "description": "The slider does not loop."
+              }
+            ],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "commitments.slide",
+                "value": {
+                  "kind": "add",
+                  "left": {
+                    "kind": "state",
+                    "path": "commitments.slide"
+                  },
+                  "right": {
+                    "kind": "literal",
+                    "value": 1
+                  }
+                },
+                "description": "One slide forward.",
+                "id": "5f26a146"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The arrow is disabled.",
+                "description": "The arrow is disabled.",
+                "id": "4bbdbc1b"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "7ea384f1",
+                "name": "Forward",
+                "description": "Moves to slide 2.",
+                "stateOverrides": [
+                  {
+                    "path": "site.section",
+                    "value": "commitments"
+                  },
+                  {
+                    "path": "commitments.slide",
+                    "value": 1
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "commitments.slide",
+                    "operator": "equals",
+                    "value": 2,
+                    "description": "commitments.slide is 2"
+                  }
+                ]
+              },
+              {
+                "id": "77e9ded3",
+                "name": "End of slider",
+                "description": "No wrap after slide 4.",
+                "stateOverrides": [
+                  {
+                    "path": "site.section",
+                    "value": "commitments"
+                  },
+                  {
+                    "path": "commitments.slide",
+                    "value": 4
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "blocked"
+              }
+            ]
+          },
+          {
+            "id": "ae5ea9b6",
+            "name": "Show Previous Slide",
+            "intent": "The slider arrow moves back; it stops at the first photo.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [
+              {
+                "id": "14d4fce9",
+                "category": "ux_feedback",
+                "condition": {
+                  "left": "commitments.slide",
+                  "operator": "lower_or_equal",
+                  "right": 1
+                },
+                "effect": {
+                  "type": "block_action",
+                  "reason": "First slide reached.",
+                  "description": "Slider is not infinite.",
+                  "id": "e5e54071"
+                },
+                "description": "The slider does not loop backwards."
+              }
+            ],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "commitments.slide",
+                "value": {
+                  "kind": "sub",
+                  "left": {
+                    "kind": "state",
+                    "path": "commitments.slide"
+                  },
+                  "right": {
+                    "kind": "literal",
+                    "value": 1
+                  }
+                },
+                "description": "One slide back.",
+                "id": "2cfdf3a8"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The arrow is disabled.",
+                "description": "The arrow is disabled.",
+                "id": "6fbfa750"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "6e07e23c",
+                "name": "Start of slider",
+                "description": "No wrap before slide 1.",
+                "stateOverrides": [
+                  {
+                    "path": "site.section",
+                    "value": "commitments"
+                  },
+                  {
+                    "path": "commitments.slide",
+                    "value": 1
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "blocked"
+              }
+            ]
+          },
+          {
+            "id": "c67d2aa1",
+            "name": "Open Slide Photo",
+            "intent": "A slide opens the viewer on the four commitment photos.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "viewer.open",
+                "value": true,
+                "description": "Viewer opens.",
+                "id": "cbaebdf2"
+              },
+              {
+                "type": "set_state",
+                "path": "viewer.set",
+                "value": "commitments",
+                "description": "Paging through the commitment photos.",
+                "id": "d86a8505"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The commitments panel is not on screen.",
+                "description": "The commitments panel is not on screen.",
+                "id": "13fbc628"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "67ef94b6",
+                "name": "Slide photo",
+                "description": "A slide opens the viewer.",
+                "stateOverrides": [
+                  {
+                    "path": "site.section",
+                    "value": "commitments"
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "viewer.open",
+                    "operator": "equals",
+                    "value": true,
+                    "description": "viewer.open is true"
+                  },
+                  {
+                    "path": "viewer.set",
+                    "operator": "equals",
+                    "value": "commitments",
+                    "description": "viewer.set is commitments"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "rules": [
+          {
+            "id": "bcee6a24",
+            "category": "ux_feedback",
+            "condition": {
+              "kind": "any",
+              "conditions": [
+                {
+                  "left": "site.section",
+                  "operator": "not_equals",
+                  "right": "commitments"
+                },
+                {
+                  "left": "trades.overlayOpen",
+                  "operator": "equals",
+                  "right": true
+                },
+                {
+                  "left": "viewer.open",
+                  "operator": "equals",
+                  "right": true
+                }
+              ]
+            },
+            "effect": {
+              "type": "block_action",
+              "reason": "The commitments panel is not the one on screen.",
+              "description": "The commitments panel is not the one on screen.",
+              "id": "db09d0ac"
+            },
+            "description": "The commitments panel is not the one on screen."
+          }
+        ],
+        "invariants": [],
+        "transitions": [
+          {
+            "id": "42721ac1",
+            "target": "59f1acf4",
+            "label": "Enlarge photo",
+            "description": "Slides open the viewer."
+          }
+        ],
+        "parentSurfaceId": "58347ae9"
+      },
+      {
+        "id": "59f1acf4",
+        "name": "Photo Viewer",
+        "type": "dialog",
+        "description": "Lightbox (Magnific Popup) that enlarges a photo and pages through the rest of its set.",
+        "stateDefinitions": [],
+        "actions": [
+          {
+            "id": "21510f6c",
+            "name": "Page Through Photos",
+            "intent": "Arrows (or arrow keys) move to the next or previous photo of the set.",
+            "parameters": [
+              {
+                "id": "708e41f6",
+                "name": "direction",
+                "type": "enum",
+                "required": true,
+                "description": "Direction.",
+                "enumValues": [
+                  "next",
+                  "previous"
+                ]
+              }
+            ],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "viewer.lastStep",
+                "value": {
+                  "kind": "param",
+                  "name": "direction"
+                },
+                "description": "Photo changed.",
+                "id": "9fd2e5e6"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The viewer is closed.",
+                "description": "The viewer is closed.",
+                "id": "e214f567"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "76ed0149",
+                "name": "Next photo",
+                "description": "Moves forward in the set.",
+                "stateOverrides": [
+                  {
+                    "path": "viewer.open",
+                    "value": true
+                  },
+                  {
+                    "path": "viewer.set",
+                    "value": "sectors"
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "direction",
+                    "value": "next"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "viewer.lastStep",
+                    "operator": "equals",
+                    "value": "next",
+                    "description": "viewer.lastStep is next"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "a13465f6",
+            "name": "Close Photo Viewer",
+            "intent": "Close control, Escape or a click outside the photo closes the viewer and returns to what was underneath.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "viewer.open",
+                "value": false,
+                "description": "Viewer closed.",
+                "id": "0ffcd4a3"
+              },
+              {
+                "type": "set_state",
+                "path": "viewer.set",
+                "value": "none",
+                "description": "No set.",
+                "id": "3ded08dd"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The viewer is closed.",
+                "description": "The viewer is closed.",
+                "id": "d783dfe1"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "18956367",
+                "name": "Close over the trades overlay",
+                "description": "Closing the viewer returns to the overlay.",
+                "stateOverrides": [
+                  {
+                    "path": "viewer.open",
+                    "value": true
+                  },
+                  {
+                    "path": "viewer.set",
+                    "value": "trade"
+                  },
+                  {
+                    "path": "trades.overlayOpen",
+                    "value": true
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "viewer.open",
+                    "operator": "equals",
+                    "value": false,
+                    "description": "viewer.open is false"
+                  },
+                  {
+                    "path": "trades.overlayOpen",
+                    "operator": "equals",
+                    "value": true,
+                    "description": "trades.overlayOpen is true"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "rules": [
+          {
+            "id": "6114975d",
+            "category": "ux_feedback",
+            "condition": {
+              "left": "viewer.open",
+              "operator": "equals",
+              "right": false
+            },
+            "effect": {
+              "type": "block_action",
+              "reason": "The photo viewer is closed.",
+              "description": "The photo viewer is closed.",
+              "id": "34eb2e4e"
+            },
+            "description": "The photo viewer is closed."
+          }
+        ],
+        "invariants": [],
+        "transitions": [
+          {
+            "id": "3a0d3c22",
+            "target": "58347ae9",
+            "label": "Close viewer",
+            "description": "Closing the viewer returns to whatever was underneath."
+          }
+        ],
+        "parentSurfaceId": "58347ae9"
+      }
+    ],
+    "personas": [],
+    "resources": [],
+    "entities": [],
+    "events": [],
+    "createdAt": "2026-09-26T11:06:22.638Z",
+    "updatedAt": "2026-09-26T11:17:26.708Z",
+    "tags": [
+      {
+        "type": "core",
+        "value": "discover"
+      }
+    ],
+    "elementVersions": {
+      "invariant:743767ac": "2026-09-26T11:12:46.847Z",
+      "invariant:45f67f6b": "2026-09-26T11:12:46.847Z",
+      "invariant:1dfa35b5": "2026-09-26T11:12:46.847Z",
+      "invariant:5d61835a": "2026-09-26T11:12:46.847Z",
+      "invariant:46a3fb90": "2026-09-26T11:12:46.847Z",
+      "criterion:5de4c6bf": "2026-09-26T11:12:46.847Z",
+      "criterion:24af514c": "2026-09-26T11:12:46.847Z",
+      "criterion:fc18ab1e": "2026-09-26T11:12:46.847Z",
+      "surface:6c0c0b52": "2026-09-26T11:12:46.847Z",
+      "transition:ef17dde8": "2026-09-26T11:14:10.419Z",
+      "action:14d34753": "2026-09-26T11:12:46.847Z",
+      "rule:225aeb1d": "2026-09-26T11:12:46.847Z",
+      "rule:9b7686a8": "2026-09-26T11:12:46.847Z",
+      "rule:89d4cf99": "2026-09-26T11:12:46.847Z",
+      "rule:89f21968": "2026-09-26T11:12:46.847Z",
+      "scenario:67230ca7": "2026-09-26T11:12:46.847Z",
+      "scenario:52b3a5e8": "2026-09-26T11:12:46.847Z",
+      "scenario:14f4124d": "2026-09-26T11:12:46.847Z",
+      "scenario:858e692b": "2026-09-26T11:12:46.847Z",
+      "action:bf713687": "2026-09-26T11:12:46.847Z",
+      "scenario:816dc426": "2026-09-26T11:12:46.847Z",
+      "surface:58347ae9": "2026-09-26T11:12:46.847Z",
+      "state:site.language": "2026-09-26T11:12:46.847Z",
+      "state:site.section": "2026-09-26T11:12:46.847Z",
+      "state:nav.menuOpen": "2026-09-26T11:12:46.847Z",
+      "state:trades.overlayOpen": "2026-09-26T11:12:46.847Z",
+      "state:trades.selected": "2026-09-26T11:12:46.847Z",
+      "state:company.subpage": "2026-09-26T11:12:46.847Z",
+      "state:company.photo": "2026-09-26T11:12:46.847Z",
+      "state:company.openMarker": "2026-09-26T11:14:10.419Z",
+      "state:home.teaser": "2026-09-26T11:12:46.847Z",
+      "state:commitments.slide": "2026-09-26T11:12:46.847Z",
+      "state:viewer.open": "2026-09-26T11:12:46.847Z",
+      "state:viewer.set": "2026-09-26T11:12:46.847Z",
+      "state:viewer.lastStep": "2026-09-26T11:12:46.847Z",
+      "state:external.lastOpened": "2026-09-26T11:12:46.847Z",
+      "state:request.redirected": "2026-09-26T11:12:46.847Z",
+      "rule:8082548a": "2026-09-26T11:12:46.847Z",
+      "transition:93eac42c": "2026-09-26T11:17:26.708Z",
+      "transition:19b5961a": "2026-09-26T11:17:26.708Z",
+      "transition:7e38afe3": "2026-09-26T11:17:26.708Z",
+      "transition:ac8660ad": "2026-09-26T11:17:26.708Z",
+      "transition:b07128d5": "2026-09-26T11:17:26.708Z",
+      "action:7599a07e": "2026-09-26T11:12:46.847Z",
+      "scenario:69b4ea8c": "2026-09-26T11:12:46.847Z",
+      "action:52ae5b96": "2026-09-26T11:12:46.847Z",
+      "scenario:20c0c03e": "2026-09-26T11:12:46.847Z",
+      "action:1f378fe9": "2026-09-26T11:12:46.847Z",
+      "rule:d46554d1": "2026-09-26T11:12:46.847Z",
+      "rule:41fa721f": "2026-09-26T11:12:46.847Z",
+      "rule:a9b7a3e3": "2026-09-26T11:12:46.847Z",
+      "rule:a282808d": "2026-09-26T11:12:46.847Z",
+      "rule:e3af05ef": "2026-09-26T11:12:46.847Z",
+      "scenario:113153a0": "2026-09-26T11:12:46.847Z",
+      "scenario:4fa162f9": "2026-09-26T11:12:46.847Z",
+      "scenario:7abadf32": "2026-09-26T11:12:46.847Z",
+      "scenario:5f60c80b": "2026-09-26T11:12:46.847Z",
+      "action:cd88ed0b": "2026-09-26T11:12:46.847Z",
+      "rule:b76cdc5a": "2026-09-26T11:12:46.847Z",
+      "scenario:0a628947": "2026-09-26T11:12:46.847Z",
+      "scenario:fdb9b228": "2026-09-26T11:12:46.847Z",
+      "scenario:8a01636a": "2026-09-26T11:12:46.847Z",
+      "action:0b34aee4": "2026-09-26T11:12:46.847Z",
+      "scenario:45c76979": "2026-09-26T11:12:46.847Z",
+      "action:2525c416": "2026-09-26T11:12:46.847Z",
+      "rule:75a9ae5c": "2026-09-26T11:12:46.847Z",
+      "rule:cc129660": "2026-09-26T11:12:46.847Z",
+      "scenario:c6eacfbc": "2026-09-26T11:12:46.847Z",
+      "action:e0441884": "2026-09-26T11:12:46.847Z",
+      "rule:b3cb2efe": "2026-09-26T11:12:46.847Z",
+      "scenario:feaa9ffb": "2026-09-26T11:12:46.847Z",
+      "scenario:0e48bdf6": "2026-09-26T11:12:46.847Z",
+      "action:df0b881c": "2026-09-26T11:12:46.847Z",
+      "scenario:1ca05a9e": "2026-09-26T11:12:46.847Z",
+      "action:8ae3c5eb": "2026-09-26T11:14:48.333Z",
+      "action:9eaad388": "2026-09-26T11:14:48.380Z",
+      "action:278452d4": "2026-09-26T11:14:48.402Z",
+      "surface:383e8321": "2026-09-26T11:16:01.062Z",
+      "rule:eca1e9b1": "2026-09-26T11:12:46.847Z",
+      "transition:1dba6c05": "2026-09-26T11:17:26.708Z",
+      "transition:296883a9": "2026-09-26T11:17:26.708Z",
+      "transition:c926d261": "2026-09-26T11:17:26.708Z",
+      "transition:ff30a753": "2026-09-26T11:17:26.708Z",
+      "action:25896187": "2026-09-26T11:12:46.847Z",
+      "scenario:341c1b6a": "2026-09-26T11:12:46.847Z",
+      "action:7c2da67a": "2026-09-26T11:12:46.847Z",
+      "scenario:c2ed9543": "2026-09-26T11:12:46.847Z",
+      "action:97dcdb00": "2026-09-26T11:12:46.847Z",
+      "rule:554dafdd": "2026-09-26T11:12:46.847Z",
+      "rule:d519b7c2": "2026-09-26T11:12:46.847Z",
+      "rule:e9b00b79": "2026-09-26T11:12:46.847Z",
+      "rule:609f16ce": "2026-09-26T11:12:46.847Z",
+      "scenario:b35897f2": "2026-09-26T11:12:46.847Z",
+      "scenario:8fb1767a": "2026-09-26T11:12:46.847Z",
+      "action:15b5b155": "2026-09-26T11:14:48.416Z",
+      "surface:c436a8c1": "2026-09-26T11:16:01.062Z",
+      "rule:12ae6032": "2026-09-26T11:12:46.847Z",
+      "transition:3f51c715": "2026-09-26T11:17:26.708Z",
+      "action:29a1ae84": "2026-09-26T11:12:46.847Z",
+      "scenario:8fe41244": "2026-09-26T11:12:46.847Z",
+      "scenario:de3c2d40": "2026-09-26T11:12:46.847Z",
+      "action:6bce2b26": "2026-09-26T11:12:46.847Z",
+      "rule:4b7eea7a": "2026-09-26T11:12:46.847Z",
+      "rule:7f7cd87f": "2026-09-26T11:12:46.847Z",
+      "scenario:e2a99655": "2026-09-26T11:12:46.847Z",
+      "scenario:7741129b": "2026-09-26T11:12:46.847Z",
+      "action:348b47af": "2026-09-26T11:14:10.419Z",
+      "rule:345f6e05": "2026-09-26T11:12:46.847Z",
+      "scenario:ced0b59e": "2026-09-26T11:12:46.847Z",
+      "action:a494ceae": "2026-09-26T11:12:46.847Z",
+      "rule:940213b2": "2026-09-26T11:12:46.847Z",
+      "scenario:c20e0366": "2026-09-26T11:12:46.847Z",
+      "surface:564f641f": "2026-09-26T11:16:01.062Z",
+      "rule:964d2b40": "2026-09-26T11:12:46.847Z",
+      "transition:90e71e72": "2026-09-26T11:17:26.708Z",
+      "transition:47d17084": "2026-09-26T11:17:26.708Z",
+      "action:9003aa65": "2026-09-26T11:12:46.847Z",
+      "scenario:b276bad3": "2026-09-26T11:12:46.847Z",
+      "scenario:7cc99f85": "2026-09-26T11:12:46.847Z",
+      "action:fb2999f7": "2026-09-26T11:12:46.847Z",
+      "scenario:45b9cff1": "2026-09-26T11:12:46.847Z",
+      "action:36a900ac": "2026-09-26T11:12:46.847Z",
+      "scenario:454dc026": "2026-09-26T11:12:46.847Z",
+      "action:63f5388e": "2026-09-26T11:12:46.847Z",
+      "scenario:da5152a0": "2026-09-26T11:12:46.847Z",
+      "surface:c05e9dd3": "2026-09-26T11:16:01.062Z",
+      "rule:9e29d589": "2026-09-26T11:12:46.847Z",
+      "transition:44ff1aa8": "2026-09-26T11:17:26.708Z",
+      "action:dc8bf7d9": "2026-09-26T11:12:46.847Z",
+      "scenario:55bbec27": "2026-09-26T11:12:46.847Z",
+      "surface:9109f67f": "2026-09-26T11:16:01.062Z",
+      "rule:bcee6a24": "2026-09-26T11:12:46.847Z",
+      "transition:42721ac1": "2026-09-26T11:17:26.708Z",
+      "action:412611cd": "2026-09-26T11:12:46.847Z",
+      "rule:a25b414e": "2026-09-26T11:12:46.847Z",
+      "scenario:7ea384f1": "2026-09-26T11:12:46.847Z",
+      "scenario:77e9ded3": "2026-09-26T11:12:46.847Z",
+      "action:ae5ea9b6": "2026-09-26T11:12:46.847Z",
+      "rule:14d4fce9": "2026-09-26T11:12:46.847Z",
+      "scenario:6e07e23c": "2026-09-26T11:12:46.847Z",
+      "action:c67d2aa1": "2026-09-26T11:12:46.847Z",
+      "scenario:67ef94b6": "2026-09-26T11:12:46.847Z",
+      "surface:59f1acf4": "2026-09-26T11:16:01.062Z",
+      "rule:6114975d": "2026-09-26T11:12:46.847Z",
+      "transition:3a0d3c22": "2026-09-26T11:17:26.708Z",
+      "action:21510f6c": "2026-09-26T11:12:46.847Z",
+      "scenario:76ed0149": "2026-09-26T11:12:46.847Z",
+      "action:a13465f6": "2026-09-26T11:12:46.847Z",
+      "scenario:18956367": "2026-09-26T11:12:46.847Z"
+    },
+    "featureInvariants": [
+      {
+        "id": "743767ac",
+        "name": "Slider stays within its four photos",
+        "condition": {
+          "kind": "all",
+          "conditions": [
+            {
+              "left": "commitments.slide",
+              "operator": "greater_or_equal",
+              "right": 1
+            },
+            {
+              "left": "commitments.slide",
+              "operator": "lower_or_equal",
+              "right": 4
+            }
+          ]
+        },
+        "message": "Commitments slide out of range.",
+        "description": "Slick is configured non-infinite, so the slide index never leaves 1..4."
+      },
+      {
+        "id": "45f67f6b",
+        "name": "Fourth story photo never shows",
+        "condition": {
+          "left": "company.photo",
+          "operator": "lower_or_equal",
+          "right": 3
+        },
+        "message": "Story photo 4 displayed.",
+        "description": "Only thumbnails 1 to 3 have handlers, so photo 4 can never be displayed (defect preserved as observed)."
+      },
+      {
+        "id": "1dfa35b5",
+        "name": "Map info windows only on Nos implantations",
+        "condition": {
+          "kind": "any",
+          "conditions": [
+            {
+              "left": "company.openMarker",
+              "operator": "equals",
+              "right": "none"
+            },
+            {
+              "left": "company.subpage",
+              "operator": "equals",
+              "right": "locations"
+            }
+          ]
+        },
+        "message": "Info window open outside the locations sub-page.",
+        "description": "The map lives inside the domaines.php fragment; replacing the fragment removes it."
+      },
+      {
+        "id": "5d61835a",
+        "name": "Trade content only inside the overlay",
+        "condition": {
+          "kind": "any",
+          "conditions": [
+            {
+              "left": "trades.overlayOpen",
+              "operator": "equals",
+              "right": true
+            },
+            {
+              "left": "trades.selected",
+              "operator": "equals",
+              "right": "intro"
+            }
+          ]
+        },
+        "message": "Trade content left over after closing.",
+        "description": "Closing the overlay restores the introduction and default photos."
+      },
+      {
+        "id": "46a3fb90",
+        "name": "An open viewer always has a photo set",
+        "condition": {
+          "kind": "any",
+          "conditions": [
+            {
+              "left": "viewer.open",
+              "operator": "equals",
+              "right": false
+            },
+            {
+              "left": "viewer.set",
+              "operator": "not_equals",
+              "right": "none"
+            }
+          ]
+        },
+        "message": "Viewer open without photos.",
+        "description": "The viewer only opens from a photo that belongs to a set."
+      }
+    ],
+    "reachabilityGoals": [
+      {
+        "id": "4f1432cd",
+        "name": "Home always reachable",
+        "kind": "always_reachable",
+        "condition": {
+          "left": "site.section",
+          "operator": "equals",
+          "right": "home"
+        },
+        "description": "From any state a visitor can get back to the home panel (close viewer, close overlay, logo)."
+      },
+      {
+        "id": "825736a0",
+        "name": "Contact reachable",
+        "kind": "always_reachable",
+        "condition": {
+          "left": "site.section",
+          "operator": "equals",
+          "right": "contact"
+        },
+        "description": "The contact panel can always be reached."
+      },
+      {
+        "id": "fd9318ab",
+        "name": "Each trade can be read",
+        "kind": "reachable",
+        "condition": {
+          "left": "trades.selected",
+          "operator": "equals",
+          "right": "industriel"
+        },
+        "description": "A trade description (here Genie Industriel) can be displayed."
+      },
+      {
+        "id": "3e8ff6f3",
+        "name": "English reachable",
+        "kind": "reachable",
+        "condition": {
+          "left": "site.language",
+          "operator": "equals",
+          "right": "en"
+        },
+        "description": "The English site is reachable."
+      }
+    ],
+    "acceptanceCriteria": [
+      {
+        "id": "5de4c6bf",
+        "title": "Indexed URLs keep resolving",
+        "given": "the sitemap lists /, /index.php?lg=en and /index.php?lg=fr",
+        "when": "a crawler or bookmark requests any of them",
+        "then": "it gets the page in the right language, directly or through a permanent redirect",
+        "expectedOutcome": "success",
+        "description": "Only these three URLs are indexed today."
+      },
+      {
+        "id": "24af514c",
+        "title": "Each language has its own title and description",
+        "given": "the French and English pages",
+        "when": "they are served",
+        "then": "each carries a title, meta description and html lang in its own language",
+        "expectedOutcome": "success",
+        "description": "Current titles and descriptions are listed in the audit, section 6."
+      },
+      {
+        "id": "fc18ab1e",
+        "title": "All captured content stays available in both languages",
+        "given": "the company facts and FR/EN copy in the audit (sections 7 and 8)",
+        "when": "the redesign ships",
+        "then": "every fact and every trade, sector, competence and commitment text is still published in French and English",
+        "expectedOutcome": "success",
+        "description": "The redesign may restructure content, not drop it."
+      }
+    ]
+  }
+}

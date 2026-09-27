@@ -1,0 +1,464 @@
+---
+import { Image } from 'astro:assets';
+import logoWhite from '../assets/brand/alfec-logo-white.png';
+import { alternatesFor, pagePath } from '../i18n/routes.mjs';
+import { tx, ui, type Lang } from '../i18n/ui';
+import { contact } from '../data/company';
+import type { NavKey } from '../layouts/Base.astro';
+
+interface Props {
+  lang: Lang;
+  current?: NavKey;
+}
+
+const { lang, current } = Astro.props;
+const other: Lang = lang === 'fr' ? 'en' : 'fr';
+const alt = alternatesFor(Astro.url.pathname);
+const otherHref = alt ? alt[other] : pagePath('home', other);
+
+const items: { key: NavKey; href: string; label: string }[] = [
+  { key: 'company', href: pagePath('company', lang), label: tx(ui.nav.company, lang) },
+  { key: 'trades', href: pagePath('trades', lang), label: tx(ui.nav.trades, lang) },
+  { key: 'projects', href: pagePath('projects', lang), label: tx(ui.nav.projects, lang) },
+  { key: 'contact', href: pagePath('contact', lang), label: tx(ui.nav.contact, lang) },
+];
+const phone = contact.phones[0];
+---
+
+<header class="site-header" data-header>
+  <div class="wrap bar">
+    <a class="brand" href={pagePath('home', lang)} aria-label={tx(ui.nav.homeLink, lang)}>
+      <Image src={logoWhite} alt="" width={80} height={60} loading="eager" />
+    </a>
+
+    <nav class="primary" aria-label={tx(ui.nav.label, lang)}>
+      <ul>
+        {
+          items.map((item) => (
+            <li>
+              <a href={item.href} aria-current={current === item.key ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="tools">
+      <a
+        class="lang"
+        href={otherHref}
+        hreflang={other}
+        lang={other}
+        aria-label={tx(ui.lang.switchTo, lang)}
+      >{tx(ui.lang.short, other)}</a>
+      <a class="phone tnum" href={`tel:${phone.tel}`}>{phone.label}</a>
+      <a class="btn cta" href={pagePath('contact', lang)}>
+        {tx(ui.cta.project, lang)}
+      </a>
+      <a class="call" href={`tel:${phone.tel}`}>
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6.6 3.5h3l1.5 4.2-2 1.5a11.5 11.5 0 0 0 5.7 5.7l1.5-2 4.2 1.5v3a1.6 1.6 0 0 1-1.7 1.6A16.8 16.8 0 0 1 5 5.2 1.6 1.6 0 0 1 6.6 3.5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" /></svg>
+        <span class="visually-hidden">{tx(ui.cta.call, lang)} {phone.label}</span>
+      </a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu" data-menu-toggle>
+        <span class="menu-label" data-open-label>{tx(ui.nav.menu, lang)}</span>
+        <span class="menu-label" data-close-label hidden>{tx(ui.nav.close, lang)}</span>
+        <span class="menu-icon" aria-hidden="true"><span></span><span></span></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="drawer" id="site-menu" data-menu hidden>
+    <div class="wrap drawer-inner">
+      <nav aria-label={tx(ui.nav.label, lang)}>
+        <ul class="drawer-list">
+          <li><a href={pagePath('home', lang)} aria-current={current === 'home' ? 'page' : undefined}>{tx(ui.nav.home, lang)}</a></li>
+          {
+            items.map((item) => (
+              <li>
+                <a href={item.href} aria-current={current === item.key ? 'page' : undefined}>
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+      <div class="drawer-foot">
+        <a class="btn" href={pagePath('contact', lang)}>{tx(ui.cta.project, lang)}</a>
+        <a class="drawer-phone tnum" href={`tel:${phone.tel}`}>{phone.label}</a>
+        <a class="drawer-lang" href={otherHref} hreflang={other} lang={other}>{tx(ui.lang.switchTo, lang)}</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<script>
+  const header = document.querySelector<HTMLElement>('[data-header]');
+  const toggle = header?.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const menu = header?.querySelector<HTMLElement>('[data-menu]');
+  const openLabel = toggle?.querySelector<HTMLElement>('[data-open-label]');
+  const closeLabel = toggle?.querySelector<HTMLElement>('[data-close-label]');
+
+  if (header && toggle && menu) {
+    // While the menu covers the page, everything behind it is inert: no focus, no clicks, no reading.
+    const behind = [...document.querySelectorAll<HTMLElement>('main, footer, .skip')];
+    const setOpen = (open: boolean, restoreFocus = false) => {
+      toggle.setAttribute('aria-expanded', String(open));
+      menu.hidden = !open;
+      behind.forEach((el) => (el.inert = open));
+      header.classList.toggle('is-open', open);
+      document.documentElement.classList.toggle('menu-open', open);
+      if (openLabel && closeLabel) {
+        openLabel.hidden = open;
+        closeLabel.hidden = !open;
+      }
+      if (open) menu.querySelector<HTMLAnchorElement>('a')?.focus();
+      else if (restoreFocus) toggle.focus();
+    };
+
+    toggle.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'));
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') setOpen(false, true);
+    });
+    menu.addEventListener('click', (event) => {
+      if ((event.target as HTMLElement).closest('a')) setOpen(false);
+    });
+    matchMedia('(min-width: 1024px)').addEventListener('change', (event) => {
+      if (event.matches) setOpen(false);
+    });
+
+    // Transparent over the page head, solid once the page scrolls.
+    const onScroll = () => header.classList.toggle('is-scrolled', window.scrollY > 24);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
+</script>
+
+<style>
+  .site-header {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 50;
+    color: var(--white);
+    border-bottom: 1px solid transparent;
+    transition:
+      background-color 0.3s var(--ease-out),
+      border-color 0.3s var(--ease-out);
+  }
+
+  .site-header:global(.is-scrolled),
+  .site-header:global(.is-open) {
+    border-bottom-color: var(--line);
+  }
+
+  /* The solid, blurred bar lives on a pseudo-element: a backdrop-filter on the header itself would
+     become the containing block of the fixed menu drawer and collapse it once the page is scrolled. */
+  .site-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: rgb(5 22 41 / 0.94);
+    opacity: 0;
+    transition: opacity 0.3s var(--ease-out);
+  }
+
+  .site-header:global(.is-scrolled)::before,
+  .site-header:global(.is-open)::before {
+    opacity: 1;
+  }
+
+  .site-header:global(.is-open)::before {
+    background: var(--night);
+  }
+
+  @supports (backdrop-filter: blur(12px)) {
+    .site-header::before {
+      background: rgb(5 22 41 / 0.86);
+      backdrop-filter: blur(12px);
+    }
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: var(--s-6);
+    height: var(--header-h);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    min-height: 48px;
+    flex: none;
+    margin-right: auto;
+  }
+
+  .brand img {
+    width: 80px;
+    height: auto;
+  }
+
+  .primary ul {
+    display: flex;
+    gap: clamp(20px, 2.4vw, 34px);
+    list-style: none;
+  }
+
+  .primary a {
+    position: relative;
+    display: block;
+    padding-block: 12px;
+    font-family: var(--cond);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  .primary a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 4px;
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.35s var(--ease-out);
+  }
+
+  .primary a:hover::after,
+  .primary a[aria-current='page']::after {
+    transform: scaleX(1);
+  }
+
+  .tools {
+    display: flex;
+    align-items: center;
+    gap: var(--s-5);
+  }
+
+  .lang {
+    display: grid;
+    place-items: center;
+    min-width: 44px;
+    min-height: 44px;
+    font-family: var(--cond);
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--text-2);
+    text-decoration: none;
+  }
+
+  .lang:hover {
+    color: var(--white);
+    text-decoration: underline;
+  }
+
+  .phone {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-family: var(--cond);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+
+  .phone:hover {
+    text-decoration: underline;
+  }
+
+  .cta {
+    min-height: 46px;
+    padding-inline: 20px;
+    font-size: 0.9375rem;
+  }
+
+  .call {
+    display: none;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    background: var(--accent);
+    color: var(--night);
+  }
+
+  .menu-toggle {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    min-height: 46px;
+    padding: 0 14px;
+    border: 0;
+    background: rgb(255 255 255 / 0.12);
+    color: var(--white);
+    font-family: var(--cond);
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .menu-icon {
+    position: relative;
+    width: 22px;
+    height: 12px;
+  }
+
+  .menu-icon span {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: currentColor;
+    transition: transform 0.35s var(--ease-out), top 0.35s var(--ease-out);
+  }
+
+  .menu-icon span:first-child {
+    top: 0;
+  }
+
+  .menu-icon span:last-child {
+    top: 10px;
+  }
+
+  .menu-toggle[aria-expanded='true'] .menu-icon span:first-child {
+    top: 5px;
+    transform: rotate(45deg);
+  }
+
+  .menu-toggle[aria-expanded='true'] .menu-icon span:last-child {
+    top: 5px;
+    transform: rotate(-45deg);
+  }
+
+  .drawer {
+    position: fixed;
+    inset: var(--header-h) 0 0 0;
+    overflow-y: auto;
+    background: var(--night);
+  }
+
+  .drawer[hidden] {
+    display: none;
+  }
+
+  .drawer-inner {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 100%;
+    padding-block: var(--s-5) var(--s-7);
+  }
+
+  .drawer-list {
+    list-style: none;
+  }
+
+  .drawer-list a {
+    display: block;
+    padding-block: 16px;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--cond);
+    font-size: clamp(2rem, 8vw, 2.75rem);
+    font-weight: 700;
+    line-height: 1;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  .drawer-list a[aria-current='page'] {
+    color: var(--accent);
+  }
+
+  .drawer-foot {
+    display: grid;
+    gap: var(--s-4);
+    justify-items: start;
+    margin-top: var(--s-7);
+  }
+
+  .drawer-phone {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-family: var(--cond);
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .drawer-lang {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--text-2);
+  }
+
+  :global(html.menu-open) {
+    overflow: hidden;
+  }
+
+  @media (max-width: 1180px) {
+    .phone {
+      display: none;
+    }
+  }
+
+  @media (max-width: 1023px) {
+    .primary {
+      display: none;
+    }
+
+    .menu-toggle {
+      display: inline-flex;
+    }
+
+    .call {
+      display: grid;
+    }
+
+    .tools {
+      gap: var(--s-2);
+    }
+
+    .brand img {
+      width: 68px;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .cta,
+    .lang {
+      display: none;
+    }
+  }
+
+  /* Keep the label as the button's accessible name, but only show the icon on narrow phones. */
+  @media (max-width: 420px) {
+    .menu-label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
+    .menu-toggle {
+      width: 46px;
+      padding: 0;
+      justify-content: center;
+    }
+  }
+</style>
