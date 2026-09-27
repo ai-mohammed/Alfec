@@ -62,31 +62,54 @@ const label: Bilingual =
     : { fr: 'Carte de l’Algérie situant le siège d’ALFEC à Oran', en: 'Map of Algeria locating ALFEC’s head office in Oran' };
 const hq = points.find((p) => p.hq);
 // A gentle arc from the head office to each wilaya, bowing upward so the lines read as a network.
-const links =
-  lines && hq
-    ? points
-        .filter((p) => !p.hq)
-        .map((p) => {
-          const mx = (hq.x + p.x) / 2;
-          const my = Math.min(hq.y, p.y) - 30 - Math.abs(p.x - hq.x) * 0.08;
-          return `M${hq.x.toFixed(1)} ${hq.y.toFixed(1)}Q${mx.toFixed(1)} ${my.toFixed(1)} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`;
-        })
-    : [];
+const linkTo = (p: { x: number; y: number }) => {
+  if (!lines || !hq) return null;
+  const mx = (hq.x + p.x) / 2;
+  const my = Math.min(hq.y, p.y) - 30 - Math.abs(p.x - hq.x) * 0.08;
+  return `M${hq.x.toFixed(1)} ${hq.y.toFixed(1)}Q${mx.toFixed(1)} ${my.toFixed(1)} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`;
+};
+// Names show above their point on hover or tap; near the edges they align inward so they stay inside the map,
+// and around Oran they drop below the point so they never sit on the ORAN label.
+const anchorFor = (x: number) => (x > W - 90 ? 'end' : x < 90 ? 'start' : 'middle');
+const nameY = (p: { x: number; y: number }) =>
+  hq && Math.abs(p.x - hq.x) < 160 && p.y < hq.y + 40 ? p.y + 32 : p.y - 16;
 ---
 
 <figure class:list={['wilaya-map', { network: lines }]} data-reveal={lines ? '' : undefined}>
   <svg viewBox={`-20 -40 ${W + 40} ${H + 60}`} role="img" aria-label={tx(label, lang)}>
     <path class="land" d={outline} />
-    {links.map((d, i) => <path class="link" d={d} pathLength="1" style={`--i:${i}`} />)}
     {
-      points.map((p, i) => (
-        <g class:list={['pt', { hq: p.hq }]} style={`--i:${i}`}>
-          {p.hq && <circle cx={p.x} cy={p.y} r="14" class="ring" />}
-          <circle cx={p.x} cy={p.y} r={p.hq ? 7 : 5} class="dot" />
-        </g>
-      ))
+      points
+        .filter((p) => !p.hq)
+        .map((p, i) => {
+          const d = linkTo(p);
+          return (
+            <g
+              class="pt"
+              style={`--i:${i}`}
+              tabindex="-1"
+              data-name={p.name}
+              data-x={p.x.toFixed(1)}
+              data-y={nameY(p).toFixed(1)}
+              data-anchor={anchorFor(p.x)}
+            >
+              {d && <path class="link" d={d} pathLength="1" />}
+              <circle cx={p.x} cy={p.y} r="11" class="hit" />
+              <circle cx={p.x} cy={p.y} r="5" class="dot" />
+            </g>
+          );
+        })
     }
-    {hq && <text x={hq.x + 20} y={hq.y - 18} class="hq-label">Oran</text>}
+    {
+      hq && (
+        <g class="pt hq">
+          <circle cx={hq.x} cy={hq.y} r="14" class="ring" />
+          <circle cx={hq.x} cy={hq.y} r="7" class="dot" />
+          <text x={hq.x + 20} y={hq.y - 18} class="hq-label">Oran</text>
+        </g>
+      )
+    }
+    {variant === 'full' && <text class="name" aria-hidden="true" data-label />}
   </svg>
   {
     names && variant === 'full' && (
@@ -99,12 +122,38 @@ const links =
   }
 </figure>
 
+<script>
+  // One label drawn above every point, so a name is never hidden by its neighbours: it follows the point
+  // being hovered, or focused by a tap on touch screens.
+  for (const svg of document.querySelectorAll<SVGSVGElement>('.wilaya-map svg')) {
+    const label = svg.querySelector<SVGTextElement>('[data-label]');
+    if (!label) continue;
+    const show = (target: EventTarget | null) => {
+      const pt = (target as Element | null)?.closest<SVGGElement>('.pt[data-name]');
+      if (!pt) return;
+      label.textContent = pt.dataset.name ?? '';
+      label.setAttribute('x', pt.dataset.x ?? '0');
+      label.setAttribute('y', pt.dataset.y ?? '0');
+      label.setAttribute('text-anchor', pt.dataset.anchor ?? 'middle');
+      label.classList.add('on');
+    };
+    const hide = () => {
+      if (!svg.querySelector('.pt:focus')) label.classList.remove('on');
+    };
+    svg.addEventListener('pointerover', (event) => show(event.target));
+    svg.addEventListener('pointerout', hide);
+    svg.addEventListener('focusin', (event) => show(event.target));
+    svg.addEventListener('focusout', () => label.classList.remove('on'));
+  }
+</script>
+
 <style>
   .wilaya-map {
     --land: rgb(41 168 232 / 0.06);
     --stroke: rgb(41 168 232 / 0.7);
     --pt: var(--white);
     --hq: var(--accent);
+    --halo: var(--night);
     margin: 0;
   }
 
@@ -113,6 +162,7 @@ const links =
     --stroke: var(--accent-dark);
     --pt: var(--ink);
     --hq: var(--accent-dark);
+    --halo: var(--paper);
   }
 
   svg {
@@ -136,6 +186,58 @@ const links =
 
   .dot {
     fill: var(--pt);
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: transform 0.25s var(--ease-out), fill 0.25s;
+  }
+
+  /* Hover (or tap, which focuses the point) names the wilaya and lights its line to Oran. */
+  .hit {
+    fill: transparent;
+  }
+
+  .pt:not(.hq) {
+    outline: none;
+  }
+
+  .name {
+    font-family: var(--cond);
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    fill: var(--fg);
+    paint-order: stroke;
+    stroke: var(--halo);
+    stroke-width: 7px;
+    stroke-linejoin: round;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s var(--ease-out);
+  }
+
+  .name:global(.on) {
+    opacity: 1;
+  }
+
+  .pt:hover .dot,
+  .pt:focus .dot {
+    fill: var(--hq);
+    transform: scale(1.5);
+  }
+
+  .pt:hover .link,
+  .pt:focus .link {
+    stroke: var(--hq);
+    stroke-width: 2;
+  }
+
+  .hq-label {
+    transition: opacity 0.2s var(--ease-out);
+  }
+
+  svg:has(.name:global(.on)) .hq-label {
+    opacity: 0.25;
   }
 
   .hq .dot {
@@ -187,15 +289,23 @@ const links =
       transition-delay: calc(var(--i) * 70ms + 0.2s);
     }
 
-    .network .pt:not(.hq) {
-      transform-box: fill-box;
-      transform-origin: center;
-      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-      transition-delay: calc(var(--i) * 70ms + 1s);
+    /* The points pop in after their line; `backwards` fill hands the transform back to the hover style afterwards. */
+    :global(.js) .network:not(:global(.in)) .pt:not(.hq) .dot {
+      transform: scale(0);
     }
 
-    :global(.js) .network:not(:global(.in)) .pt:not(.hq) {
-      transform: scale(0);
+    .network:global(.in) .pt:not(.hq) .dot {
+      animation: pop 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+      animation-delay: calc(var(--i) * 70ms + 1s);
+    }
+
+    @keyframes pop {
+      from {
+        transform: scale(0);
+      }
+      to {
+        transform: scale(1);
+      }
     }
 
     .network:global(.in) .link {
