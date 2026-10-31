@@ -73,7 +73,7 @@ const sloganArt = lang === 'fr' ? sloganFr : sloganEn;
 
     <div class="bottom">
       <p>© {year} ALFEC. {tx(ui.footer.rights, lang)}</p>
-      <p>Engineering · Procurement · Construction</p>
+      <p lang="en">Engineering · Procurement · Construction</p>
     </div>
   </div>
 </footer>
@@ -202,6 +202,23 @@ const sloganArt = lang === 'fr' ? sloganFr : sloganEn;
   @media (max-width: 1023px) {
     .col {
       grid-column: span 6;
+    }
+
+    /* Touch screens: every footer link is a full 44 px row, so neighbours are hard to mistap. */
+    .col ul,
+    dl {
+      gap: 0;
+    }
+
+    .col ul a,
+    dd a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+    }
+
+    dl div {
+      align-items: baseline;
     }
   }
 

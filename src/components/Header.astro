@@ -46,13 +46,9 @@ const phone = contact.phones[0];
     </nav>
 
     <div class="tools">
-      <a
-        class="lang"
-        href={otherHref}
-        hreflang={other}
-        lang={other}
-        aria-label={tx(ui.lang.switchTo, lang)}
-      >{tx(ui.lang.short, other)}</a>
+      <a class="lang" href={otherHref} hreflang={other} lang={other}>
+        {tx(ui.lang.short, other)}<span class="visually-hidden">, {tx(ui.lang.switchTo, lang)}</span>
+      </a>
       <a class="phone tnum" href={`tel:${phone.tel}`}>{phone.label}</a>
       <a class="btn cta" href={pagePath('contact', lang)}>
         {tx(ui.cta.project, lang)}
@@ -290,6 +286,12 @@ const phone = contact.phones[0];
     height: 46px;
     background: var(--accent);
     color: var(--night);
+    transition: scale 0.15s var(--ease-out);
+  }
+
+  .call:active,
+  .menu-toggle:active {
+    scale: 0.96;
   }
 
   .menu-toggle {
@@ -307,6 +309,7 @@ const phone = contact.phones[0];
     letter-spacing: 0.12em;
     text-transform: uppercase;
     cursor: pointer;
+    transition: scale 0.15s var(--ease-out);
   }
 
   .menu-icon {
@@ -351,6 +354,20 @@ const phone = contact.phones[0];
 
   .drawer[hidden] {
     display: none;
+  }
+
+  /* The menu settles in from just above; it closes at once. */
+  @media (prefers-reduced-motion: no-preference) {
+    .drawer:not([hidden]) {
+      animation: drawer-in 0.22s var(--ease-out);
+    }
+
+    @keyframes drawer-in {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+    }
   }
 
   .drawer-inner {

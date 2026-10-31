@@ -16,6 +16,8 @@
   /* Neutrals */
   --white: #ffffff;
   --text-2: #a9bfd6;
+  /* Running text set over photographs, under their dark gradient. */
+  --text-on-photo: #d2deea;
   --line: rgb(255 255 255 / 0.12);
   --line-strong: rgb(255 255 255 / 0.3);
   --paper: #f3f5f8;
@@ -26,6 +28,8 @@
   --field-border: #7d8c9b;
   --danger: #b3261e;
   --danger-ink: #a4231b;
+  --danger-strong: #8c1d18;
+  --danger-soft: #fdf1f0;
 
   /* Contextual tokens: dark by default */
   --fg: var(--white);
@@ -323,7 +327,14 @@ ol {
   text-decoration: none;
   cursor: pointer;
   clip-path: polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%);
-  transition: background-color 0.25s var(--ease-out);
+  transition:
+    background-color 0.25s var(--ease-out),
+    scale 0.15s var(--ease-out);
+}
+
+/* A slight press, so a tap or click is felt before the next page loads. */
+.btn:active {
+  scale: 0.96;
 }
 
 .btn:hover {
@@ -401,13 +412,13 @@ ol {
 @media (prefers-reduced-motion: no-preference) {
   .js [data-reveal] {
     transition:
-      opacity 0.8s var(--ease-out),
-      transform 0.8s var(--ease-out);
+      opacity 0.5s var(--ease-out),
+      transform 0.5s var(--ease-out);
     transition-delay: var(--d, 0s);
   }
 
   .js [data-reveal]:not(.in) {
     opacity: 0;
-    transform: translateY(28px);
+    transform: translateY(16px);
   }
 }

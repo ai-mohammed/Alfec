@@ -48,6 +48,42 @@ test('the opening photos can be chosen and the headline is the one ALFEC chose',
   await expect(page.locator('[data-hero] .slide').nth(2)).toHaveClass(/on/);
 });
 
+test('the opening slideshow has a pause button that keeps it paused', async ({ page }) => {
+  await page.goto('/');
+  const hero = page.locator('[data-hero]');
+  const pause = page.getByRole('button', { name: 'Mettre le diaporama en pause' });
+  await pause.click();
+  await expect(hero).toHaveClass(/held/);
+  // The photo on screen stops moving as well.
+  await expect(hero.locator('.slide.on img')).toHaveCSS('animation-play-state', 'paused');
+  const play = page.getByRole('button', { name: 'Relancer le diaporama' });
+  await expect(play).toBeVisible();
+  // Leaving the hero does not restart a slideshow the visitor paused.
+  await page.mouse.move(5, 5);
+  await expect(hero).toHaveClass(/paused/);
+  await play.click();
+  await expect(hero).not.toHaveClass(/held/);
+});
+
+test('the headline shows without JavaScript', async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  await page.goto('/');
+  await expect(page.locator('h1')).toBeVisible();
+  await expect(page.locator('h1 .ln').first()).toBeInViewport();
+  await context.close();
+});
+
+test('no animation runs forever (WCAG 2.2.2)', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('figure.network').scrollIntoViewIfNeeded();
+  await expect(page.locator('figure.network')).toHaveClass(/in/);
+  const endless = await page.evaluate(() =>
+    document.getAnimations().filter((a) => a.effect?.getTiming().iterations === Infinity).map((a) => (a as CSSAnimation).animationName),
+  );
+  expect(endless).toEqual([]);
+});
+
 test('trade pages link to their neighbours', async ({ page }) => {
   await page.goto('/metiers/genie-climatique/');
   await page.getByRole('link', { name: /Métier suivant/ }).click();
@@ -148,7 +184,7 @@ for (const width of [1440, 1280, 1024, 768, 390]) {
 test('touch targets in the header and footer are at least 44px @mobile', async ({ page }) => {
   await page.goto('/');
   const small = await page.evaluate(() =>
-    [...document.querySelectorAll<HTMLElement>('header a, header button, .enquiry a.btn, footer .lang')]
+    [...document.querySelectorAll<HTMLElement>('header a, header button, .enquiry a.btn, footer .lang, footer .col ul a, footer dd a, [data-playpause]')]
       .filter((el) => el.offsetParent !== null)
       .map((el) => ({ text: el.textContent?.trim(), h: el.getBoundingClientRect().height }))
       .filter((r) => r.h < 44),

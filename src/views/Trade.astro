@@ -65,7 +65,7 @@ const arrow = '<path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor"
       <div class="text" data-reveal>
         {tx(trade.body, lang).map((para, i) => <p class:list={{ big: i === 0 }}>{para}</p>)}
       </div>
-      <aside class="side" data-reveal style="--d: 0.1s">
+      <div class="side" data-reveal style="--d: 0.1s">
         <h2 class="kicker scope-title">{tx(copy.scopeTitle, lang)}</h2>
         <ul class="scope" role="list">
           {tx(trade.scope, lang).map((s) => <li>{s}</li>)}
@@ -74,7 +74,7 @@ const arrow = '<path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor"
           <span>{tx(ui.cta.project, lang)}</span>
           <svg class="arrow" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" set:html={arrow} />
         </a>
-      </aside>
+      </div>
     </div>
   </section>
 

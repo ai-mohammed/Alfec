@@ -89,11 +89,13 @@ const arrow = '<path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor"
   }
 
   .t-photo :global(img) {
-    transition: transform 1s var(--ease-out);
+    transition: transform 0.5s var(--ease-out);
   }
 
-  .trade:hover .t-photo :global(img) {
-    transform: scale(1.04);
+  @media (hover: hover) and (pointer: fine) {
+    .trade:hover .t-photo :global(img) {
+      transform: scale(1.04);
+    }
   }
 
   .t-text {

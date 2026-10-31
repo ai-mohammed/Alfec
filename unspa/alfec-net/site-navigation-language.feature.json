@@ -1821,8 +1821,16 @@
         "id": "383e8321",
         "name": "Home",
         "type": "screen",
-        "description": "Home page: an opening slideshow of four photos behind the headline « À chaque défi technique, la solution adaptée. », the six trades as photo panels under « Six métiers. Plusieurs équipes spécialisées. Une solution coordonnée. » (Génie climatique first and open), the Ingénierie, Réalisation, Maintenance cycle, the network map « Des réalisations à travers le territoire national. » with counters, the references and the call to action « Votre projet est unique. Construisons la solution technique qui lui correspond. ».",
-        "stateDefinitions": [],
+        "description": "Home page: an opening slideshow of four photos behind the headline « À chaque défi technique, la solution adaptée. » (rises in with CSS on first paint, no script needed) with a pause button, the six trades as photo panels under « Six métiers. Plusieurs équipes spécialisées. Une solution coordonnée. » (Génie climatique first and open), the Ingénierie, Réalisation, Maintenance cycle, the network map « Des réalisations à travers le territoire national. » with two still figures (22 wilayas, 6 métiers), the references and the call to action « Votre projet est unique. Construisons la solution technique qui lui correspond. ».",
+        "stateDefinitions": [
+          {
+            "id": "33f4d765",
+            "path": "home.slideshowHeld",
+            "type": "boolean",
+            "defaultValue": false,
+            "description": "The visitor paused the slideshow with its pause button; only that button restarts it."
+          }
+        ],
         "actions": [
           {
             "id": "abc0235d",
@@ -2104,6 +2112,20 @@
                   "id": "7fe9a2db"
                 },
                 "description": "Reduced motion wins."
+              },
+              {
+                "id": "45715e58",
+                "category": "ux_feedback",
+                "condition": {
+                  "left": "home.slideshowHeld",
+                  "operator": "is_true"
+                },
+                "effect": {
+                  "type": "block_action",
+                  "reason": "The visitor paused the slideshow.",
+                  "id": "8316fb8c"
+                },
+                "description": "Only the play button restarts a slideshow the visitor paused."
               }
             ],
             "invariants": [],
@@ -2173,13 +2195,34 @@
                 ],
                 "parameterOverrides": [],
                 "expectedStatus": "blocked"
+              },
+              {
+                "id": "5f3d0feb",
+                "name": "Visitor's pause survives the pointer leaving",
+                "description": "After the pause button, leaving the opening does not restart it.",
+                "stateOverrides": [
+                  {
+                    "path": "site.page",
+                    "value": "home"
+                  },
+                  {
+                    "path": "home.slideshow",
+                    "value": "paused"
+                  },
+                  {
+                    "path": "home.slideshowHeld",
+                    "value": true
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "blocked"
               }
             ]
           },
           {
             "id": "f3634fcf",
             "name": "Open Trade Panel",
-            "intent": "On screens 1024 px and wider, pointing at or focusing a trade panel widens it to show its photo in colour, name, summary and Discover link; the others narrow to a vertical label. Below 1024 px every panel is open in a swipeable row.",
+            "intent": "On screens 1024 px and wider, resting the pointer on a trade panel for 120 ms (or focusing it, at once) widens it to show its photo in colour, name, summary and Discover link; the others narrow to a vertical label. Sweeping across the row does not open each panel in turn. Below 1024 px every panel is open in a swipeable row.",
             "parameters": [
               {
                 "id": "f67349a3",
@@ -2347,6 +2390,141 @@
                   }
                 ],
                 "expectedTransition": "49c64dc3"
+              }
+            ]
+          },
+          {
+            "id": "a9ba0470",
+            "name": "Toggle Slideshow Pause",
+            "intent": "A 44 px pause button after the photo names stops the slideshow and keeps it stopped (pointer and focus no longer restart it); pressed again it restarts from the current photo. Its label switches between « Mettre le diaporama en pause » and « Relancer le diaporama ».",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "home.slideshowHeld",
+                "value": {
+                  "kind": "switch",
+                  "cases": [
+                    {
+                      "when": {
+                        "left": "home.slideshowHeld",
+                        "operator": "is_true"
+                      },
+                      "then": {
+                        "kind": "literal",
+                        "value": false
+                      }
+                    }
+                  ],
+                  "default": {
+                    "kind": "literal",
+                    "value": true
+                  }
+                },
+                "description": "Flip the visitor's pause.",
+                "id": "17b1b8f1"
+              },
+              {
+                "type": "set_state",
+                "path": "home.slideshow",
+                "value": {
+                  "kind": "switch",
+                  "cases": [
+                    {
+                      "when": {
+                        "left": "home.slideshowHeld",
+                        "operator": "is_true"
+                      },
+                      "then": {
+                        "kind": "literal",
+                        "value": "paused"
+                      }
+                    }
+                  ],
+                  "default": {
+                    "kind": "literal",
+                    "value": "playing"
+                  }
+                },
+                "description": "Paused when held, running otherwise.",
+                "id": "af62b7a8"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "scenarios": [
+              {
+                "id": "29a44e82",
+                "name": "Pause button holds the slideshow",
+                "description": "Pressing pause stops the photos.",
+                "stateOverrides": [
+                  {
+                    "path": "site.page",
+                    "value": "home"
+                  },
+                  {
+                    "path": "home.slideshow",
+                    "value": "playing"
+                  },
+                  {
+                    "path": "home.slideshowHeld",
+                    "value": false
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "home.slideshowHeld",
+                    "operator": "equals",
+                    "value": true,
+                    "description": "Held"
+                  },
+                  {
+                    "path": "home.slideshow",
+                    "operator": "equals",
+                    "value": "paused",
+                    "description": "Paused"
+                  }
+                ]
+              },
+              {
+                "id": "df7481ac",
+                "name": "Play button restarts it",
+                "description": "Pressing play again restarts the photos.",
+                "stateOverrides": [
+                  {
+                    "path": "site.page",
+                    "value": "home"
+                  },
+                  {
+                    "path": "home.slideshow",
+                    "value": "paused"
+                  },
+                  {
+                    "path": "home.slideshowHeld",
+                    "value": true
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "home.slideshowHeld",
+                    "operator": "equals",
+                    "value": false,
+                    "description": "Released"
+                  },
+                  {
+                    "path": "home.slideshow",
+                    "operator": "equals",
+                    "value": "playing",
+                    "description": "Running"
+                  }
+                ]
               }
             ]
           }
@@ -3750,7 +3928,7 @@
     "entities": [],
     "events": [],
     "createdAt": "2026-09-26T11:06:22.638Z",
-    "updatedAt": "2026-09-27T20:42:21.201Z",
+    "updatedAt": "2026-10-31T16:48:01.933Z",
     "tags": [
       {
         "type": "core",
@@ -3825,7 +4003,8 @@
       "scenario:e4da407b": "2026-09-27T15:55:18.246Z",
       "scenario:2af9fbbd": "2026-09-27T15:55:18.246Z",
       "action:f7ae7206": "2026-09-27T15:57:17.828Z",
-      "surface:383e8321": "2026-09-27T20:42:21.201Z",
+      "surface:383e8321": "2026-10-31T16:39:44.407Z",
+      "state:home.slideshowHeld": "2026-10-31T16:34:02.094Z",
       "rule:eca1e9b1": "2026-09-27T16:07:08.072Z",
       "transition:be09e4fe": "2026-09-27T15:57:02.659Z",
       "transition:f07bcbd5": "2026-09-27T20:42:21.132Z",
@@ -3841,12 +4020,17 @@
       "scenario:56cfdb25": "2026-09-27T15:57:02.659Z",
       "action:da637d0b": "2026-09-27T15:57:02.659Z",
       "rule:d5a0f82f": "2026-09-27T15:57:02.659Z",
+      "rule:45715e58": "2026-10-31T16:34:02.094Z",
       "scenario:43fa1110": "2026-09-27T15:57:02.659Z",
       "scenario:91ec1ec5": "2026-09-27T15:57:02.659Z",
-      "action:f3634fcf": "2026-09-27T15:57:02.659Z",
+      "scenario:5f3d0feb": "2026-10-31T16:34:02.094Z",
+      "action:f3634fcf": "2026-10-31T16:34:02.094Z",
       "scenario:ada43872": "2026-09-27T15:57:02.659Z",
       "action:acecd60b": "2026-09-27T15:57:02.659Z",
       "scenario:b78a5a28": "2026-09-27T15:57:02.659Z",
+      "action:a9ba0470": "2026-10-31T16:34:02.094Z",
+      "scenario:29a44e82": "2026-10-31T16:34:02.094Z",
+      "scenario:df7481ac": "2026-10-31T16:34:02.094Z",
       "surface:59f1acf4": "2026-09-27T15:51:52.785Z",
       "rule:6114975d": "2026-09-26T11:12:46.847Z",
       "transition:3a0d3c22": "2026-09-26T11:17:26.708Z",

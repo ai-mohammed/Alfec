@@ -61,7 +61,7 @@ const clientText = {
 
   <section class="contact section light" aria-label={L(copy.formTitle)}>
     <div class="wrap grid">
-      <aside class="details" aria-labelledby="direct-title">
+      <section class="details" aria-labelledby="direct-title">
         <h2 id="direct-title" class="d-title">{L(copy.direct)}</h2>
         <dl class="tnum">
           <div>
@@ -103,7 +103,7 @@ const clientText = {
           <a href={gmapsDir} rel="noopener noreferrer" target="_blank">{L(copy.directions)} (Google Maps)</a>
           <a href={osmLink} rel="noopener noreferrer" target="_blank">OpenStreetMap</a>
         </p>
-      </aside>
+      </section>
 
       <div class="form-col">
         <h2 id="form-title" class="visually-hidden">{L(copy.formTitle)}</h2>
@@ -346,6 +346,15 @@ const clientText = {
     display: grid;
   }
 
+  /* Touch screens: phone numbers and the address are full 44 px rows. */
+  @media (max-width: 1023px) {
+    dd a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+    }
+  }
+
   address {
     font-style: normal;
   }
@@ -428,14 +437,28 @@ const clientText = {
   .summary {
     margin-bottom: var(--s-6);
     padding: var(--s-4) var(--s-5);
-    border: 1px solid #b3261e;
-    background: #fdf1f0;
-    color: #8c1d18;
+    border: 1px solid var(--danger);
+    background: var(--danger-soft);
+    color: var(--danger-strong);
     font-weight: 500;
   }
 
+  /* The summary eases in so it does not jolt the form; reduced motion shows it at once. */
+  @media (prefers-reduced-motion: no-preference) {
+    .summary:not([hidden]) {
+      animation: summary-in 0.2s var(--ease-out);
+    }
+
+    @keyframes summary-in {
+      from {
+        opacity: 0;
+        transform: translateY(-4px);
+      }
+    }
+  }
+
   .summary:focus {
-    outline: 2px solid #b3261e;
+    outline: 2px solid var(--danger);
     outline-offset: 2px;
   }
 
@@ -544,19 +567,21 @@ const clientText = {
   input:focus-visible,
   select:focus-visible,
   textarea:focus-visible {
-    outline: none;
+    /* Transparent, so the border and shadow carry focus; forced-colours mode paints it in the system colour. */
+    outline: 2px solid transparent;
+    outline-offset: 0;
     border-color: var(--accent-dark);
     box-shadow: 0 0 0 1px var(--accent-dark);
   }
 
   [aria-invalid='true'] {
-    border-color: #b3261e !important;
+    border-color: var(--danger) !important;
   }
 
   .error {
     font-size: var(--fs-meta);
     font-weight: 500;
-    color: #a4231b;
+    color: var(--danger-ink);
   }
 
   .hp {

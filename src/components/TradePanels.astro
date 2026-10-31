@@ -80,11 +80,20 @@ const t = {
 </ul>
 
 <script>
+  // A panel opens once the pointer rests on it, so sweeping across the row does not open each one in
+  // turn (and the panels do not slide under the pointer while it moves). Keyboard focus opens at once.
   const panels = [...document.querySelectorAll<HTMLElement>('[data-panels] .panel')];
   const wide = matchMedia('(min-width: 1024px)');
+  const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
+  const HOVER_INTENT = 120;
+  let pending: number | undefined;
   const open = (panel: HTMLElement) => panels.forEach((p) => p.classList.toggle('open', p === panel));
   for (const panel of panels) {
-    panel.addEventListener('mouseenter', () => wide.matches && open(panel));
+    panel.addEventListener('mouseenter', () => {
+      window.clearTimeout(pending);
+      if (wide.matches && finePointer.matches) pending = window.setTimeout(() => open(panel), HOVER_INTENT);
+    });
+    panel.addEventListener('mouseleave', () => window.clearTimeout(pending));
     panel.addEventListener('focusin', () => wide.matches && open(panel));
   }
 </script>
@@ -103,7 +112,7 @@ const t = {
     min-width: 0;
     overflow: hidden;
     background: var(--night-2);
-    transition: flex-grow 0.7s var(--ease-out);
+    transition: flex-grow 0.45s var(--ease-out);
   }
 
   .panel.open {
@@ -136,8 +145,8 @@ const t = {
     filter: grayscale(0.6) brightness(0.7);
     transform: scale(1.08);
     transition:
-      filter 0.7s,
-      transform 1.2s var(--ease-out);
+      filter 0.45s var(--ease-out),
+      transform 0.6s var(--ease-out);
   }
 
   .open .link :global(img) {
@@ -191,7 +200,7 @@ const t = {
   .open .body {
     opacity: 1;
     transform: none;
-    transition-delay: 0.3s;
+    transition-delay: 0.2s;
   }
 
   .flag {
@@ -213,7 +222,7 @@ const t = {
 
   .sum {
     max-width: 44ch;
-    color: #d2deea;
+    color: var(--text-on-photo);
   }
 
   .scope {

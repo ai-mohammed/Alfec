@@ -157,11 +157,13 @@ const entries = await Promise.all(
     aspect-ratio: 4 / 3;
     height: auto;
     object-fit: cover;
-    transition: transform 0.6s var(--ease-out);
+    transition: transform 0.5s var(--ease-out);
   }
 
-  .thumb:hover :global(img) {
-    transform: scale(1.04);
+  @media (hover: hover) and (pointer: fine) {
+    .thumb:hover :global(img) {
+      transform: scale(1.04);
+    }
   }
 
   .cap {
@@ -181,7 +183,37 @@ const entries = await Promise.all(
     border: 0;
     background: var(--night);
     color: var(--white);
+    overscroll-behavior: contain;
     --focus: var(--accent);
+  }
+
+  /* The page behind the open viewer stays still. */
+  :global(html:has(dialog[open])) {
+    overflow: hidden;
+  }
+
+  /* The viewer fades in and settles; photo changes inside it stay instant. */
+  @media (prefers-reduced-motion: no-preference) {
+    .viewer[open] {
+      animation: viewer-in 0.22s var(--ease-out);
+    }
+
+    .viewer[open]::backdrop {
+      animation: backdrop-in 0.22s var(--ease-out);
+    }
+
+    @keyframes viewer-in {
+      from {
+        opacity: 0;
+        transform: scale(0.98);
+      }
+    }
+
+    @keyframes backdrop-in {
+      from {
+        opacity: 0;
+      }
+    }
   }
 
   .viewer[open] {
@@ -253,10 +285,17 @@ const entries = await Promise.all(
     letter-spacing: 0.1em;
     text-transform: uppercase;
     cursor: pointer;
+    transition:
+      border-color 0.2s var(--ease-out),
+      scale 0.15s var(--ease-out);
   }
 
   .v-btn:hover {
     border-color: var(--white);
+  }
+
+  .v-btn:active {
+    scale: 0.96;
   }
 
   @media (max-width: 1023px) {
@@ -275,7 +314,7 @@ const entries = await Promise.all(
 
     .cap {
       margin-top: var(--s-2);
-      font-size: 0.75rem;
+      font-size: var(--fs-meta);
     }
 
     /* Odd-sized sets: the first photo spans the row so none is left alone at the end. */

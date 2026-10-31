@@ -116,6 +116,8 @@ const widths = image ? [...new Set([640, 960, 1280, 1520].filter((w) => w < imag
   }
 
   .crumbs a {
+    display: inline-block;
+    padding-block: 4px;
     color: var(--white);
     text-decoration: none;
   }
@@ -130,7 +132,7 @@ const widths = image ? [...new Set([640, 960, 1280, 1520].filter((w) => w < imag
 
   .intro {
     max-width: 58ch;
-    color: #d2deea;
+    color: var(--text-on-photo);
   }
 
   @media (max-width: 767px) {

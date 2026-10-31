@@ -37,7 +37,9 @@ const copy = {
   },
   references: { fr: 'Nos références', en: 'Our references' },
   slidesLabel: { fr: 'Photos d’ouverture', en: 'Opening photos' },
-  photo: { fr: 'Photo', en: 'Photo' },
+  photoOf: { fr: 'photo {n} sur {total}', en: 'photo {n} of {total}' },
+  pause: { fr: 'Mettre le diaporama en pause', en: 'Pause the slideshow' },
+  play: { fr: 'Relancer le diaporama', en: 'Play the slideshow' },
   tradesKicker: { fr: 'Nos métiers', en: 'Our trades' },
   // Trades, cycle and network wording supplied by ALFEC (validation questionnaire, 2026-09-27).
   tradesTitle: { fr: 'Six métiers. Plusieurs équipes spécialisées.', en: 'Six trades. Several specialist teams.' },
@@ -64,7 +66,6 @@ const copy = {
   figures: [
     { n: 22, label: { fr: 'Wilayas', en: 'Wilayas' } },
     { n: 6, label: { fr: 'Métiers', en: 'Trades' } },
-    { n: 3, label: { fr: 'Étapes', en: 'Stages' } },
   ] as { n: number; label: Bilingual }[],
   refsKicker: { fr: 'Réalisations', en: 'Projects' },
   refsTitle: { fr: 'Nos', en: 'Our' },
@@ -120,7 +121,7 @@ const arrow = '<path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor"
     </div>
 
     <div class="wrap hero-copy">
-      <p class="kicker">Engineering · Procurement · Construction</p>
+      <p class="kicker" lang="en">Engineering · Procurement · Construction</p>
       <h1 id="hero-title">
         {
           tx(copy.headline, lang).map((line) => (
@@ -149,7 +150,7 @@ const arrow = '<path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor"
               class:list={['seg', { on: i === 0 }]}
               type="button"
               aria-pressed={i === 0 ? 'true' : 'false'}
-              aria-label={`${tx(copy.photo, lang)} ${i + 1} : ${tx(photos[s.key].alt, lang)}`}
+              aria-label={`${tx(s.label, lang)}, ${tx(copy.photoOf, lang).replace('{n}', String(i + 1)).replace('{total}', String(slides.length))}`}
             >
               <span class="fill" />
               <span class="seg-name">{tx(s.label, lang)}</span>
@@ -157,6 +158,10 @@ const arrow = '<path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor"
           ))
         }
         <span class="count tnum" aria-hidden="true"><b data-slide-no>01</b> / {pad(slides.length)}</span>
+        <button class="playpause" type="button" aria-label={tx(copy.pause, lang)} data-playpause data-pause={tx(copy.pause, lang)} data-play={tx(copy.play, lang)}>
+          <svg class="i-pause" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M8 5v14M16 5v14" fill="none" stroke="currentColor" stroke-width="2.4" /></svg>
+          <svg class="i-play" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5Z" fill="currentColor" /></svg>
+        </button>
       </div>
     </div>
   </section>
@@ -218,7 +223,7 @@ const arrow = '<path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor"
             copy.figures.map((f) => (
               <div>
                 <dt>{tx(f.label, lang)}</dt>
-                <dd class="tnum"><span data-count={f.n}>{f.n}</span></dd>
+                <dd class="tnum">{f.n}</dd>
               </div>
             ))
           }
@@ -315,18 +320,19 @@ const arrow = '<path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor"
 </Base>
 
 <script>
-  // Opening: the title lines rise in, then the photographs cross-fade every seven seconds.
+  // Opening: the photographs cross-fade every seven seconds. The slideshow pauses while it is hovered or
+  // focused, and stays paused once the visitor presses the pause button.
   const hero = document.querySelector<HTMLElement>('[data-hero]');
   if (hero) {
-    requestAnimationFrame(() => requestAnimationFrame(() => hero.classList.add('go')));
-
     const slides = [...hero.querySelectorAll<HTMLElement>('.slide')];
     const segs = [...hero.querySelectorAll<HTMLButtonElement>('.seg')];
     const no = hero.querySelector<HTMLElement>('[data-slide-no]');
+    const toggle = hero.querySelector<HTMLButtonElement>('[data-playpause]');
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const DURATION = 7000;
     let index = 0;
     let timer: number | undefined;
+    let held = reduce; // paused by the visitor (or by the reduced-motion setting)
 
     const show = (n: number) => {
       index = (n + slides.length) % slides.length;
@@ -345,11 +351,30 @@ const arrow = '<path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor"
     const stop = () => window.clearInterval(timer);
     const play = () => {
       stop();
-      if (!reduce) timer = window.setInterval(() => show(index + 1), DURATION);
+      if (!held)
+        timer = window.setInterval(() => {
+          hero.classList.remove('picked');
+          show(index + 1);
+        }, DURATION);
     };
+    const setHeld = (value: boolean) => {
+      held = value;
+      hero.classList.toggle('held', held);
+      if (toggle) toggle.setAttribute('aria-label', (held ? toggle.dataset.play : toggle.dataset.pause) ?? '');
+      if (held) {
+        hero.classList.add('paused');
+        stop();
+      } else {
+        hero.classList.remove('paused');
+        show(index);
+        play();
+      }
+    };
+    toggle?.addEventListener('click', () => setHeld(!held));
 
     segs.forEach((s, k) =>
       s.addEventListener('click', () => {
+        hero.classList.add('picked'); // a photo the visitor picks answers at once
         show(k);
         play();
       }),
@@ -359,6 +384,7 @@ const arrow = '<path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor"
       stop();
     });
     hero.addEventListener('mouseleave', () => {
+      if (held) return;
       hero.classList.remove('paused');
       play();
     });
@@ -367,12 +393,12 @@ const arrow = '<path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor"
       stop();
     });
     hero.addEventListener('focusout', (event) => {
-      if (hero.contains(event.relatedTarget as Node)) return;
+      if (held || hero.contains(event.relatedTarget as Node)) return;
       hero.classList.remove('paused');
       play();
     });
     document.addEventListener('visibilitychange', () => (document.hidden ? stop() : play()));
-    if (reduce) hero.classList.add('paused');
+    if (held) setHeld(true);
     play();
   }
 </script>
@@ -405,6 +431,10 @@ const arrow = '<path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor"
 
   .slide.on {
     opacity: 1;
+  }
+
+  .picked .slide {
+    transition-duration: 0.3s;
   }
 
   .slide :global(picture),
@@ -456,7 +486,7 @@ const arrow = '<path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor"
 
   .hero .lead {
     max-width: 52ch;
-    color: #d2deea;
+    color: var(--text-on-photo);
   }
 
   .ctas {
@@ -478,7 +508,7 @@ const arrow = '<path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor"
 
   .segs {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) auto auto;
     gap: 18px;
     align-items: end;
   }
@@ -540,25 +570,58 @@ const arrow = '<path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor"
     color: var(--white);
   }
 
+  .playpause {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgb(255 255 255 / 0.3);
+    background: rgb(5 22 41 / 0.4);
+    color: var(--white);
+    cursor: pointer;
+    transition: border-color 0.2s var(--ease-out);
+  }
+
+  .playpause:hover {
+    border-color: var(--white);
+  }
+
+  .playpause .i-play,
+  :global(.held) .playpause .i-pause {
+    display: none;
+  }
+
+  :global(.held) .playpause .i-play {
+    display: block;
+  }
+
+  /* The headline rises in on first paint with CSS alone, so it never waits for a script to appear. */
   @media (prefers-reduced-motion: no-preference) {
     .ln > span {
-      transition: transform 1s var(--ease-out);
+      animation: rise 0.7s var(--ease-out) backwards;
     }
 
     .ln:nth-child(2) > span {
-      transition-delay: 0.1s;
+      animation-delay: 0.08s;
     }
 
     .ln:nth-child(3) > span {
-      transition-delay: 0.2s;
+      animation-delay: 0.16s;
     }
 
-    :global(.js) .hero:not(:global(.go)) .ln > span {
-      transform: translateY(105%);
+    @keyframes rise {
+      from {
+        transform: translateY(105%);
+      }
     }
 
     .slide:global(.on) :global(img) {
       animation: drift 8s ease-out forwards;
+    }
+
+    /* Pause means still: the photo stops drifting too. */
+    :global(.held) .slide:global(.on) :global(img) {
+      animation-play-state: paused;
     }
 
     @keyframes drift {
@@ -670,7 +733,7 @@ const arrow = '<path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor"
 
   .figures {
     display: grid;
-    grid-template-columns: repeat(3, auto);
+    grid-template-columns: repeat(2, auto);
     gap: 18px 44px;
     margin: 10px 0 0;
   }
@@ -730,7 +793,7 @@ const arrow = '<path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor"
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 1.2s var(--ease-out);
+    transition: transform 0.5s var(--ease-out);
   }
 
   .ref::after {
@@ -741,8 +804,10 @@ const arrow = '<path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor"
     background: linear-gradient(0deg, rgb(5 22 41 / 0.9), rgb(5 22 41 / 0) 60%);
   }
 
-  .ref:hover :global(img) {
-    transform: scale(1.05);
+  @media (hover: hover) and (pointer: fine) {
+    .ref:hover :global(img) {
+      transform: scale(1.05);
+    }
   }
 
   .cap {
@@ -856,7 +921,8 @@ const arrow = '<path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor"
     }
 
     .segs {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+      align-items: center;
     }
 
     .seg-name,

@@ -276,10 +276,23 @@ const nameY = (p: { x: number; y: number }) =>
     color: var(--fg);
   }
 
-  /* The network draws itself once, then the head office keeps pulsing. */
+  /* The network draws itself once; the head office pulses twice (under 5 s, WCAG 2.2.2) and settles into a still ring. */
   @media (prefers-reduced-motion: no-preference) {
     .ring {
-      animation: pulse 2.4s ease-out infinite;
+      animation:
+        settle 0.4s var(--ease-out) 4.8s backwards,
+        pulse 2.4s ease-out 2;
+    }
+
+    :global(.js) .network:not(:global(.in)) .ring {
+      animation: none;
+    }
+
+    @keyframes settle {
+      from {
+        transform: scale(0.7);
+        opacity: 0;
+      }
     }
 
     .network .link {
