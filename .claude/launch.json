@@ -1,0 +1,25 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "port": 4321
+    },
+    {
+      "name": "pistes",
+      "runtimeExecutable": ".tools/php8.3/php.exe",
+      "runtimeArgs": [
+        "-S",
+        "127.0.0.1:8090",
+        "-t",
+        "pistes"
+      ],
+      "port": 8090
+    }
+  ]
+}

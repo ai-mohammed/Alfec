@@ -1,0 +1,1040 @@
+---
+import { Image, Picture } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import TradePanels from '../components/TradePanels.astro';
+import WilayaMap from '../components/WilayaMap.astro';
+import EnquiryBand from '../components/EnquiryBand.astro';
+import sloganFr from '../assets/brand/slogan-fr.png';
+import sloganEn from '../assets/brand/slogan-en.png';
+import { photos, type PhotoKey } from '../data/photos';
+import { competences, partners, sectors, slogan, testimonials } from '../data/company';
+import { pagePath } from '../i18n/routes.mjs';
+import { tx, ui, type Bilingual, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+
+const copy = {
+  title: {
+    fr: 'ALFEC Oran · Génie climatique, incendie, désenfumage, froid',
+    en: 'ALFEC Oran · HVAC, fire protection, smoke control, refrigeration',
+  },
+  description: {
+    fr: 'ALFEC, basée à Oran : génie climatique, incendie, désenfumage, électricité, froid et génie industriel, de l’étude à la maintenance.',
+    en: 'ALFEC, based in Oran, Algeria: HVAC, fire protection, smoke control, electrical, refrigeration and industrial engineering, from design to maintenance.',
+  },
+  // The headline ALFEC chose, set on three lines; the last one takes the accent colour.
+  headline: {
+    fr: ['À chaque défi', 'technique, la', 'solution adaptée.'],
+    en: ['For every', 'technical challenge,', 'the right solution.'],
+  },
+  deck: {
+    fr: 'Climatisation, incendie, désenfumage, électricité, froid et génie industriel : ALFEC étudie, réalise et maintient vos installations, depuis Oran et partout en Algérie.',
+    en: 'Air conditioning, fire protection, smoke control, electrical work, refrigeration and industrial engineering: ALFEC designs, installs and maintains your installations, from Oran and across Algeria.',
+  },
+  references: { fr: 'Nos références', en: 'Our clients' },
+  slidesLabel: { fr: 'Photos d’ouverture', en: 'Featured photos' },
+  photoOf: { fr: 'photo {n} sur {total}', en: 'photo {n} of {total}' },
+  pause: { fr: 'Mettre le diaporama en pause', en: 'Pause the slideshow' },
+  play: { fr: 'Relancer le diaporama', en: 'Play the slideshow' },
+  tradesKicker: { fr: 'Nos métiers', en: 'Our trades' },
+  // Trades, cycle and network wording supplied by ALFEC (validation questionnaire, 2026-09-27).
+  tradesTitle: { fr: 'Six métiers. Plusieurs équipes spécialisées.', en: 'Six trades. Several specialist teams.' },
+  tradesTitleEnd: { fr: 'Une solution coordonnée.', en: 'One coordinated solution.' },
+  tradesLead: {
+    fr: 'Née dans le génie climatique, ALFEC mobilise aujourd’hui ses équipes spécialisées pour répondre aux besoins techniques des bâtiments et de l’industrie.',
+    en: 'Rooted in HVAC, ALFEC now brings its specialist teams to the technical needs of buildings and industry.',
+  },
+  cycleKicker: { fr: 'Notre accompagnement', en: 'How we work' },
+  cycleTitle: { fr: 'De l’étude', en: 'From design' },
+  cycleTitleEnd: { fr: 'à la maintenance.', en: 'to maintenance.' },
+  cycleLead: {
+    fr: 'Un seul interlocuteur sur toute la vie de vos installations.',
+    en: 'One point of contact for the whole life of your installations.',
+  },
+  sectorsLabel: { fr: 'Secteurs', en: 'Sectors' },
+  networkKicker: { fr: 'Implantation', en: 'Locations' },
+  networkTitle: { fr: 'Des réalisations', en: 'Projects' },
+  networkTitleEnd: { fr: 'à travers le territoire national.', en: 'across the whole country.' },
+  networkText: {
+    fr: 'Avec son siège à Oran, ALFEC déploie ses équipes sur l’ensemble du territoire national pour réaliser des projets techniques dans le bâtiment et l’industrie.',
+    en: 'With its head office in Oran, ALFEC deploys its teams across the whole country to deliver technical projects in buildings and industry.',
+  },
+  figures: [
+    { n: 22, label: { fr: 'Wilayas', en: 'Wilayas' } },
+    { n: 6, label: { fr: 'Métiers', en: 'Trades' } },
+  ] as { n: number; label: Bilingual }[],
+  refsKicker: { fr: 'Réalisations', en: 'Projects' },
+  refsTitle: { fr: 'Nos', en: 'Our' },
+  refsTitleEnd: { fr: 'références.', en: 'clients.' },
+  refsLead: {
+    fr: 'Quelques installations réalisées et entretenues par nos équipes.',
+    en: 'Some of the installations our teams have delivered and maintain.',
+  },
+  voiceKicker: { fr: 'Ils nous font confiance', en: 'They trust us' },
+  voiceTitle: { fr: 'La parole', en: 'In our' },
+  voiceTitleEnd: { fr: 'à nos clients.', en: 'clients’ words.' },
+  partnersTitle: { fr: 'Nos marques partenaires', en: 'Our partner brands' },
+} satisfies Record<string, unknown>;
+
+// Opening slideshow: the widest photographs, each showing a different trade at work.
+const slides: { key: PhotoKey; label: Bilingual; position?: string }[] = [
+  { key: 'salleDesPompes', label: { fr: 'Génie climatique', en: 'HVAC' } },
+  { key: 'desenfumageEquipe', label: { fr: 'Désenfumage', en: 'Smoke control' }, position: '50% 35%' },
+  { key: 'techniciensArmoires', label: { fr: 'Électricité & régulation', en: 'Electrical & controls' } },
+  { key: 'plafondGaines', label: { fr: 'Détection & gaines', en: 'Detection & ductwork' } },
+];
+
+const references: { key: PhotoKey; client: string; place: string; field: Bilingual }[] = [
+  { key: 'sonelgazTiaret', client: 'Sonelgaz', place: 'Tiaret', field: { fr: 'Climatisation', en: 'Air conditioning' } },
+  { key: 'banqueBeaOran', client: 'Banque BEA', place: 'Oran', field: { fr: 'Banques', en: 'Banks' } },
+];
+
+const sloganArt = lang === 'fr' ? sloganFr : sloganEn;
+const pad = (n: number) => String(n).padStart(2, '0');
+const widthsFor = (w: number) => [...new Set([640, 960, 1280, 1520].filter((x) => x < w).concat(w))];
+const arrow = '<path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square" />';
+---
+
+<Base lang={lang} title={tx(copy.title, lang)} description={tx(copy.description, lang)} current="home">
+  <section class="hero" aria-labelledby="hero-title" data-hero>
+    <div class="slides" aria-hidden="true">
+      {
+        slides.map((s, i) => (
+          <div class:list={['slide', { on: i === 0 }]} style={s.position ? `--pos:${s.position}` : undefined}>
+            <Picture
+              src={photos[s.key].src}
+              formats={['avif', 'webp']}
+              fallbackFormat="jpg"
+              widths={widthsFor(photos[s.key].src.width)}
+              sizes="100vw"
+              alt=""
+              loading={i === 0 ? 'eager' : 'lazy'}
+              fetchpriority={i === 0 ? 'high' : undefined}
+            />
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="wrap hero-copy">
+      <p class="kicker" lang="en">Engineering · Procurement · Construction</p>
+      <h1 id="hero-title">
+        {
+          tx(copy.headline, lang).map((line) => (
+            <>
+              <span class="ln"><span>{line}</span></span>{' '}
+            </>
+          ))
+        }
+      </h1>
+      <p class="lead">{tx(copy.deck, lang)}</p>
+      <div class="ctas">
+        <a class="btn" href={pagePath('contact', lang)}>
+          <span>{tx(ui.cta.project, lang)}</span>
+          <svg class="arrow" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" set:html={arrow} />
+        </a>
+        <a class="btn btn--line" href={pagePath('projects', lang)}>{tx(copy.references, lang)}</a>
+      </div>
+      <span class="slogan" role="img" aria-label={tx(slogan, lang)} style={`--slogan:url(${sloganArt.src})`}></span>
+    </div>
+
+    <div class="hero-nav">
+      <div class="wrap segs" role="group" aria-label={tx(copy.slidesLabel, lang)}>
+        {
+          slides.map((s, i) => (
+            <button
+              class:list={['seg', { on: i === 0 }]}
+              type="button"
+              aria-pressed={i === 0 ? 'true' : 'false'}
+              aria-label={`${tx(s.label, lang)}, ${tx(copy.photoOf, lang).replace('{n}', String(i + 1)).replace('{total}', String(slides.length))}`}
+            >
+              <span class="fill" />
+              <span class="seg-name">{tx(s.label, lang)}</span>
+            </button>
+          ))
+        }
+        <span class="count tnum" aria-hidden="true"><b data-slide-no>01</b> / {pad(slides.length)}</span>
+        <button class="playpause" type="button" aria-label={tx(copy.pause, lang)} data-playpause data-pause={tx(copy.pause, lang)} data-play={tx(copy.play, lang)}>
+          <svg class="i-pause" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M8 5v14M16 5v14" fill="none" stroke="currentColor" stroke-width="2.6" /></svg>
+          <svg class="i-play" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5Z" fill="currentColor" /></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="metiers" aria-labelledby="trades-title">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <p class="kicker" data-reveal>{tx(copy.tradesKicker, lang)}</p>
+          <h2 id="trades-title" class="h2-long" data-reveal style="--d: 0.06s">{tx(copy.tradesTitle, lang)} <span class="dim">{tx(copy.tradesTitleEnd, lang)}</span></h2>
+        </div>
+        <p class="lead" data-reveal style="--d: 0.12s">{tx(copy.tradesLead, lang)}</p>
+      </div>
+      <div data-reveal>
+        <TradePanels lang={lang} />
+      </div>
+      <a class="link-arrow all" href={pagePath('trades', lang)}>
+        <span>{tx(ui.cta.allTrades, lang)}</span>
+        <svg class="arrow" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" set:html={arrow} />
+      </a>
+    </div>
+  </section>
+
+  <section class="section band" aria-labelledby="cycle-title">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <p class="kicker" data-reveal>{tx(copy.cycleKicker, lang)}</p>
+          <h2 id="cycle-title" data-reveal style="--d: 0.06s">{tx(copy.cycleTitle, lang)} <span class="dim">{tx(copy.cycleTitleEnd, lang)}</span></h2>
+        </div>
+        <p class="lead" data-reveal style="--d: 0.12s">{tx(copy.cycleLead, lang)}</p>
+      </div>
+      <ol class="steps" role="list">
+        {
+          competences.map((c, i) => (
+            <li class="step" data-reveal style={`--d: ${i * 0.1}s`}>
+              <span class="no tnum" aria-hidden="true">{pad(i + 1)}</span>
+              <h3>{tx(c.title, lang)}</h3>
+              <p>{tx(c.short, lang)}</p>
+            </li>
+          ))
+        }
+      </ol>
+      <p class="sectors" data-reveal>
+        <b>{tx(copy.sectorsLabel, lang)}</b>
+        {sectors.map((s) => <span>{tx(s.name, lang)}</span>)}
+      </p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="network-title">
+    <div class="wrap network">
+      <div class="network-copy">
+        <p class="kicker" data-reveal>{tx(copy.networkKicker, lang)}</p>
+        <h2 id="network-title" class="h2-long" data-reveal style="--d: 0.06s">{tx(copy.networkTitle, lang)} <span class="dim">{tx(copy.networkTitleEnd, lang)}</span></h2>
+        <p class="lead" data-reveal style="--d: 0.12s">{tx(copy.networkText, lang)}</p>
+        <dl class="figures" data-reveal style="--d: 0.18s">
+          {
+            copy.figures.map((f) => (
+              <div>
+                <dt>{tx(f.label, lang)}</dt>
+                <dd class="tnum">{f.n}</dd>
+              </div>
+            ))
+          }
+        </dl>
+        <a class="link-arrow" href={pagePath('company', lang)}>
+          <span>{tx(ui.cta.company, lang)}</span>
+          <svg class="arrow" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" set:html={arrow} />
+        </a>
+      </div>
+      <div class="network-map">
+        <WilayaMap lang={lang} names={false} lines />
+      </div>
+    </div>
+  </section>
+
+  <section class="section light" aria-labelledby="refs-title">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <p class="kicker" data-reveal>{tx(copy.refsKicker, lang)}</p>
+          <h2 id="refs-title" data-reveal style="--d: 0.06s">{tx(copy.refsTitle, lang)} <span class="dim">{tx(copy.refsTitleEnd, lang)}</span></h2>
+        </div>
+        <p class="lead" data-reveal style="--d: 0.12s">{tx(copy.refsLead, lang)}</p>
+      </div>
+      <ul class="refs" role="list">
+        {
+          references.map((r, i) => (
+            <li data-reveal style={`--d: ${i * 0.08}s`}>
+              <a class="ref" href={pagePath('projects', lang)}>
+                <Picture
+                  src={photos[r.key].src}
+                  formats={['avif', 'webp']}
+                  fallbackFormat="jpg"
+                  widths={widthsFor(photos[r.key].src.width)}
+                  sizes={i === 0 ? '(min-width: 1024px) 58vw, 100vw' : '(min-width: 1024px) 40vw, 100vw'}
+                  alt={tx(photos[r.key].alt, lang)}
+                  loading="lazy"
+                />
+                <span class="cap">
+                  <b>{r.client}</b>
+                  <span>{r.place} · {tx(r.field, lang)}</span>
+                </span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <a class="link-arrow all" href={pagePath('projects', lang)}>
+        <span>{tx(ui.cta.projects, lang)}</span>
+        <svg class="arrow" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" set:html={arrow} />
+      </a>
+
+      {
+        testimonials.length > 0 && (
+          <div class="voice" aria-labelledby="voice-title">
+            <div class="voice-head">
+              <p class="kicker">{tx(copy.voiceKicker, lang)}</p>
+              <h2 id="voice-title" class="voice-title">
+                {tx(copy.voiceTitle, lang)} <span class="dim">{tx(copy.voiceTitleEnd, lang)}</span>
+              </h2>
+            </div>
+            <div class="quotes">
+              {testimonials.map((q) => (
+                <figure class="quote">
+                  <blockquote>{tx(q.quote, lang)}</blockquote>
+                  <figcaption>
+                    {q.name} · {tx(q.role, lang)}
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          </div>
+        )
+      }
+
+      {
+        partners.length > 0 && (
+          <div class="partners">
+            <h2 class="partners-title">{tx(copy.partnersTitle, lang)}</h2>
+            <ul class="logos" role="list">
+              {partners.map((p) => (
+                <li>
+                  <Image src={p.logo} alt={p.name} height={48} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  <EnquiryBand lang={lang} />
+</Base>
+
+<script>
+  // Opening: the photographs cross-fade every seven seconds. The slideshow pauses while it is hovered or
+  // focused, and stays paused once the visitor presses the pause button.
+  const hero = document.querySelector<HTMLElement>('[data-hero]');
+  if (hero) {
+    const slides = [...hero.querySelectorAll<HTMLElement>('.slide')];
+    const segs = [...hero.querySelectorAll<HTMLButtonElement>('.seg')];
+    const no = hero.querySelector<HTMLElement>('[data-slide-no]');
+    const toggle = hero.querySelector<HTMLButtonElement>('[data-playpause]');
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const DURATION = 7000;
+    let index = 0;
+    let timer: number | undefined;
+    let held = reduce; // paused by the visitor (or by the reduced-motion setting)
+
+    const show = (n: number) => {
+      index = (n + slides.length) % slides.length;
+      slides.forEach((s, k) => s.classList.toggle('on', k === index));
+      segs.forEach((s, k) => {
+        s.classList.remove('on');
+        s.classList.toggle('done', k < index);
+        if (k === index) {
+          void s.offsetWidth; // restart the progress animation
+          s.classList.add('on');
+        }
+        s.setAttribute('aria-pressed', String(k === index));
+      });
+      if (no) no.textContent = String(index + 1).padStart(2, '0');
+    };
+    const stop = () => window.clearInterval(timer);
+    const play = () => {
+      stop();
+      if (!held)
+        timer = window.setInterval(() => {
+          hero.classList.remove('picked');
+          show(index + 1);
+        }, DURATION);
+    };
+    const setHeld = (value: boolean) => {
+      held = value;
+      hero.classList.toggle('held', held);
+      if (toggle) toggle.setAttribute('aria-label', (held ? toggle.dataset.play : toggle.dataset.pause) ?? '');
+      if (held) {
+        hero.classList.add('paused');
+        stop();
+      } else {
+        hero.classList.remove('paused');
+        show(index);
+        play();
+      }
+    };
+    toggle?.addEventListener('click', () => setHeld(!held));
+
+    segs.forEach((s, k) =>
+      s.addEventListener('click', () => {
+        hero.classList.add('picked'); // a photo the visitor picks answers at once
+        show(k);
+        play();
+      }),
+    );
+    hero.addEventListener('mouseenter', () => {
+      hero.classList.add('paused');
+      stop();
+    });
+    hero.addEventListener('mouseleave', () => {
+      if (held) return;
+      hero.classList.remove('paused');
+      play();
+    });
+    hero.addEventListener('focusin', () => {
+      hero.classList.add('paused');
+      stop();
+    });
+    hero.addEventListener('focusout', (event) => {
+      if (held || hero.contains(event.relatedTarget as Node)) return;
+      hero.classList.remove('paused');
+      play();
+    });
+    document.addEventListener('visibilitychange', () => (document.hidden ? stop() : play()));
+    if (held) setHeld(true);
+    play();
+  }
+</script>
+
+<style>
+  /* ---------- Opening ---------- */
+  .hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    min-height: min(96vh, 920px);
+    display: grid;
+    align-items: end;
+    padding-block: calc(var(--header-h) + 64px) 150px;
+  }
+
+  .slides {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    background: var(--night);
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 1.6s ease;
+  }
+
+  .slide.on {
+    opacity: 1;
+  }
+
+  .picked .slide {
+    transition-duration: 0.3s;
+  }
+
+  .slide :global(picture),
+  .slide :global(img) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .slide :global(img) {
+    object-fit: cover;
+    object-position: var(--pos, 50% 50%);
+    transform: scale(1.02);
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(90deg, rgb(5 22 41 / 0.92) 0%, rgb(5 22 41 / 0.66) 45%, rgb(5 22 41 / 0.25) 100%),
+      linear-gradient(0deg, rgb(5 22 41 / 0.95) 0%, rgb(5 22 41 / 0) 45%);
+  }
+
+  .hero-copy {
+    display: grid;
+    gap: 28px;
+    justify-items: start;
+  }
+
+  .hero h1 {
+    font-size: var(--fs-display);
+    line-height: 0.88;
+  }
+
+  .ln {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.04em;
+  }
+
+  .ln > span {
+    display: block;
+  }
+
+  .ln:nth-child(3) > span {
+    color: var(--accent);
+  }
+
+  .hero .lead {
+    max-width: 52ch;
+    color: var(--text-on-photo);
+  }
+
+  .ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .hero .slogan {
+    color: var(--white);
+  }
+
+  .hero-nav {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 36px;
+  }
+
+  .segs {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) auto auto;
+    gap: 18px;
+    align-items: end;
+  }
+
+  .seg {
+    position: relative;
+    min-height: 44px;
+    padding: 14px 0 0;
+    border: 0;
+    background: none;
+    color: var(--text-2);
+    font-family: var(--cond);
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-align: left;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .seg::before,
+  .fill {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 2px;
+  }
+
+  .seg::before {
+    right: 0;
+    background: rgb(255 255 255 / 0.22);
+  }
+
+  .fill {
+    width: 0;
+    background: var(--accent);
+  }
+
+  .seg.on {
+    color: var(--white);
+  }
+
+  .seg:global(.done) .fill,
+  :global(.paused) .seg.on .fill {
+    width: 100%;
+  }
+
+  .count {
+    padding-bottom: 8px;
+    font-family: var(--cond);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--text-2);
+  }
+
+  .count b {
+    color: var(--white);
+  }
+
+  /* Discreet: a small glyph in the counter's grey, on a full 44 px hit area. The negative
+     margins pull the glyph flush with the content edge without shrinking that area. */
+  .playpause {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    margin: 0 -15px 0 -10px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--text-2);
+    cursor: pointer;
+    transition:
+      color 0.2s var(--ease-out),
+      scale 0.15s var(--ease-out);
+  }
+
+  .playpause:hover {
+    color: var(--white);
+  }
+
+  .playpause:active {
+    scale: 0.96;
+  }
+
+  .playpause .i-play,
+  :global(.held) .playpause .i-pause {
+    display: none;
+  }
+
+  :global(.held) .playpause .i-play {
+    display: block;
+  }
+
+  /* The headline rises in on first paint with CSS alone, so it never waits for a script to appear. */
+  @media (prefers-reduced-motion: no-preference) {
+    .ln > span {
+      animation: rise 0.7s var(--ease-out) backwards;
+    }
+
+    .ln:nth-child(2) > span {
+      animation-delay: 0.08s;
+    }
+
+    .ln:nth-child(3) > span {
+      animation-delay: 0.16s;
+    }
+
+    @keyframes rise {
+      from {
+        transform: translateY(105%);
+      }
+    }
+
+    .slide:global(.on) :global(img) {
+      animation: drift 8s ease-out forwards;
+    }
+
+    /* Pause means still: the photo stops drifting too. */
+    :global(.held) .slide:global(.on) :global(img) {
+      animation-play-state: paused;
+    }
+
+    @keyframes drift {
+      from {
+        transform: scale(1.12) translateX(1.5%);
+      }
+      to {
+        transform: scale(1.02) translateX(0);
+      }
+    }
+
+    .seg.on .fill {
+      animation: progress 7s linear forwards;
+    }
+
+    :global(.paused) .seg.on .fill {
+      animation: none;
+    }
+
+    @keyframes progress {
+      to {
+        width: 100%;
+      }
+    }
+  }
+
+  /* ---------- Trades ---------- */
+  .all {
+    margin-top: var(--s-5);
+  }
+
+  /* ---------- Cycle ---------- */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    list-style: none;
+    border-top: 1px solid var(--edge);
+  }
+
+  .step {
+    display: grid;
+    gap: 16px;
+    align-content: start;
+    padding: 40px 40px 8px 0;
+    border-right: 1px solid var(--edge);
+  }
+
+  .step + .step {
+    padding-left: 40px;
+  }
+
+  .step:last-child {
+    border-right: 0;
+  }
+
+  .no {
+    font-family: var(--cond);
+    font-size: clamp(5rem, 3rem + 4vw, 8rem);
+    font-weight: 800;
+    line-height: 0.8;
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--sky);
+  }
+
+  .step p {
+    color: var(--fg-2);
+  }
+
+  .sectors {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 28px;
+    margin-top: 56px;
+    font-family: var(--cond);
+    font-size: 1.375rem;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .sectors b {
+    margin-right: 8px;
+    font-size: 0.9375rem;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+  }
+
+  .sectors span + span::before {
+    content: '/';
+    margin-right: 28px;
+    color: var(--sky);
+  }
+
+  /* ---------- Network ---------- */
+  .network {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    gap: clamp(40px, 6vw, 100px);
+    align-items: center;
+  }
+
+  .network-copy {
+    display: grid;
+    gap: 26px;
+    justify-items: start;
+  }
+
+  .figures {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    gap: 18px 44px;
+    margin: 10px 0 0;
+  }
+
+  .figures div {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 6px;
+  }
+
+  .figures dd {
+    margin: 0;
+    font-family: var(--cond);
+    font-size: clamp(4rem, 2.5rem + 3.6vw, 7rem);
+    font-weight: 800;
+    line-height: 0.85;
+    color: var(--accent);
+  }
+
+  .figures dt {
+    font-family: var(--cond);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-2);
+  }
+
+  /* ---------- References ---------- */
+  .refs {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+    gap: 16px;
+    list-style: none;
+  }
+
+  .ref {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-items: flex-end;
+    height: 100%;
+    min-height: 460px;
+    overflow: hidden;
+    background: var(--night);
+    color: var(--white);
+    text-decoration: none;
+  }
+
+  .ref :global(picture) {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+  }
+
+  .ref :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s var(--ease-out);
+  }
+
+  .ref::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(0deg, rgb(5 22 41 / 0.9), rgb(5 22 41 / 0) 60%);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .ref:hover :global(img) {
+      transform: scale(1.05);
+    }
+  }
+
+  .cap {
+    display: grid;
+    gap: 6px;
+    padding: 28px;
+  }
+
+  .cap b {
+    font-family: var(--cond);
+    font-size: 2.5rem;
+    font-weight: 800;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .cap span {
+    font-family: var(--cond);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .voice {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
+    gap: 32px 80px;
+    margin-top: clamp(72px, 9vw, 120px);
+    padding-top: 48px;
+    border-top: 1px solid var(--edge);
+  }
+
+  .voice-head {
+    display: grid;
+    gap: 18px;
+    justify-items: start;
+  }
+
+  .voice-title {
+    font-size: clamp(2.5rem, 1.6rem + 2.4vw, 4rem);
+  }
+
+  .quotes {
+    display: grid;
+    gap: var(--s-7);
+  }
+
+  .quote {
+    margin: 0;
+  }
+
+  .quote blockquote {
+    position: relative;
+    margin: 0;
+    padding-top: 24px;
+    font-size: clamp(1.4rem, 1.2rem + 0.6vw, 2rem);
+    font-weight: 500;
+    line-height: 1.35;
+  }
+
+  /* A short rule above each quote, in the same language as the section kickers. */
+  .quote blockquote::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 48px;
+    height: 2px;
+    background: var(--accent);
+  }
+
+  .quote figcaption {
+    margin-top: 20px;
+    font-family: var(--cond);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+  }
+
+  .partners {
+    display: grid;
+    gap: var(--s-6);
+    margin-top: var(--s-8);
+  }
+
+  .partners-title {
+    font-size: 1.875rem;
+  }
+
+  .logos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-6) var(--s-8);
+    list-style: none;
+  }
+
+  .logos :global(img) {
+    width: auto;
+    height: 48px;
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1023px) {
+    .hero {
+      min-height: 0;
+      padding-block: calc(var(--header-h) + 60px) 120px;
+    }
+
+    .segs {
+      grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+      align-items: center;
+    }
+
+    /* Only the lines remain on phones: the glyph sits level with them. */
+    .playpause {
+      align-self: start;
+      margin-top: -21px;
+    }
+
+    .seg-name,
+    .count {
+      display: none;
+    }
+
+    .steps {
+      grid-template-columns: 1fr;
+      border-top: 0;
+    }
+
+    .step,
+    .step + .step {
+      grid-template-columns: auto 1fr;
+      column-gap: 24px;
+      padding: 28px 0;
+      border-right: 0;
+      border-top: 1px solid var(--edge);
+    }
+
+    .step .no {
+      grid-row: span 2;
+      font-size: 4.5rem;
+    }
+
+    .step h3 {
+      align-self: end;
+    }
+
+    .network,
+    .voice {
+      grid-template-columns: 1fr;
+    }
+
+    .network-map {
+      max-width: 460px;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .hero h1 {
+      font-size: clamp(2.9rem, 1.2rem + 9vw, 4rem);
+    }
+
+    .ctas {
+      display: grid;
+      width: 100%;
+    }
+
+    .hero .slogan {
+      width: min(100%, 290px);
+    }
+
+    .step,
+    .step + .step {
+      grid-template-columns: 1fr;
+    }
+
+    .step .no {
+      grid-row: auto;
+      font-size: 3.5rem;
+    }
+
+    .sectors {
+      gap: 8px 16px;
+      margin-top: 32px;
+      font-size: 1.125rem;
+    }
+
+    .sectors span + span::before {
+      margin-right: 16px;
+    }
+
+    .figures {
+      gap: 12px 36px;
+    }
+
+    .figures dd {
+      font-size: 3.75rem;
+    }
+
+    .refs {
+      grid-template-columns: 1fr;
+    }
+
+    .ref {
+      min-height: 300px;
+    }
+
+    .cap {
+      padding: 20px;
+    }
+
+    .cap b {
+      font-size: 2rem;
+    }
+  }
+</style>

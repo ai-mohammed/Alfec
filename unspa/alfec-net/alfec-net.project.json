@@ -1,0 +1,25 @@
+{
+  "format": "unspaghettit-project",
+  "version": 1,
+  "project": {
+    "id": "442249bd",
+    "name": "alfec.net",
+    "description": "Corporate website of ALFEC (Engineering, Procurement, Construction), Oran, Algeria. This model is the behavioral contract captured from the production site on 2026-09-26, before the redesign. The redesign may replace every implementation detail and the whole visual presentation, but must keep this behavior compatible unless a change is explicitly accepted as an evolution.",
+    "featureIds": [
+      "63df9922",
+      "9505fbbc"
+    ],
+    "createdAt": "2026-09-26T11:06:22.611Z",
+    "updatedAt": "2026-09-26T11:06:47.693Z",
+    "coreFeatures": [
+      {
+        "value": "discover",
+        "description": "Understand who ALFEC is and what it can build: sections, trades, sectors, commitments, photos, in French or English."
+      },
+      {
+        "value": "enquire",
+        "description": "Start a project conversation with ALFEC: contact details and the enquiry form."
+      }
+    ]
+  }
+}

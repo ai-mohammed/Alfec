@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ALFEC · Piste C · Grands projets</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="../assets/brand/alfec-mark.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../assets/shared.css">
+<script>
+  (function () {
+    var ok = ['ciel', 'cuivre', 'corail', 'turquoise'], a = null;
+    try { a = new URLSearchParams(location.search).get('accent') || localStorage.getItem('alfec-accent-v2'); } catch (e) {}
+    if (ok.indexOf(a) > 0) document.documentElement.setAttribute('data-accent', a);
+  })();
+</script>
+<style>
+  :root {
+    --night: #051629;
+    --night-2: #0a2340;
+    --night-3: #0f2e52;
+    --line: rgba(255, 255, 255, .12);
+    --white: #ffffff;
+    --text-2: #a9bfd6;
+    --sky: #29a8e8;
+    --accent: #4cbcf4;
+    --accent-2: #74ccf7;
+    --accent-dark: #11689f;
+    --paper: #f3f5f8;
+    --ink: #0b1b2d;
+    --ink-2: #4b5d71;
+    --cond: "Barlow Condensed", "Arial Narrow", "Segoe UI", sans-serif;
+    --sans: "Barlow", "Segoe UI", system-ui, sans-serif;
+    --wrap: 1320px;
+    --gutter: clamp(20px, 5vw, 64px);
+    --ease: cubic-bezier(.2, .7, .2, 1);
+  }
+  :root[data-accent="corail"] { --accent: #ff7a5c; --accent-2: #ff9479; --accent-dark: #b8472a; }
+  :root[data-accent="turquoise"] { --accent: #2cc5b8; --accent-2: #52d4c9; --accent-dark: #0c7469; }
+  :root[data-accent="cuivre"] { --accent: #e58a4e; --accent-2: #f0a06b; --accent-dark: #9c5220; }
+
+  /* Accent picker, presentation only */
+  .piste-switch .acc-sep { width: 1px; margin: 6px 6px; background: rgba(255, 255, 255, .18); }
+  .piste-switch .acc { width: 36px; height: 36px; padding: 0; border: 0; border-radius: 50%; background: none; display: grid; place-items: center; cursor: pointer; }
+  .piste-switch .acc i { width: 18px; height: 18px; border-radius: 50%; background: var(--c); }
+  .piste-switch .acc:hover { background: rgba(255, 255, 255, .08); }
+  .piste-switch .acc[aria-pressed="true"] i { outline: 2px solid #fff; outline-offset: 2px; }
+  .piste-switch .acc-name { display: flex; align-items: center; padding: 0 12px 0 4px; color: #fff; white-space: nowrap; }
+  @media (max-width: 520px) { .piste-switch .acc-name { display: none; } .piste-switch .acc { width: 32px; } }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 84px; background: var(--night); }
+  .reduce { scroll-behavior: auto; }
+  body { margin: 0; background: var(--night); color: var(--white); font: 400 17px/1.6 var(--sans); -webkit-font-smoothing: antialiased; }
+  img { display: block; max-width: 100%; height: auto; }
+  a { color: inherit; }
+  h1, h2, h3 { margin: 0; font-family: var(--cond); font-weight: 700; text-transform: uppercase; text-wrap: balance; letter-spacing: .005em; }
+  p { margin: 0; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+  .wrap { max-width: var(--wrap); margin-inline: auto; padding-inline: var(--gutter); }
+
+  .kicker { font: 600 14px/1 var(--cond); letter-spacing: .22em; text-transform: uppercase; color: var(--accent); display: inline-flex; align-items: center; gap: 12px; }
+  .kicker::before { content: ""; width: 34px; height: 2px; background: currentColor; }
+  .h2 { font-size: clamp(44px, 6vw, 96px); line-height: .92; }
+  .h2 .dim { color: var(--sky); }
+  .lead { font-size: 19px; color: var(--text-2); max-width: 56ch; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 58px;
+    padding: 0 28px;
+    font: 700 17px/1 var(--cond);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    background: var(--accent);
+    color: var(--night);
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%);
+    transition: background-color .25s, transform .25s;
+  }
+  .btn:hover { background: var(--accent-2); }
+  .btn svg { transition: transform .25s; }
+  .btn:hover svg { transform: translateX(5px); }
+  .btn.line { background: transparent; color: #fff; box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .5); clip-path: none; }
+  .btn.line:hover { box-shadow: inset 0 0 0 2px #fff; background: rgba(255, 255, 255, .06); }
+
+  .slogan {
+    display: block;
+    width: min(100%, 360px);
+    aspect-ratio: 927 / 81;
+    background: #fff;
+    -webkit-mask: url(../assets/brand/slogan-fr.png) no-repeat left center / contain;
+    mask: url(../assets/brand/slogan-fr.png) no-repeat left center / contain;
+  }
+
+  /* Header */
+  .site-header { position: fixed; inset: 0 0 auto 0; z-index: 50; transition: background-color .3s, backdrop-filter .3s; }
+  .site-header.scrolled { background: rgba(5, 22, 41, .9); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+  .bar { display: flex; align-items: center; gap: 32px; min-height: 84px; }
+  .logo img { width: 80px; }
+  .nav { display: flex; gap: 30px; margin-inline: auto; }
+  .nav a { position: relative; font: 600 17px/1 var(--cond); letter-spacing: .12em; text-transform: uppercase; text-decoration: none; padding-block: 10px; }
+  .nav a::after { content: ""; position: absolute; left: 0; right: 0; bottom: 2px; height: 2px; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform .3s var(--ease); }
+  .nav a:hover::after { transform: scaleX(1); }
+  .bar-end { display: flex; align-items: center; gap: 22px; }
+  .lang { font: 600 15px/1 var(--cond); letter-spacing: .1em; color: var(--text-2); }
+  .lang b { color: #fff; }
+  .phone { font: 600 17px/1 var(--cond); letter-spacing: .06em; text-decoration: none; white-space: nowrap; }
+  .bar .btn { min-height: 46px; padding: 0 20px; font-size: 15px; }
+  .menu-btn, .call { display: none; }
+
+  /* Hero slideshow */
+  .hero { position: relative; min-height: min(96vh, 920px); display: grid; align-items: end; padding-block: 150px 150px; overflow: hidden; isolation: isolate; }
+  .slides { position: absolute; inset: 0; z-index: -2; background: var(--night); }
+  .slide { position: absolute; inset: 0; margin: 0; opacity: 0; transition: opacity 1.6s ease; }
+  .slide.on { opacity: 1; }
+  .slide img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.12); }
+  .slide.on img { animation: kb 8s ease-out forwards; }
+  @keyframes kb { from { transform: scale(1.12) translateX(1.5%); } to { transform: scale(1.02) translateX(0); } }
+  .hero::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgba(5, 22, 41, .92) 0%, rgba(5, 22, 41, .66) 45%, rgba(5, 22, 41, .25) 100%), linear-gradient(0deg, rgba(5, 22, 41, .95) 0%, rgba(5, 22, 41, 0) 45%); }
+  .hero-copy { width: 100%; display: grid; gap: 28px; justify-items: start; }
+  .hero h1 { font-size: clamp(56px, 8.4vw, 136px); line-height: .88; font-weight: 800; }
+  .hero h1 .ln { display: block; overflow: hidden; padding-bottom: .04em; }
+  .hero h1 .ln > span { display: block; transform: translateY(0); transition: transform 1s var(--ease); }
+  .js .hero:not(.go) h1 .ln > span { transform: translateY(105%); }
+  .hero h1 .ln:nth-child(2) > span { transition-delay: .1s; }
+  .hero h1 .ln:nth-child(3) > span { transition-delay: .2s; color: var(--accent); }
+  .hero-row { display: flex; flex-wrap: wrap; align-items: center; gap: 20px 40px; }
+  .hero .lead { max-width: 52ch; color: #d2deea; }
+  .ctas { display: flex; flex-wrap: wrap; gap: 14px; }
+  .hero-nav { position: absolute; left: 0; right: 0; bottom: 36px; }
+  .segs { display: grid; grid-template-columns: repeat(4, 1fr) auto; gap: 18px; align-items: end; }
+  .seg { appearance: none; background: none; border: 0; padding: 14px 0 0; text-align: left; color: var(--text-2); cursor: pointer; font: 600 14px/1.2 var(--cond); letter-spacing: .12em; text-transform: uppercase; position: relative; min-height: 44px; }
+  .seg::before, .seg .fill { content: ""; position: absolute; left: 0; top: 0; height: 2px; }
+  .seg::before { right: 0; background: rgba(255, 255, 255, .22); }
+  .seg .fill { width: 0; background: var(--accent); }
+  .seg.on { color: #fff; }
+  .seg.on .fill { animation: fill 7s linear forwards; }
+  .seg.done .fill { width: 100%; }
+  .paused .seg.on .fill { animation-play-state: paused; }
+  @keyframes fill { to { width: 100%; } }
+  .count { font: 600 15px/1 var(--cond); letter-spacing: .12em; color: var(--text-2); font-variant-numeric: tabular-nums; padding-bottom: 6px; }
+  .count b { color: #fff; }
+
+
+  section.block { padding-block: clamp(80px, 11vw, 150px); position: relative; }
+  .head { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 24px 64px; align-items: end; margin-bottom: 56px; }
+  .head > div { display: grid; gap: 22px; justify-items: start; }
+
+  /* Trades: expanding panels */
+  .panels { display: flex; gap: 10px; height: 600px; }
+  .panel {
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: hidden;
+    background: var(--night-2);
+    cursor: pointer;
+    transition: flex-grow .7s var(--ease);
+    isolation: isolate;
+    outline-offset: -3px;
+  }
+  .panel.open { flex-grow: 5; cursor: default; }
+  .panel img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; filter: grayscale(.6) brightness(.7); transform: scale(1.08); transition: filter .7s, transform 1.2s var(--ease); }
+  .panel.open img { filter: none; transform: scale(1); }
+  .panel::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(0deg, rgba(5, 22, 41, .95) 0%, rgba(5, 22, 41, .35) 55%, rgba(5, 22, 41, .15) 100%); }
+  .panel .vt { position: absolute; left: 50%; bottom: 28px; transform: translateX(-50%) rotate(180deg); writing-mode: vertical-rl; font: 700 24px/1 var(--cond); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; transition: opacity .3s; }
+  .panel.open .vt { opacity: 0; }
+  .panel .body { position: absolute; left: 36px; right: 36px; bottom: 34px; display: grid; gap: 14px; justify-items: start; opacity: 0; transform: translateY(16px); transition: opacity .35s, transform .5s var(--ease); pointer-events: none; min-width: 360px; }
+  .panel.open .body { opacity: 1; transform: none; transition-delay: .3s; pointer-events: auto; }
+  .panel .flag { font: 700 13px/1 var(--cond); letter-spacing: .16em; text-transform: uppercase; background: var(--accent); color: var(--night); padding: 7px 10px; }
+  .panel h3 { font-size: clamp(40px, 3.6vw, 56px); line-height: .95; font-weight: 800; }
+  .panel p { color: #d2deea; max-width: 44ch; }
+  .panel ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .panel li { font: 600 14px/1 var(--cond); letter-spacing: .1em; text-transform: uppercase; border: 1px solid rgba(255, 255, 255, .35); padding: 8px 10px; }
+  .panel a { font: 700 16px/1 var(--cond); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); text-decoration: none; display: inline-flex; gap: 10px; align-items: center; padding-block: 8px; }
+  .panel a:hover { color: var(--accent-2); }
+
+  /* Cycle */
+  .cycle { background: var(--night-2); }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); list-style: none; margin: 0; padding: 0; }
+  .step { padding: 40px 40px 8px 0; display: grid; gap: 16px; align-content: start; border-right: 1px solid var(--line); }
+  .step + .step { padding-left: 40px; }
+  .step:last-child { border-right: 0; }
+  .step .no { font: 800 clamp(80px, 8vw, 128px)/.8 var(--cond); color: transparent; -webkit-text-stroke: 1.5px var(--sky); }
+  .step h3 { font-size: 38px; line-height: 1; }
+  .step p { color: var(--text-2); }
+  .sectors { margin-top: 56px; display: flex; flex-wrap: wrap; gap: 10px 28px; align-items: center; font: 600 22px/1.2 var(--cond); letter-spacing: .08em; text-transform: uppercase; color: #fff; }
+  .sectors b { color: var(--accent); font-size: 15px; letter-spacing: .2em; margin-right: 8px; }
+  .sectors span + span::before { content: "/"; color: var(--sky); margin-right: 28px; }
+
+  /* Network map */
+  .network-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: clamp(40px, 6vw, 100px); align-items: center; }
+  .network-copy { display: grid; gap: 26px; justify-items: start; }
+  .figures { display: grid; grid-template-columns: repeat(3, auto); gap: 18px 44px; margin-top: 10px; }
+  .figures div { display: grid; gap: 6px; }
+  .figures .n { font: 800 clamp(64px, 7vw, 112px)/.85 var(--cond); color: var(--accent); font-variant-numeric: tabular-nums; }
+  .figures span:last-child { font: 600 15px/1.2 var(--cond); letter-spacing: .14em; text-transform: uppercase; color: var(--text-2); }
+  .map svg { width: 100%; height: auto; overflow: visible; }
+  .map-outline { fill: rgba(41, 168, 232, .06); stroke: rgba(41, 168, 232, .7); stroke-width: 1.2; stroke-linejoin: round; }
+  .map-line { fill: none; stroke: rgba(41, 168, 232, .55); stroke-width: 1.1; stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1.4s var(--ease); transition-delay: calc(var(--i) * 70ms + .2s); }
+  .map.in .map-line, .reduce .map-line { stroke-dashoffset: 0; }
+  .map-pt { fill: #fff; transform-box: fill-box; transform-origin: center; }
+  .js .map:not(.in) .map-pt { transform: scale(0); }
+  .map .map-pt { transition: transform .5s cubic-bezier(.3, 1.6, .5, 1); transition-delay: calc(var(--i) * 70ms + 1s); }
+  .map-hq { fill: var(--accent); }
+  .map-hq-ring { fill: none; stroke: var(--accent); stroke-width: 2; transform-box: fill-box; transform-origin: center; animation: pulse 2.4s ease-out infinite; }
+  .map-label { font: 800 30px var(--cond); letter-spacing: .08em; fill: var(--accent); text-transform: uppercase; }
+  @keyframes pulse { 0% { transform: scale(.7); opacity: 1; } 100% { transform: scale(2.4); opacity: 0; } }
+
+  /* Light sections */
+  .light { background: var(--paper); color: var(--ink); }
+  .light .kicker { color: var(--accent-dark); }
+  .light .h2 { color: var(--ink); }
+  .light .h2 .dim { color: #1678b8; }
+  .light .lead { color: var(--ink-2); }
+  .refs { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 16px; }
+  .ref { position: relative; min-height: 460px; overflow: hidden; color: #fff; text-decoration: none; background: var(--night); isolation: isolate; display: flex; align-items: flex-end; }
+  .ref img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; transition: transform 1.2s var(--ease); }
+  .ref::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(0deg, rgba(5, 22, 41, .9), rgba(5, 22, 41, 0) 60%); }
+  .ref:hover img { transform: scale(1.06); }
+  .ref .cap { padding: 28px; display: grid; gap: 6px; }
+  .ref .cap b { font: 800 40px/1 var(--cond); text-transform: uppercase; }
+  .ref .cap span { font: 600 15px/1 var(--cond); letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+  .ref.todo-card { background: transparent; color: var(--ink-2); border: 2px dashed #a8b6c5; align-items: center; justify-content: center; text-align: center; padding: 28px; }
+  .ref.todo-card::after { display: none; }
+  .ref.todo-card .cap { justify-items: center; gap: 14px; padding: 0; }
+  .ref.todo-card .cap .todo { color: #7a5200; letter-spacing: .06em; font: 600 11px/1 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .ref.todo-card b { color: var(--ink); font-size: 30px; }
+  .ref.todo-card p { font-size: 15px; max-width: 26ch; }
+
+  .voice { margin-top: clamp(72px, 9vw, 120px); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: 32px 80px; align-items: start; padding-top: 48px; border-top: 1px solid #d5dde6; }
+  .voice-head { display: grid; gap: 18px; justify-items: start; }
+  .voice blockquote { margin: 0; font: 500 clamp(24px, 2.3vw, 32px)/1.35 var(--sans); color: var(--ink); border-left: 4px solid var(--accent); padding-left: 28px; }
+  .voice figcaption { margin-top: 20px; padding-left: 32px; font: 600 16px/1.3 var(--cond); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); }
+  .logos { margin-top: 56px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+  .logos .slot { height: 84px; color: var(--ink-2); border-color: #a8b6c5; font: 600 13px/1.2 var(--cond); letter-spacing: .1em; text-transform: uppercase; }
+  .partners-head { margin-top: 64px; display: flex; flex-wrap: wrap; align-items: center; gap: 14px 20px; }
+  .partners-head h3 { color: var(--ink); font-size: 30px; }
+
+  /* CTA */
+  .cta { overflow: hidden; }
+  .cta-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 40px 80px; align-items: end; }
+  .cta h2 { font-size: clamp(56px, 8vw, 128px); line-height: .88; font-weight: 800; }
+  .cta h2 span { color: var(--accent); }
+  .cta-side { display: grid; gap: 18px; justify-items: start; }
+  .cta-side .tel { font: 700 clamp(30px, 3vw, 42px)/1 var(--cond); letter-spacing: .03em; text-decoration: none; }
+  .cta-side .mail { color: var(--text-2); font-weight: 500; }
+
+  .site-footer { border-top: 1px solid var(--line); padding-block: 72px 110px; font-size: 15px; color: var(--text-2); }
+  .foot { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 40px; }
+  .foot .brand { display: grid; gap: 22px; align-content: start; }
+  .foot .brand img { width: 120px; }
+  .foot .slogan { width: 270px; }
+  .foot h3 { font: 700 15px/1 var(--cond); letter-spacing: .2em; color: #fff; margin-bottom: 18px; }
+  .foot ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .foot a { color: var(--text-2); text-decoration: none; }
+  .foot a:hover { color: #fff; }
+  .foot address { font-style: normal; }
+  .legal { margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-size: 13.5px; }
+
+  @media (max-width: 1100px) {
+    .phone { display: none; }
+    .nav { gap: 20px; }
+    .panels { height: 520px; }
+    .panel .body { min-width: 300px; left: 26px; right: 26px; }
+    .logos { grid-template-columns: repeat(3, 1fr); }
+    .foot { grid-template-columns: 1fr 1fr; }
+    .refs { grid-template-columns: 1fr 1fr; }
+    .refs .ref:first-child { grid-column: span 2; }
+  }
+  @media (max-width: 900px) {
+    .nav, .bar-end .btn, .lang { display: none; }
+    .bar { min-height: 70px; justify-content: space-between; }
+    .menu-btn, .call { display: grid; place-items: center; width: 46px; height: 46px; border: 0; cursor: pointer; }
+    .menu-btn { background: rgba(255, 255, 255, .12); color: #fff; }
+    .call { background: var(--accent); color: var(--night); }
+    .bar-end { gap: 8px; }
+    .menu-open .site-header { background: var(--night); }
+    .menu-open .nav { display: grid; position: absolute; left: 0; right: 0; top: 100%; background: var(--night); padding: 8px var(--gutter) 28px; gap: 0; border-bottom: 1px solid var(--line); }
+    .menu-open .nav a { font-size: 26px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+    .hero { min-height: 0; padding-block: 130px 120px; }
+    .segs { grid-template-columns: repeat(4, 1fr); }
+    .seg b { display: none; }
+    .count { display: none; }
+    .head, .network-grid, .voice, .cta-grid { grid-template-columns: 1fr; }
+    .panels { display: grid; grid-auto-flow: column; grid-auto-columns: 82%; height: auto; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; gap: 12px; margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); scroll-padding-inline: var(--gutter); }
+    .panels::-webkit-scrollbar { display: none; }
+    .panel { height: 440px; scroll-snap-align: start; cursor: default; }
+    .panel img { filter: none; transform: none; }
+    .panel .vt { display: none; }
+    .panel .body { opacity: 1; transform: none; pointer-events: auto; min-width: 0; left: 22px; right: 22px; bottom: 24px; }
+    .panel h3 { font-size: 36px; }
+    .panel p { font-size: 15.5px; }
+    .steps { grid-template-columns: 1fr; border-top: 0; }
+    .step, .step + .step { padding: 26px 0; border-right: 0; border-top: 1px solid var(--line); grid-template-columns: auto 1fr; column-gap: 22px; }
+    .step .no { font-size: 72px; grid-row: span 2; }
+    .step h3 { font-size: 30px; align-self: end; }
+    .map { max-width: 420px; }
+  }
+  @media (max-width: 640px) {
+    body { font-size: 16px; }
+    .hero h1 { font-size: 54px; }
+    .hero .lead, .lead { font-size: 17px; }
+    .ctas { display: grid; width: 100%; }
+    .ctas .btn { justify-content: center; }
+    .slogan { width: 280px; }
+    section.block { padding-block: 64px; }
+    .head { margin-bottom: 32px; }
+    .step, .step + .step { grid-template-columns: 1fr; }
+    .step .no { font-size: 56px; grid-row: auto; }
+    .sectors { margin-top: 32px; font-size: 18px; gap: 8px 16px; }
+    .sectors span + span::before { margin-right: 16px; }
+    .figures { grid-template-columns: repeat(3, auto); gap: 12px 36px; }
+    .figures .n { font-size: 60px; }
+    .figures span:last-child { font-size: 12px; }
+    .refs { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .refs .ref:first-child { grid-column: span 2; min-height: 300px; }
+    .ref { min-height: 220px; }
+    .ref .cap { padding: 18px; }
+    .ref .cap b { font-size: 28px; }
+    .ref.todo-card { min-height: 220px; padding: 16px; }
+    .ref.todo-card b { font-size: 22px; }
+    .ref.todo-card p { display: none; }
+    .voice blockquote { padding-left: 18px; font-size: 20px; }
+    .voice figcaption { padding-left: 22px; }
+    .logos { grid-template-columns: repeat(3, 1fr); margin-top: 24px; }
+    .logos .slot:nth-child(n+4) { display: none; }
+    .logos .slot { height: 60px; font-size: 11px; }
+    .partners-head { margin-top: 48px; }
+    .foot { grid-template-columns: 1fr; gap: 30px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition-duration: 0s !important; animation: none !important; }
+  }
+</style>
+</head>
+<body data-piste="c">
+<a class="skip" href="#main">Aller au contenu</a>
+
+<header class="site-header" data-header>
+  <div class="wrap bar">
+    <a class="logo" href="#" aria-label="ALFEC, accueil"><img src="../assets/brand/alfec-logo-white.png" alt="ALFEC" width="675" height="507"></a>
+    <nav class="nav" data-menu aria-label="Navigation principale">
+      <a href="#entreprise">Entreprise</a>
+      <a href="#metiers">Métiers</a>
+      <a href="#realisations">Réalisations</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <div class="bar-end">
+      <span class="lang"><b>FR</b> / <a href="#" lang="en">EN</a></span>
+      <a class="phone" href="tel:+21341737337">+213 (0)41 73 73 37</a>
+      <a class="btn" href="#contact">Nous contacter</a>
+      <a class="call" href="tel:+21341737337" aria-label="Appeler ALFEC"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></a>
+      <button class="menu-btn" type="button" data-menu-toggle aria-expanded="false" aria-label="Ouvrir le menu"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18M3 12h18M3 17h18" stroke="currentColor" stroke-width="2.2" stroke-linecap="square"/></svg></button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero" id="hero" aria-labelledby="hero-title">
+    <div class="slides" aria-hidden="true">
+      <figure class="slide on"><img src="../assets/photos/salle-des-pompes.jpg" alt="" width="1521" height="850" fetchpriority="high"></figure>
+      <figure class="slide"><img src="../assets/photos/desenfumage-toiture-equipe.jpg" alt="" width="1300" height="800" loading="lazy"></figure>
+      <figure class="slide"><img src="../assets/photos/techniciens-armoires.jpg" alt="" width="1133" height="850" loading="lazy"></figure>
+      <figure class="slide"><img src="../assets/photos/plafond-gaines-detection.jpg" alt="" width="1170" height="780" loading="lazy"></figure>
+    </div>
+    <div class="wrap hero-copy">
+      <span class="kicker">Engineering · Procurement · Construction</span>
+      <h1 id="hero-title"><span class="ln"><span>À chaque défi</span></span><span class="ln"><span>technique, la</span></span><span class="ln"><span>solution adaptée.</span></span></h1>
+      <div class="hero-row">
+        <p class="lead">Climatisation, incendie, désenfumage, électricité, froid et génie industriel&#8239;: ALFEC étudie, réalise et maintient vos installations, depuis Oran et partout en Algérie.</p>
+      </div>
+      <div class="ctas">
+        <a class="btn" href="#contact">Parler de votre projet <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"/></svg></a>
+        <a class="btn line" href="#realisations">Nos références</a>
+      </div>
+      <span class="slogan" role="img" aria-label="Équilibre durable, continuité et innovation"></span>
+    </div>
+    <div class="hero-nav">
+      <div class="wrap segs" role="group" aria-label="Photos d’ouverture">
+        <button class="seg on" type="button" aria-label="Photo 1 : local technique, génie climatique"><span class="fill"></span><b>Génie climatique</b></button>
+        <button class="seg" type="button" aria-label="Photo 2 : désenfumage en toiture"><span class="fill"></span><b>Désenfumage</b></button>
+        <button class="seg" type="button" aria-label="Photo 3 : électricité et régulation"><span class="fill"></span><b>Électricité &amp; régulation</b></button>
+        <button class="seg" type="button" aria-label="Photo 4 : détection incendie et gaines"><span class="fill"></span><b>Détection &amp; gaines</b></button>
+        <span class="count"><b id="slide-no">01</b> / 04</span>
+      </div>
+    </div>
+  </section>
+
+
+  <section class="block" id="metiers" aria-labelledby="metiers-title">
+    <div class="wrap">
+      <div class="head">
+        <div>
+          <span class="kicker" data-reveal>Nos métiers</span>
+          <h2 class="h2" id="metiers-title" data-reveal style="--d:.06s">Six métiers, <span class="dim">une seule équipe.</span></h2>
+        </div>
+        <p class="lead" data-reveal style="--d:.12s">Né dans le génie climatique au début des années 2000, ALFEC prend aujourd’hui en charge des corps d’état complémentaires, du bâtiment à l’industrie.</p>
+      </div>
+      <div class="panels" data-panels data-reveal>
+        <article class="panel open" tabindex="0" aria-labelledby="p1">
+          <img src="../assets/photos/groupe-froid-toiture.jpg" alt="" width="850" height="850" loading="lazy">
+          <span class="vt" aria-hidden="true">Génie climatique</span>
+          <div class="body"><span class="flag">Notre métier d’origine</span><h3 id="p1">Génie climatique</h3><p>Climatisation, chauffage central et ventilation mécanique, avec des gaz réfrigérants écologiques.</p><ul><li>Climatisation</li><li>Chauffage</li><li>Ventilation</li></ul><a href="#">Découvrir <span aria-hidden="true">→</span></a></div>
+        </article>
+        <article class="panel" tabindex="0" aria-labelledby="p2">
+          <img src="../assets/photos/pompes-incendie.jpg" alt="" width="849" height="565" loading="lazy">
+          <span class="vt" aria-hidden="true">Incendie</span>
+          <div class="body"><h3 id="p2">Protection &amp; détection incendie</h3><p>Protection conforme aux normes en vigueur en Algérie et détection alliant fiabilité et efficacité.</p><a href="#">Découvrir <span aria-hidden="true">→</span></a></div>
+        </article>
+        <article class="panel" tabindex="0" aria-labelledby="p3">
+          <img src="../assets/photos/exutoire-toiture.jpg" alt="" width="950" height="693" loading="lazy">
+          <span class="vt" aria-hidden="true">Désenfumage</span>
+          <div class="body"><h3 id="p3">Désenfumage</h3><p>Des installations fiables et certifiées, obligatoires dans les ERP et les IGH.</p><a href="#">Découvrir <span aria-hidden="true">→</span></a></div>
+        </article>
+        <article class="panel" tabindex="0" aria-labelledby="p4">
+          <img src="../assets/photos/coffrets-regulation.jpg" alt="" width="800" height="533" loading="lazy">
+          <span class="vt" aria-hidden="true">Électricité</span>
+          <div class="body"><h3 id="p4">Électricité &amp; régulation</h3><p>Installations électriques et régulation, pour des solutions globales, automatisées et au moindre coût.</p><a href="#">Découvrir <span aria-hidden="true">→</span></a></div>
+        </article>
+        <article class="panel" tabindex="0" aria-labelledby="p5">
+          <img src="../assets/photos/chambre-froide-evaporateurs.jpg" alt="" width="850" height="850" loading="lazy">
+          <span class="vt" aria-hidden="true">Froid industriel</span>
+          <div class="body"><h3 id="p5">Froid industriel</h3><p>La réfrigération au service de l’agroalimentaire, de la pharmacie et de la pétrochimie.</p><a href="#">Découvrir <span aria-hidden="true">→</span></a></div>
+        </article>
+        <article class="panel" tabindex="0" aria-labelledby="p6">
+          <img src="../assets/photos/reservoirs-sous-pression.jpg" alt="" width="850" height="850" loading="lazy">
+          <span class="vt" aria-hidden="true">Génie industriel</span>
+          <div class="body"><h3 id="p6">Génie industriel</h3><p>Réservoirs de stockage, piping et serres multichapelles, avec des partenaires locaux et internationaux.</p><a href="#">Découvrir <span aria-hidden="true">→</span></a></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="block cycle" id="entreprise" aria-labelledby="cycle-title">
+    <div class="wrap">
+      <div class="head">
+        <div>
+          <span class="kicker" data-reveal>Notre accompagnement</span>
+          <h2 class="h2" id="cycle-title" data-reveal style="--d:.06s">De l’étude <span class="dim">à la maintenance.</span></h2>
+        </div>
+        <p class="lead" data-reveal style="--d:.12s">Un seul interlocuteur sur toute la vie de vos installations.</p>
+      </div>
+      <ol class="steps">
+        <li class="step" data-reveal><span class="no" aria-hidden="true">01</span><h3>Étude</h3><p>Les études de vos projets, des premières idées jusqu’au meilleur concept, puis le suivi de l’exécution par des équipes multidisciplinaires.</p></li>
+        <li class="step" data-reveal style="--d:.1s"><span class="no" aria-hidden="true">02</span><h3>Réalisation</h3><p>Des installations techniques conformes aux normes en vigueur, avec des équipes compétentes et des moyens matériels conséquents.</p></li>
+        <li class="step" data-reveal style="--d:.2s"><span class="no" aria-hidden="true">03</span><h3>Maintenance</h3><p>L’entretien régulier des installations, dans le cadre de contrats de maintenance, pour réduire au maximum le risque de pannes.</p></li>
+      </ol>
+      <p class="sectors" data-reveal><b>Secteurs</b><span>Bâtiment</span><span>Tertiaire</span><span>Hôpitaux</span><span>Hôtellerie</span><span>Industrie</span><span>Agroalimentaire</span></p>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="network-title">
+    <div class="wrap network-grid">
+      <div class="network-copy">
+        <span class="kicker" data-reveal>Implantation</span>
+        <h2 class="h2" id="network-title" data-reveal style="--d:.06s">Depuis Oran, <span class="dim">partout en Algérie.</span></h2>
+        <p class="lead" data-reveal style="--d:.12s">Avec une direction basée à Oran, ALFEC intervient sur l’ensemble du territoire national, grâce à une force d’intervention appréciable et à des équipes de maintenance disponibles et efficaces.</p>
+        <div class="figures" data-reveal style="--d:.18s">
+          <div><span class="n" data-count="22">22</span><span>Wilayas</span></div>
+          <div><span class="n" data-count="6">6</span><span>Métiers</span></div>
+          <div><span class="n" data-count="3">3</span><span>Étapes</span></div>
+        </div>
+      </div>
+      <div class="map" data-map data-map-lines data-map-label="Oran" data-reveal></div>
+    </div>
+  </section>
+
+  <section class="block light" id="realisations" aria-labelledby="refs-title">
+    <div class="wrap">
+      <div class="head">
+        <div>
+          <span class="kicker" data-reveal>Réalisations</span>
+          <h2 class="h2" id="refs-title" data-reveal style="--d:.06s">Nos <span class="dim">références.</span></h2>
+        </div>
+        <p class="lead" data-reveal style="--d:.12s">Des bâtiments publics aux sites industriels, quelques installations réalisées et entretenues par nos équipes.</p>
+      </div>
+      <div class="refs">
+        <a class="ref" href="#" data-reveal>
+          <img src="../assets/photos/sonelgaz-tiaret.jpg" alt="Technicien d’ALFEC intervenant sur une unité de climatisation en toiture, Sonelgaz Tiaret" width="1024" height="768" loading="lazy">
+          <span class="cap"><b>Sonelgaz</b><span>Tiaret · Climatisation</span></span>
+        </a>
+        <a class="ref" href="#" data-reveal style="--d:.08s">
+          <img src="../assets/photos/banque-bea-oran.jpg" alt="Technicien d’ALFEC sur une armoire de climatisation, Banque BEA Oran" width="1133" height="850" loading="lazy">
+          <span class="cap"><b>Banque BEA</b><span>Oran · Banques</span></span>
+        </a>
+        <div class="ref todo-card" data-reveal style="--d:.16s">
+          <span class="cap"><span class="todo">À fournir par ALFEC</span><b>Projet à documenter</b><p>Photos, lieu, année et travaux réalisés sur un chantier industriel ou public.</p></span>
+        </div>
+      </div>
+
+      <div class="voice">
+        <div class="voice-head">
+          <span class="kicker" data-reveal>Ils nous font confiance</span>
+          <h2 class="h2" style="font-size:clamp(40px,4vw,64px)" data-reveal>La parole <span class="dim">à nos clients.</span></h2>
+          <span class="todo" data-reveal>Témoignages à fournir par ALFEC</span>
+        </div>
+        <figure style="margin:0" data-reveal>
+          <blockquote>Emplacement réservé au témoignage d’un client d’ALFEC&#8239;: quelques phrases sur un projet réalisé ensemble, fournies par ALFEC avec l’accord du client.</blockquote>
+          <figcaption>Nom du client · Fonction, organisme</figcaption>
+        </figure>
+      </div>
+
+      <div class="partners-head"><h3>Nos marques partenaires</h3><span class="todo">Logos à fournir</span></div>
+      <div class="logos" data-reveal>
+        <span class="slot">Logo partenaire</span><span class="slot">Logo partenaire</span><span class="slot">Logo partenaire</span>
+        <span class="slot">Logo partenaire</span><span class="slot">Logo partenaire</span><span class="slot">Logo partenaire</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="block cta" id="contact" aria-labelledby="cta-title">
+    <div class="wrap cta-grid">
+      <h2 id="cta-title" data-reveal>Parlons de votre <span>prochain projet.</span></h2>
+      <div class="cta-side" data-reveal style="--d:.1s">
+        <p class="lead">Installation neuve, rénovation ou contrat de maintenance&#8239;: décrivez-nous votre besoin.</p>
+        <a class="tel" href="tel:+21341737337">+213 (0)41 73 73 37</a>
+        <span class="mail">contact@alfec.net</span>
+        <a class="btn" href="#">Écrire à ALFEC <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"/></svg></a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot">
+      <div class="brand">
+        <img src="../assets/brand/alfec-logo-white.png" alt="ALFEC Engineering Procurement Construction" width="675" height="507" loading="lazy">
+        <span class="slogan" role="img" aria-label="Équilibre durable, continuité et innovation"></span>
+      </div>
+      <div>
+        <h3>Siège</h3>
+        <address>38, Rue El Moudjahid Kacha Lahouari<br>Coopérative Tekkouk Adda, Canastel<br>31000 Oran, Algérie</address>
+      </div>
+      <div>
+        <h3>Contact</h3>
+        <ul>
+          <li><a href="tel:+21341737337">+213 (0)41 73 73 37</a></li>
+          <li><a href="tel:+21341737338">+213 (0)41 73 73 38</a></li>
+          <li><a href="tel:+213555071930">+213 (0)555 07 19 30</a></li>
+          <li><a href="mailto:contact@alfec.net">contact@alfec.net</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Le site</h3>
+        <ul>
+          <li><a href="#entreprise">Entreprise</a></li>
+          <li><a href="#metiers">Métiers</a></li>
+          <li><a href="#realisations">Réalisations</a></li>
+          <li><a href="#contact">Contact</a></li>
+          <li><a href="https://www.linkedin.com/company/alfec/" rel="noopener noreferrer" target="_blank">LinkedIn</a> · <a href="https://www.facebook.com/AlfecDZ" rel="noopener noreferrer" target="_blank">Facebook</a> · <a href="https://www.youtube.com/channel/UCDak7qYykMomAYEgwSPs89w/" rel="noopener noreferrer" target="_blank">YouTube</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="legal"><span>© ALFEC Engineering Procurement Construction</span><span>Maquette · Piste C « Grands projets »</span></div>
+  </div>
+</footer>
+
+<script src="../assets/map.js"></script>
+<script src="../assets/shared.js"></script>
+<script>
+(function () {
+  'use strict';
+  var reduce = window.ALFEC && window.ALFEC.reduce;
+
+  // Hero: title lines rise in, then the slideshow runs.
+  var hero = document.getElementById('hero');
+  requestAnimationFrame(function () { requestAnimationFrame(function () { hero.classList.add('go'); }); });
+
+  var slides = hero.querySelectorAll('.slide');
+  var segs = hero.querySelectorAll('.seg');
+  var no = document.getElementById('slide-no');
+  var i = 0, timer = null, DUR = 7000;
+  function show(n) {
+    i = (n + slides.length) % slides.length;
+    slides.forEach(function (s, k) { s.classList.toggle('on', k === i); });
+    segs.forEach(function (s, k) {
+      s.classList.remove('on');
+      s.classList.toggle('done', k < i);
+      if (k === i) { void s.offsetWidth; s.classList.add('on'); }
+      s.setAttribute('aria-pressed', k === i ? 'true' : 'false');
+    });
+    no.textContent = '0' + (i + 1);
+  }
+  function play() {
+    if (reduce) return;
+    clearInterval(timer);
+    timer = setInterval(function () { show(i + 1); }, DUR);
+  }
+  segs.forEach(function (s, k) { s.addEventListener('click', function () { show(k); play(); }); });
+  hero.addEventListener('mouseenter', function () { hero.classList.add('paused'); clearInterval(timer); });
+  hero.addEventListener('mouseleave', function () { hero.classList.remove('paused'); play(); });
+  document.addEventListener('visibilitychange', function () { if (document.hidden) clearInterval(timer); else play(); });
+  show(0);
+  play();
+
+  // Accent picker, added to the piste switcher for presentations.
+  var ACCENTS = [['ciel', 'Ciel', '#4cbcf4'], ['cuivre', 'Cuivre', '#e58a4e'], ['corail', 'Corail', '#ff7a5c'], ['turquoise', 'Turquoise', '#2cc5b8']];
+  document.addEventListener('DOMContentLoaded', function () {
+    var bar = document.querySelector('.piste-switch');
+    if (!bar) return;
+    var root = document.documentElement;
+    var current = root.getAttribute('data-accent') || 'ciel';
+    var sep = document.createElement('span');
+    sep.className = 'acc-sep';
+    bar.appendChild(sep);
+    var name = document.createElement('span');
+    name.className = 'acc-name';
+    var buttons = ACCENTS.map(function (a) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'acc';
+      b.style.setProperty('--c', a[2]);
+      b.setAttribute('aria-label', 'Couleur d’accent : ' + a[1]);
+      b.title = a[1];
+      b.innerHTML = '<i></i>';
+      b.addEventListener('click', function () { set(a[0]); });
+      bar.appendChild(b);
+      return b;
+    });
+    bar.appendChild(name);
+    function set(key) {
+      current = key;
+      if (key === 'ciel') root.removeAttribute('data-accent'); else root.setAttribute('data-accent', key);
+      ACCENTS.forEach(function (a, k) {
+        buttons[k].setAttribute('aria-pressed', a[0] === key ? 'true' : 'false');
+        if (a[0] === key) name.textContent = a[1];
+      });
+      try {
+        localStorage.setItem('alfec-accent-v2', key);
+        var u = new URL(location.href);
+        u.searchParams.set('accent', key);
+        history.replaceState(null, '', u);
+      } catch (e) {}
+    }
+    set(current);
+  });
+
+  // Trades: the hovered, focused or clicked panel opens (desktop).
+  var panels = document.querySelectorAll('[data-panels] .panel');
+  function open(p) { panels.forEach(function (q) { q.classList.toggle('open', q === p); }); }
+  panels.forEach(function (p) {
+    p.addEventListener('mouseenter', function () { if (window.innerWidth > 900) open(p); });
+    p.addEventListener('focusin', function () { if (window.innerWidth > 900) open(p); });
+    p.addEventListener('click', function () { if (window.innerWidth > 900) open(p); });
+  });
+})();
+</script>
+</body>
+</html>

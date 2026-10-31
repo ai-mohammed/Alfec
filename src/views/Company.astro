@@ -1,0 +1,305 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import Photo from '../components/Photo.astro';
+import WilayaMap from '../components/WilayaMap.astro';
+import EnquiryBand from '../components/EnquiryBand.astro';
+import { photos, type PhotoKey } from '../data/photos';
+import { commitments, competences, locationsText, presentation, sectors, sectorsText, story } from '../data/company';
+import { tx, ui, type Bilingual, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+
+const copy = {
+  title: { fr: 'L’entreprise · ALFEC Oran', en: 'Company · ALFEC Oran' },
+  description: {
+    fr: 'ALFEC, créée au début des années 2000 à Oran : histoire, compétences de l’étude à la maintenance, implantations dans 22 wilayas.',
+    en: 'ALFEC, founded in Oran in the early 2000s: history, capabilities from design to maintenance, and locations in 22 wilayas.',
+  },
+  h1: { fr: 'Une entreprise d’ingénierie née du génie climatique.', en: 'An engineering company rooted in HVAC.' },
+  storyKicker: { fr: 'Notre histoire', en: 'Our story' },
+  presentationKicker: { fr: 'Présentation', en: 'Profile' },
+  presentationTitle: { fr: 'Une jeune entreprise', en: 'A young,' },
+  presentationTitleEnd: { fr: 'dynamique.', en: 'dynamic company.' },
+  competencesKicker: { fr: 'Nos compétences', en: 'Our capabilities' },
+  competencesTitle: { fr: 'De l’étude', en: 'From design' },
+  competencesTitleEnd: { fr: 'à la maintenance.', en: 'to maintenance.' },
+  locationsKicker: { fr: 'Nos implantations', en: 'Our locations' },
+  locationsTitle: { fr: 'Depuis Oran,', en: 'From Oran,' },
+  locationsTitleEnd: { fr: 'dans 22 wilayas.', en: 'in 22 wilayas.' },
+  sectorsKicker: { fr: 'Secteurs d’intervention', en: 'Sectors' },
+  sectorsTitle: { fr: 'Du bâtiment', en: 'From buildings' },
+  sectorsTitleEnd: { fr: 'à l’industrie.', en: 'to industry.' },
+  commitmentsKicker: { fr: 'Nos engagements', en: 'Our commitments' },
+  commitmentsTitle: { fr: 'Le développement durable', en: 'Sustainable development' },
+  commitmentsTitleEnd: { fr: 'des territoires.', en: 'of the regions we serve.' },
+} satisfies Record<string, Bilingual>;
+
+const competencePhotos: Record<string, PhotoKey> = {
+  // Réalisations and Maintenance use the photos the original site paired with them;
+  // Engineering's original image was stock, so it shows the coordinated service ceiling.
+  engineering: 'plafondGaines',
+  installation: 'toitureGaines',
+  maintenance: 'maintenanceToiture',
+};
+const pad = (n: number) => String(n).padStart(2, '0');
+const storyParas = tx(story, lang);
+---
+
+<Base lang={lang} title={tx(copy.title, lang)} description={tx(copy.description, lang)} current="company">
+  <PageHead lang={lang} title={tx(copy.h1, lang)} crumb={tx(ui.nav.company, lang)} image={photos.siegeOran.src} position="50% 60%" />
+
+  <section class="section" aria-labelledby="story-kicker">
+    <div class="wrap grid story">
+      <div class="story-lead">
+        <p class="kicker" id="story-kicker" data-reveal>{tx(copy.storyKicker, lang)}</p>
+        <p class="big" data-reveal style="--d: 0.06s">{storyParas[0]}</p>
+      </div>
+      <div class="story-rest" data-reveal style="--d: 0.12s">
+        {storyParas.slice(1).map((para) => <p>{para}</p>)}
+      </div>
+    </div>
+  </section>
+
+  <section class="section light" aria-labelledby="presentation-title">
+    <div class="wrap grid">
+      <div class="col-head">
+        <p class="kicker" data-reveal>{tx(copy.presentationKicker, lang)}</p>
+        <h2 id="presentation-title" data-reveal style="--d: 0.06s">{tx(copy.presentationTitle, lang)} <span class="dim">{tx(copy.presentationTitleEnd, lang)}</span></h2>
+      </div>
+      <div class="col-body lead" data-reveal style="--d: 0.12s">
+        {tx(presentation, lang).map((para) => <p>{para}</p>)}
+      </div>
+    </div>
+  </section>
+
+  <section class="section band" aria-labelledby="competences-title">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <p class="kicker" data-reveal>{tx(copy.competencesKicker, lang)}</p>
+          <h2 id="competences-title" data-reveal style="--d: 0.06s">{tx(copy.competencesTitle, lang)} <span class="dim">{tx(copy.competencesTitleEnd, lang)}</span></h2>
+        </div>
+      </div>
+      <ol class="comp-list" role="list">
+        {
+          competences.map((c, i) => (
+            <li class="comp grid" data-reveal>
+              <div class="comp-photo">
+                <Photo photo={photos[competencePhotos[c.key]]} lang={lang} ratio="4 / 3" caption={false} sizes="(min-width: 1024px) 40vw, 100vw" />
+              </div>
+              <div class="comp-text">
+                <span class="no tnum" aria-hidden="true">{pad(i + 1)}</span>
+                <h3>{tx(c.title, lang)}</h3>
+                <p>{tx(c.text, lang)}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" id="implantations" aria-labelledby="locations-title">
+    <div class="wrap grid">
+      <div class="loc-text">
+        <p class="kicker" data-reveal>{tx(copy.locationsKicker, lang)}</p>
+        <h2 id="locations-title" data-reveal style="--d: 0.06s">{tx(copy.locationsTitle, lang)} <span class="dim">{tx(copy.locationsTitleEnd, lang)}</span></h2>
+        <p class="lead" data-reveal style="--d: 0.12s">{tx(locationsText, lang)}</p>
+      </div>
+      <div class="loc-map">
+        <WilayaMap lang={lang} lines />
+      </div>
+    </div>
+  </section>
+
+  <section class="section light" aria-labelledby="sectors-title">
+    <div class="wrap grid">
+      <div class="col-head">
+        <p class="kicker" data-reveal>{tx(copy.sectorsKicker, lang)}</p>
+        <h2 id="sectors-title" data-reveal style="--d: 0.06s">{tx(copy.sectorsTitle, lang)} <span class="dim">{tx(copy.sectorsTitleEnd, lang)}</span></h2>
+        <p class="lead" data-reveal style="--d: 0.12s">{tx(sectorsText, lang)}</p>
+      </div>
+      <ul class="sector-list" role="list" data-reveal>
+        {sectors.map((s) => <li>{tx(s.name, lang)}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section band" aria-labelledby="commitments-title">
+    <div class="wrap grid">
+      <div class="col-head">
+        <p class="kicker" data-reveal>{tx(copy.commitmentsKicker, lang)}</p>
+        <h2 id="commitments-title" data-reveal style="--d: 0.06s">{tx(copy.commitmentsTitle, lang)} <span class="dim">{tx(copy.commitmentsTitleEnd, lang)}</span></h2>
+      </div>
+      <div class="col-body lead" data-reveal style="--d: 0.12s">
+        {tx(commitments, lang).map((para) => <p>{para}</p>)}
+      </div>
+    </div>
+  </section>
+
+  <EnquiryBand lang={lang} />
+</Base>
+
+<style>
+  .story {
+    row-gap: var(--s-7);
+    align-items: start;
+  }
+
+  .story-lead {
+    grid-column: 1 / span 7;
+    display: grid;
+    gap: var(--s-5);
+    justify-items: start;
+  }
+
+  .big {
+    font-size: clamp(1.4rem, 1.1rem + 0.9vw, 1.9rem);
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .story-rest {
+    grid-column: 9 / span 4;
+    padding-top: 42px;
+    color: var(--fg-2);
+  }
+
+  .col-head {
+    grid-column: 1 / span 5;
+    display: grid;
+    gap: 22px;
+    align-content: start;
+    justify-items: start;
+  }
+
+  .col-body {
+    grid-column: 7 / span 6;
+    max-width: 62ch;
+    align-self: end;
+  }
+
+  .comp-list {
+    list-style: none;
+    display: grid;
+    gap: clamp(56px, 7vw, 104px);
+  }
+
+  .comp {
+    align-items: center;
+    row-gap: var(--s-6);
+  }
+
+  .comp-photo {
+    grid-column: 1 / span 6;
+  }
+
+  .comp-text {
+    grid-column: 8 / span 5;
+    display: grid;
+    gap: var(--s-4);
+    justify-items: start;
+  }
+
+  .comp:nth-child(even) .comp-photo {
+    grid-column: 7 / span 6;
+    grid-row: 1;
+  }
+
+  .comp:nth-child(even) .comp-text {
+    grid-column: 1 / span 5;
+    grid-row: 1;
+  }
+
+  .no {
+    font-family: var(--cond);
+    font-size: clamp(4.5rem, 3rem + 3vw, 7rem);
+    font-weight: 800;
+    line-height: 0.8;
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--sky);
+  }
+
+  .comp h3 {
+    font-size: clamp(2.2rem, 1.6rem + 1.6vw, 3.4rem);
+  }
+
+  .comp p {
+    color: var(--fg-2);
+    max-width: 52ch;
+  }
+
+  .loc-text {
+    grid-column: 1 / span 5;
+    display: grid;
+    gap: 22px;
+    align-content: center;
+    justify-items: start;
+  }
+
+  .loc-map {
+    grid-column: 7 / span 6;
+  }
+
+  .sector-list {
+    grid-column: 7 / span 6;
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--col-gap);
+    align-self: end;
+    border-top: 1px solid var(--edge);
+  }
+
+  .sector-list li {
+    padding-block: var(--s-4);
+    border-bottom: 1px solid var(--edge);
+    font-family: var(--cond);
+    font-size: clamp(1.6rem, 1.3rem + 0.8vw, 2.2rem);
+    font-weight: 700;
+    line-height: 1.1;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 1023px) {
+    .story-lead,
+    .story-rest,
+    .col-head,
+    .col-body,
+    .comp-photo,
+    .comp-text,
+    .comp:nth-child(even) .comp-photo,
+    .comp:nth-child(even) .comp-text,
+    .loc-text,
+    .loc-map,
+    .sector-list {
+      grid-column: 1 / -1;
+      grid-row: auto;
+    }
+
+    .story-rest {
+      padding-top: 0;
+    }
+
+    .col-body,
+    .loc-map,
+    .sector-list {
+      margin-top: var(--s-7);
+    }
+
+    .loc-map {
+      max-width: 520px;
+    }
+  }
+
+  @media (max-width: 599px) {
+    .sector-list {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

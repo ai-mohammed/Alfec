@@ -1,0 +1,4279 @@
+{
+  "format": "unspaghettit",
+  "version": 1,
+  "feature": {
+    "id": "63df9922",
+    "name": "Site Navigation & Language",
+    "description": "How a visitor reaches ALFEC's pages in French or English and moves between them: each page and each trade has its own URL, old single-page addresses redirect, the header and the mobile menu drawer lead to every section, the language link keeps the visitor on the same page, the home page runs an opening slideshow and opens the six trades as photo panels, trade pages link to each other, and gallery photos open a looping viewer. Rebuilt as a multi-page Astro site in September 2026 (Grands projets design).",
+    "surfaces": [
+      {
+        "id": "6c0c0b52",
+        "name": "Page Request",
+        "type": "route",
+        "description": "The HTTP request for a page. Every page has its own URL in French (no prefix) and English (/en/), with a trailing slash. Unknown paths answer 404 with a link home. The old single-page addresses (index.php, ?lg=, ?msg=) answer with redirects. Hosting redirects http and www to https://alfec.net.",
+        "stateDefinitions": [],
+        "actions": [
+          {
+            "id": "bf713687",
+            "name": "Request Non-Canonical Address",
+            "intent": "Hosting answers a request to http:// or www.alfec.net with a 301 to https://alfec.net, keeping the path and query string.",
+            "parameters": [
+              {
+                "id": "b384b8c3",
+                "name": "variant",
+                "type": "enum",
+                "required": true,
+                "description": "Which non-canonical form was requested.",
+                "enumValues": [
+                  "http",
+                  "www"
+                ]
+              }
+            ],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "request.redirected",
+                "value": true,
+                "description": "Answered with a permanent redirect to the canonical address.",
+                "id": "ed5e3ef6"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "actor": "system",
+            "scenarios": [
+              {
+                "id": "816dc426",
+                "name": "www redirect",
+                "description": "www.alfec.net redirects permanently.",
+                "stateOverrides": [],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "variant",
+                    "value": "www"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "request.redirected",
+                    "operator": "equals",
+                    "value": true,
+                    "description": "request.redirected is true"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "2896acb5",
+            "name": "Open Page",
+            "intent": "Load a page by its URL. French pages have no prefix and English pages start with /en/; the home, company, trades, each trade, projects, contact and the two confirmation pages all have their own address in both languages. A page opens with the menu and the viewer closed, the first opening photo and the Genie climatique panel open. An unknown address answers 404 with a link home.",
+            "parameters": [
+              {
+                "id": "9c8c8506",
+                "name": "page",
+                "type": "enum",
+                "required": true,
+                "description": "Which page the URL names; unknown for an address the site does not have.",
+                "enumValues": [
+                  "home",
+                  "company",
+                  "trades",
+                  "trade",
+                  "projects",
+                  "contact",
+                  "thanks",
+                  "sendError",
+                  "unknown"
+                ],
+                "defaultValue": "home"
+              },
+              {
+                "id": "95888d76",
+                "name": "lang",
+                "type": "enum",
+                "required": true,
+                "description": "fr without prefix, en under /en/.",
+                "enumValues": [
+                  "fr",
+                  "en"
+                ],
+                "defaultValue": "fr"
+              },
+              {
+                "id": "82cc80b4",
+                "name": "trade",
+                "type": "enum",
+                "required": true,
+                "description": "The trade slug of a trade page (genie-climatique / hvac, and so on); none elsewhere or for an unknown slug.",
+                "enumValues": [
+                  "none",
+                  "climatique",
+                  "incendie",
+                  "desenfumage",
+                  "electricite",
+                  "froid",
+                  "industriel"
+                ],
+                "defaultValue": "none"
+              }
+            ],
+            "requiredStates": [],
+            "rules": [
+              {
+                "id": "447d8ebd",
+                "category": "ux_feedback",
+                "condition": {
+                  "kind": "any",
+                  "conditions": [
+                    {
+                      "left": {
+                        "kind": "param",
+                        "name": "page"
+                      },
+                      "operator": "equals",
+                      "right": "unknown"
+                    },
+                    {
+                      "kind": "all",
+                      "conditions": [
+                        {
+                          "left": {
+                            "kind": "param",
+                            "name": "page"
+                          },
+                          "operator": "equals",
+                          "right": "trade"
+                        },
+                        {
+                          "left": {
+                            "kind": "param",
+                            "name": "trade"
+                          },
+                          "operator": "equals",
+                          "right": "none"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "effect": {
+                  "type": "show_message",
+                  "message": "Cette page n'existe pas ou a été déplacée. / This page does not exist or has moved.",
+                  "tone": "warning",
+                  "description": "The 404 page explains and links back home.",
+                  "id": "5d220b2f"
+                },
+                "description": "Unknown addresses answer 404."
+              },
+              {
+                "id": "ff9232ba",
+                "category": "business",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "page"
+                  },
+                  "operator": "equals",
+                  "right": "home"
+                },
+                "effect": {
+                  "type": "transition_surface",
+                  "target": "383e8321",
+                  "description": "The home page is shown.",
+                  "id": "f2dd9e40"
+                },
+                "description": "Home address."
+              },
+              {
+                "id": "8bcd267b",
+                "category": "business",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "page"
+                  },
+                  "operator": "equals",
+                  "right": "trades"
+                },
+                "effect": {
+                  "type": "transition_surface",
+                  "target": "87d29428",
+                  "description": "The trades hub is shown.",
+                  "id": "c659b981"
+                },
+                "description": "Trades address."
+              },
+              {
+                "id": "efb7266b",
+                "category": "business",
+                "condition": {
+                  "kind": "all",
+                  "conditions": [
+                    {
+                      "left": {
+                        "kind": "param",
+                        "name": "page"
+                      },
+                      "operator": "equals",
+                      "right": "trade"
+                    },
+                    {
+                      "left": {
+                        "kind": "param",
+                        "name": "trade"
+                      },
+                      "operator": "not_equals",
+                      "right": "none"
+                    }
+                  ]
+                },
+                "effect": {
+                  "type": "transition_surface",
+                  "target": "49c64dc3",
+                  "description": "The trade page is shown.",
+                  "id": "e8c88b3d"
+                },
+                "description": "Trade address."
+              },
+              {
+                "id": "db4dbf77",
+                "category": "business",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "page"
+                  },
+                  "operator": "equals",
+                  "right": "projects"
+                },
+                "effect": {
+                  "type": "transition_surface",
+                  "target": "da0d9816",
+                  "description": "The projects page is shown.",
+                  "id": "497a8ea0"
+                },
+                "description": "Projects address."
+              }
+            ],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "site.page",
+                "value": {
+                  "kind": "switch",
+                  "cases": [
+                    {
+                      "when": {
+                        "left": {
+                          "kind": "param",
+                          "name": "page"
+                        },
+                        "operator": "equals",
+                        "right": "unknown"
+                      },
+                      "then": {
+                        "kind": "literal",
+                        "value": "notFound"
+                      }
+                    },
+                    {
+                      "when": {
+                        "kind": "all",
+                        "conditions": [
+                          {
+                            "left": {
+                              "kind": "param",
+                              "name": "page"
+                            },
+                            "operator": "equals",
+                            "right": "trade"
+                          },
+                          {
+                            "left": {
+                              "kind": "param",
+                              "name": "trade"
+                            },
+                            "operator": "equals",
+                            "right": "none"
+                          }
+                        ]
+                      },
+                      "then": {
+                        "kind": "literal",
+                        "value": "notFound"
+                      }
+                    }
+                  ],
+                  "default": {
+                    "kind": "param",
+                    "name": "page"
+                  }
+                },
+                "description": "The named page is shown; an unknown address or trade slug shows the not-found page.",
+                "id": "691ce3d3"
+              },
+              {
+                "type": "set_state",
+                "path": "site.trade",
+                "value": {
+                  "kind": "switch",
+                  "cases": [
+                    {
+                      "when": {
+                        "left": {
+                          "kind": "param",
+                          "name": "page"
+                        },
+                        "operator": "not_equals",
+                        "right": "trade"
+                      },
+                      "then": {
+                        "kind": "literal",
+                        "value": "none"
+                      }
+                    }
+                  ],
+                  "default": {
+                    "kind": "param",
+                    "name": "trade"
+                  }
+                },
+                "description": "Only a trade page names a trade.",
+                "id": "becd0d05"
+              },
+              {
+                "type": "set_state",
+                "path": "site.language",
+                "value": {
+                  "kind": "param",
+                  "name": "lang"
+                },
+                "description": "The page is served in the language of its URL.",
+                "id": "17dd16c7"
+              },
+              {
+                "type": "set_state",
+                "path": "nav.menuOpen",
+                "value": false,
+                "description": "The menu drawer starts closed.",
+                "id": "666362c9"
+              },
+              {
+                "type": "set_state",
+                "path": "viewer.open",
+                "value": false,
+                "description": "The photo viewer starts closed.",
+                "id": "9033fae3"
+              },
+              {
+                "type": "set_state",
+                "path": "viewer.set",
+                "value": "none",
+                "description": "No photo set is loaded.",
+                "id": "75a2d2a2"
+              },
+              {
+                "type": "set_state",
+                "path": "viewer.index",
+                "value": 1,
+                "description": "Viewer position reset.",
+                "id": "1b2c34fc"
+              },
+              {
+                "type": "set_state",
+                "path": "viewer.count",
+                "value": 0,
+                "description": "No photos counted.",
+                "id": "ef2c786a"
+              },
+              {
+                "type": "set_state",
+                "path": "home.slide",
+                "value": 1,
+                "description": "The first opening photo is shown.",
+                "id": "626fd343"
+              },
+              {
+                "type": "set_state",
+                "path": "home.openPanel",
+                "value": "climatique",
+                "description": "The Genie climatique panel starts open.",
+                "id": "95ae682d"
+              },
+              {
+                "type": "set_state",
+                "path": "home.slideshow",
+                "value": {
+                  "kind": "switch",
+                  "cases": [
+                    {
+                      "when": {
+                        "left": "site.reducedMotion",
+                        "operator": "equals",
+                        "right": true
+                      },
+                      "then": {
+                        "kind": "literal",
+                        "value": "paused"
+                      }
+                    }
+                  ],
+                  "default": {
+                    "kind": "literal",
+                    "value": "playing"
+                  }
+                },
+                "description": "The slideshow runs unless the visitor's system asks for reduced motion.",
+                "id": "9006ed46"
+              },
+              {
+                "type": "set_state",
+                "path": "request.redirected",
+                "value": false,
+                "description": "Served directly, without a redirect.",
+                "id": "39347b87"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "actor": "user",
+            "scenarios": [
+              {
+                "id": "5b8fc652",
+                "name": "French home",
+                "description": "The root address serves the French home page.",
+                "stateOverrides": [],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "page",
+                    "value": "home"
+                  },
+                  {
+                    "parameterName": "lang",
+                    "value": "fr"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "site.page",
+                    "operator": "equals",
+                    "value": "home",
+                    "description": "Home is shown"
+                  },
+                  {
+                    "path": "site.language",
+                    "operator": "equals",
+                    "value": "fr",
+                    "description": "In French"
+                  },
+                  {
+                    "path": "home.slideshow",
+                    "operator": "equals",
+                    "value": "playing",
+                    "description": "The opening photos run"
+                  }
+                ]
+              },
+              {
+                "id": "fdc24fe6",
+                "name": "English trade page",
+                "description": "/en/expertise/smoke-control/ opens the smoke control page in English.",
+                "stateOverrides": [],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "page",
+                    "value": "trade"
+                  },
+                  {
+                    "parameterName": "lang",
+                    "value": "en"
+                  },
+                  {
+                    "parameterName": "trade",
+                    "value": "desenfumage"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "site.page",
+                    "operator": "equals",
+                    "value": "trade",
+                    "description": "A trade page is shown"
+                  },
+                  {
+                    "path": "site.trade",
+                    "operator": "equals",
+                    "value": "desenfumage",
+                    "description": "It is smoke control"
+                  },
+                  {
+                    "path": "site.language",
+                    "operator": "equals",
+                    "value": "en",
+                    "description": "In English"
+                  }
+                ]
+              },
+              {
+                "id": "0c8e52db",
+                "name": "Unknown address",
+                "description": "An address the site does not have shows the not-found page.",
+                "stateOverrides": [],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "page",
+                    "value": "unknown"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "site.page",
+                    "operator": "equals",
+                    "value": "notFound",
+                    "description": "Not-found page"
+                  },
+                  {
+                    "path": "site.trade",
+                    "operator": "equals",
+                    "value": "none",
+                    "description": "No trade"
+                  }
+                ]
+              },
+              {
+                "id": "9189e4eb",
+                "name": "Reduced motion keeps the first photo",
+                "description": "With reduced motion, the opening photos do not advance.",
+                "stateOverrides": [
+                  {
+                    "path": "site.reducedMotion",
+                    "value": true
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "page",
+                    "value": "home"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "home.slideshow",
+                    "operator": "equals",
+                    "value": "paused",
+                    "description": "Slideshow paused"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "af3b4239",
+            "name": "Open Old Address",
+            "intent": "An address of the previous single-page site answers with a redirect to the new one: /index.php and ?lg=fr go to the French home (301), ?lg=en to /en/ (301), ?msg=success and ?msg=success_en to the French or English confirmation page (303), any other ?msg to the contact page (303).",
+            "parameters": [
+              {
+                "id": "ebf03d57",
+                "name": "address",
+                "type": "enum",
+                "required": true,
+                "description": "Which old address was requested.",
+                "enumValues": [
+                  "index_php",
+                  "lg_fr",
+                  "lg_en",
+                  "msg_success",
+                  "msg_success_en",
+                  "msg_other"
+                ],
+                "defaultValue": "index_php"
+              }
+            ],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "request.redirected",
+                "value": true,
+                "description": "Answered with a redirect.",
+                "id": "523a8231"
+              },
+              {
+                "type": "set_state",
+                "path": "site.language",
+                "value": {
+                  "kind": "switch",
+                  "cases": [
+                    {
+                      "when": {
+                        "left": {
+                          "kind": "param",
+                          "name": "address"
+                        },
+                        "operator": "equals",
+                        "right": "lg_en"
+                      },
+                      "then": {
+                        "kind": "literal",
+                        "value": "en"
+                      }
+                    },
+                    {
+                      "when": {
+                        "left": {
+                          "kind": "param",
+                          "name": "address"
+                        },
+                        "operator": "equals",
+                        "right": "msg_success_en"
+                      },
+                      "then": {
+                        "kind": "literal",
+                        "value": "en"
+                      }
+                    }
+                  ],
+                  "default": {
+                    "kind": "literal",
+                    "value": "fr"
+                  }
+                },
+                "description": "English only for the old English addresses.",
+                "id": "31cf2940"
+              },
+              {
+                "type": "set_state",
+                "path": "site.page",
+                "value": {
+                  "kind": "switch",
+                  "cases": [
+                    {
+                      "when": {
+                        "left": {
+                          "kind": "param",
+                          "name": "address"
+                        },
+                        "operator": "equals",
+                        "right": "msg_success"
+                      },
+                      "then": {
+                        "kind": "literal",
+                        "value": "thanks"
+                      }
+                    },
+                    {
+                      "when": {
+                        "left": {
+                          "kind": "param",
+                          "name": "address"
+                        },
+                        "operator": "equals",
+                        "right": "msg_success_en"
+                      },
+                      "then": {
+                        "kind": "literal",
+                        "value": "thanks"
+                      }
+                    },
+                    {
+                      "when": {
+                        "left": {
+                          "kind": "param",
+                          "name": "address"
+                        },
+                        "operator": "equals",
+                        "right": "msg_other"
+                      },
+                      "then": {
+                        "kind": "literal",
+                        "value": "contact"
+                      }
+                    }
+                  ],
+                  "default": {
+                    "kind": "literal",
+                    "value": "home"
+                  }
+                },
+                "description": "The matching new page.",
+                "id": "7104aab8"
+              },
+              {
+                "type": "set_state",
+                "path": "site.trade",
+                "value": "none",
+                "description": "No trade page.",
+                "id": "551d7c01"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "actor": "user",
+            "scenarios": [
+              {
+                "id": "5e68138d",
+                "name": "Old English address",
+                "description": "/index.php?lg=en redirects permanently to /en/.",
+                "stateOverrides": [],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "address",
+                    "value": "lg_en"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "request.redirected",
+                    "operator": "equals",
+                    "value": true,
+                    "description": "Redirected"
+                  },
+                  {
+                    "path": "site.page",
+                    "operator": "equals",
+                    "value": "home",
+                    "description": "To the home page"
+                  },
+                  {
+                    "path": "site.language",
+                    "operator": "equals",
+                    "value": "en",
+                    "description": "In English"
+                  }
+                ]
+              },
+              {
+                "id": "2b5d5c4b",
+                "name": "Old English confirmation",
+                "description": "The old form's English success address lands on the new English confirmation page.",
+                "stateOverrides": [],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "address",
+                    "value": "msg_success_en"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "site.page",
+                    "operator": "equals",
+                    "value": "thanks",
+                    "description": "Confirmation page"
+                  },
+                  {
+                    "path": "site.language",
+                    "operator": "equals",
+                    "value": "en",
+                    "description": "In English"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "rules": [],
+        "invariants": [],
+        "transitions": [
+          {
+            "id": "ef17dde8",
+            "target": "58347ae9",
+            "label": "Page shown",
+            "description": "Every successful page request renders the site chrome around the current panel."
+          }
+        ]
+      },
+      {
+        "id": "58347ae9",
+        "name": "Site Chrome",
+        "type": "screen",
+        "description": "Frame on every page. Fixed header: logo, main navigation (Entreprise, Métiers, Réalisations, Contact), language link, phone number, project button; transparent over the page head and solid once the page scrolls. Below 1024 px a Menu button opens a full-screen drawer and a call button replaces the phone number. Footer: head-office address, phones, fax, e-mail, site map, trade links, social links and a second language link.",
+        "stateDefinitions": [
+          {
+            "id": "df980537",
+            "path": "site.language",
+            "type": "enum",
+            "defaultValue": "fr",
+            "enumValues": [
+              "fr",
+              "en"
+            ],
+            "description": "Active language. French unless the lg query parameter is exactly en.",
+            "sharedWith": [
+              "6c0c0b52",
+              "383e8321",
+              "59f1acf4",
+              "87d29428",
+              "49c64dc3",
+              "da0d9816"
+            ]
+          },
+          {
+            "id": "fe3c19fd",
+            "path": "nav.menuOpen",
+            "type": "boolean",
+            "defaultValue": false,
+            "description": "The mobile menu drawer is open.",
+            "sharedWith": [
+              "6c0c0b52",
+              "383e8321",
+              "59f1acf4",
+              "87d29428",
+              "49c64dc3",
+              "da0d9816"
+            ]
+          },
+          {
+            "id": "b1895cfd",
+            "path": "viewer.open",
+            "type": "boolean",
+            "defaultValue": false,
+            "description": "Whether the photo viewer is open.",
+            "sharedWith": [
+              "6c0c0b52",
+              "383e8321",
+              "59f1acf4",
+              "87d29428",
+              "49c64dc3",
+              "da0d9816"
+            ]
+          },
+          {
+            "id": "ec1aec62",
+            "path": "viewer.set",
+            "type": "enum",
+            "defaultValue": "none",
+            "enumValues": [
+              "none",
+              "trade",
+              "projects",
+              "napec"
+            ],
+            "description": "Photo set loaded in the viewer: a trade's installations, a projects gallery group, or the NAPEC 2018 photos.",
+            "sharedWith": [
+              "6c0c0b52",
+              "383e8321",
+              "59f1acf4",
+              "87d29428",
+              "49c64dc3",
+              "da0d9816"
+            ]
+          },
+          {
+            "id": "08879d26",
+            "path": "external.lastOpened",
+            "type": "enum",
+            "defaultValue": "none",
+            "enumValues": [
+              "none",
+              "facebook",
+              "youtube",
+              "linkedin",
+              "napecVideo"
+            ],
+            "description": "Last external page opened in a new tab.",
+            "sharedWith": [
+              "6c0c0b52",
+              "383e8321",
+              "59f1acf4",
+              "87d29428",
+              "49c64dc3",
+              "da0d9816"
+            ]
+          },
+          {
+            "id": "7a2b5ab0",
+            "path": "request.redirected",
+            "type": "boolean",
+            "defaultValue": false,
+            "description": "The request was answered with a redirect to the canonical address.",
+            "sharedWith": [
+              "6c0c0b52",
+              "383e8321",
+              "59f1acf4",
+              "87d29428",
+              "49c64dc3",
+              "da0d9816"
+            ]
+          },
+          {
+            "id": "5aa72363",
+            "path": "site.page",
+            "type": "enum",
+            "defaultValue": "home",
+            "enumValues": [
+              "home",
+              "company",
+              "trades",
+              "trade",
+              "projects",
+              "contact",
+              "thanks",
+              "sendError",
+              "notFound"
+            ],
+            "description": "The page on screen.",
+            "sharedWith": [
+              "6c0c0b52",
+              "383e8321",
+              "59f1acf4",
+              "87d29428",
+              "49c64dc3",
+              "da0d9816"
+            ]
+          },
+          {
+            "id": "31742165",
+            "path": "site.trade",
+            "type": "enum",
+            "defaultValue": "none",
+            "enumValues": [
+              "none",
+              "climatique",
+              "incendie",
+              "desenfumage",
+              "electricite",
+              "froid",
+              "industriel"
+            ],
+            "description": "The trade whose page is shown, none on other pages.",
+            "sharedWith": [
+              "6c0c0b52",
+              "383e8321",
+              "59f1acf4",
+              "87d29428",
+              "49c64dc3",
+              "da0d9816"
+            ]
+          },
+          {
+            "id": "e8f95639",
+            "path": "site.reducedMotion",
+            "type": "boolean",
+            "defaultValue": false,
+            "description": "The visitor's system asks for reduced motion: no slideshow, no reveal or panel animations.",
+            "sharedWith": [
+              "6c0c0b52",
+              "383e8321",
+              "59f1acf4",
+              "87d29428",
+              "49c64dc3",
+              "da0d9816"
+            ]
+          },
+          {
+            "id": "13d1892e",
+            "path": "home.slide",
+            "type": "number",
+            "defaultValue": 1,
+            "description": "Opening photo shown, 1 to 4.",
+            "sharedWith": [
+              "6c0c0b52",
+              "383e8321",
+              "59f1acf4",
+              "87d29428",
+              "49c64dc3",
+              "da0d9816"
+            ]
+          },
+          {
+            "id": "9dca1606",
+            "path": "home.slideshow",
+            "type": "enum",
+            "defaultValue": "playing",
+            "enumValues": [
+              "playing",
+              "paused"
+            ],
+            "description": "Whether the opening photos advance on their own.",
+            "sharedWith": [
+              "6c0c0b52",
+              "383e8321",
+              "59f1acf4",
+              "87d29428",
+              "49c64dc3",
+              "da0d9816"
+            ]
+          },
+          {
+            "id": "59c91488",
+            "path": "home.openPanel",
+            "type": "enum",
+            "defaultValue": "climatique",
+            "enumValues": [
+              "climatique",
+              "incendie",
+              "desenfumage",
+              "electricite",
+              "froid",
+              "industriel"
+            ],
+            "description": "The trade panel shown open on wide screens.",
+            "sharedWith": [
+              "6c0c0b52",
+              "383e8321",
+              "59f1acf4",
+              "87d29428",
+              "49c64dc3",
+              "da0d9816"
+            ]
+          },
+          {
+            "id": "0567d17f",
+            "path": "viewer.index",
+            "type": "number",
+            "defaultValue": 1,
+            "description": "Position of the photo shown in the viewer, 1 to viewer.count.",
+            "sharedWith": [
+              "6c0c0b52",
+              "383e8321",
+              "59f1acf4",
+              "87d29428",
+              "49c64dc3",
+              "da0d9816"
+            ]
+          },
+          {
+            "id": "817bca96",
+            "path": "viewer.count",
+            "type": "number",
+            "defaultValue": 0,
+            "description": "Number of photos in the set the viewer pages through.",
+            "sharedWith": [
+              "6c0c0b52",
+              "383e8321",
+              "59f1acf4",
+              "87d29428",
+              "49c64dc3",
+              "da0d9816"
+            ]
+          }
+        ],
+        "actions": [
+          {
+            "id": "7599a07e",
+            "name": "Open Menu",
+            "intent": "Below 1024 px the Menu button opens a full-screen drawer with Accueil, Entreprise, Métiers, Réalisations and Contact, the project button, the phone number and the language link. The button announces its state (aria-expanded) and its label becomes Fermer; the page behind becomes inert and focus moves to the first link. The drawer opens at full height wherever the page is scrolled.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [
+              {
+                "id": "bdb172f2",
+                "category": "ux_feedback",
+                "condition": {
+                  "left": "nav.menuOpen",
+                  "operator": "equals",
+                  "right": true
+                },
+                "effect": {
+                  "type": "block_action",
+                  "reason": "The menu is already open.",
+                  "description": "Pressing the button again closes it instead (Close Menu).",
+                  "id": "d2b4409d"
+                },
+                "description": "Only a closed menu can open."
+              }
+            ],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "nav.menuOpen",
+                "value": true,
+                "description": "Menu revealed.",
+                "id": "844d34c7"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "Nothing happens while an overlay covers the chrome.",
+                "description": "Nothing happens while an overlay covers the chrome.",
+                "id": "f381138d"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "69b4ea8c",
+                "name": "Menu button opens the drawer",
+                "description": "The Menu button opens the drawer.",
+                "stateOverrides": [],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "nav.menuOpen",
+                    "operator": "equals",
+                    "value": true,
+                    "description": "nav.menuOpen is true"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "52ae5b96",
+            "name": "Close Menu",
+            "intent": "The same button (labelled Fermer), the Escape key, choosing a link in the drawer or widening the window past 1024 px closes the drawer. After the button or Escape, focus returns to the Menu button; the page behind becomes usable again.",
+            "parameters": [
+              {
+                "id": "6e746a3d",
+                "name": "how",
+                "type": "enum",
+                "required": true,
+                "description": "What closed the drawer.",
+                "enumValues": [
+                  "button",
+                  "escape",
+                  "link",
+                  "widen"
+                ],
+                "defaultValue": "button"
+              }
+            ],
+            "requiredStates": [],
+            "rules": [
+              {
+                "id": "5e3e4253",
+                "category": "ux_feedback",
+                "condition": {
+                  "left": "nav.menuOpen",
+                  "operator": "equals",
+                  "right": false
+                },
+                "effect": {
+                  "type": "block_action",
+                  "reason": "The menu is already closed.",
+                  "description": "Nothing to close.",
+                  "id": "a3cfa096"
+                },
+                "description": "Only an open menu can close."
+              }
+            ],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "nav.menuOpen",
+                "value": false,
+                "description": "Menu hidden.",
+                "id": "193e8cca"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "Nothing happens while an overlay covers the chrome.",
+                "description": "Nothing happens while an overlay covers the chrome.",
+                "id": "f3f85f5b"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "20c0c03e",
+                "name": "Escape closes the drawer",
+                "description": "Escape closes the open drawer.",
+                "stateOverrides": [
+                  {
+                    "path": "nav.menuOpen",
+                    "value": true
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "how",
+                    "value": "escape"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "nav.menuOpen",
+                    "operator": "equals",
+                    "value": false,
+                    "description": "nav.menuOpen is false"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "df0b881c",
+            "name": "Open Social Profile",
+            "intent": "The footer links open ALFEC's Facebook (AlfecDZ), YouTube and LinkedIn profiles in a new tab, with rel=noopener noreferrer. The page stays as it was.",
+            "parameters": [
+              {
+                "id": "5328d1b2",
+                "name": "network",
+                "type": "enum",
+                "required": true,
+                "description": "Which profile.",
+                "enumValues": [
+                  "facebook",
+                  "youtube",
+                  "linkedin"
+                ]
+              }
+            ],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "external.lastOpened",
+                "value": {
+                  "kind": "param",
+                  "name": "network"
+                },
+                "description": "Profile opened in a new tab.",
+                "id": "3693bff5"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "Nothing happens while an overlay covers the chrome.",
+                "description": "Nothing happens while an overlay covers the chrome.",
+                "id": "7732c7cc"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "fcd79cde",
+                "name": "LinkedIn in a new tab",
+                "description": "The LinkedIn link opens the company profile in a new tab.",
+                "stateOverrides": [],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "network",
+                    "value": "linkedin"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "external.lastOpened",
+                    "operator": "equals",
+                    "value": "linkedin",
+                    "description": "LinkedIn opened"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "a2694293",
+            "name": "Go To Page",
+            "intent": "The header navigation, the drawer, the footer site map and in-page links (Les métiers, Voir les réalisations, Découvrir l'entreprise) open Entreprise, Métiers, Réalisations or Contact. The header underlines the current section (aria-current=page). Choosing a link in the drawer also closes it.",
+            "parameters": [
+              {
+                "id": "b9a2ab44",
+                "name": "page",
+                "type": "enum",
+                "required": true,
+                "description": "Page chosen.",
+                "enumValues": [
+                  "home",
+                  "company",
+                  "trades",
+                  "projects",
+                  "contact"
+                ],
+                "defaultValue": "company"
+              }
+            ],
+            "requiredStates": [],
+            "rules": [
+              {
+                "id": "ebda88ca",
+                "category": "business",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "page"
+                  },
+                  "operator": "equals",
+                  "right": "home"
+                },
+                "effect": {
+                  "type": "transition_surface",
+                  "target": "383e8321",
+                  "description": "Home page.",
+                  "id": "4b6e7532"
+                },
+                "description": "Home link."
+              },
+              {
+                "id": "27e8c8ea",
+                "category": "business",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "page"
+                  },
+                  "operator": "equals",
+                  "right": "trades"
+                },
+                "effect": {
+                  "type": "transition_surface",
+                  "target": "87d29428",
+                  "description": "Trades hub.",
+                  "id": "774dcbeb"
+                },
+                "description": "Métiers link."
+              },
+              {
+                "id": "089eb420",
+                "category": "business",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "page"
+                  },
+                  "operator": "equals",
+                  "right": "projects"
+                },
+                "effect": {
+                  "type": "transition_surface",
+                  "target": "da0d9816",
+                  "description": "Projects page.",
+                  "id": "8d9b3f55"
+                },
+                "description": "Réalisations link."
+              }
+            ],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "site.page",
+                "value": {
+                  "kind": "param",
+                  "name": "page"
+                },
+                "description": "The chosen page is shown.",
+                "id": "48366620"
+              },
+              {
+                "type": "set_state",
+                "path": "site.trade",
+                "value": "none",
+                "description": "No trade page.",
+                "id": "ebef3592"
+              },
+              {
+                "type": "set_state",
+                "path": "nav.menuOpen",
+                "value": false,
+                "description": "The drawer closes.",
+                "id": "7e836974"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "actor": "user",
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "Links cannot be used while the photo viewer covers the page.",
+                "description": "Nothing happens while the viewer is open.",
+                "id": "7b9e19ca"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "5823220d",
+                "name": "Trades from the drawer",
+                "description": "Choosing Métiers in the open drawer opens the trades hub and closes the drawer.",
+                "stateOverrides": [
+                  {
+                    "path": "nav.menuOpen",
+                    "value": true
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "page",
+                    "value": "trades"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "site.page",
+                    "operator": "equals",
+                    "value": "trades",
+                    "description": "Trades hub"
+                  },
+                  {
+                    "path": "nav.menuOpen",
+                    "operator": "equals",
+                    "value": false,
+                    "description": "Drawer closed"
+                  }
+                ],
+                "expectedTransition": "87d29428"
+              },
+              {
+                "id": "aca62141",
+                "name": "Not while the viewer is open",
+                "description": "The viewer covers the page, so its links do nothing.",
+                "stateOverrides": [
+                  {
+                    "path": "viewer.open",
+                    "value": true
+                  },
+                  {
+                    "path": "viewer.set",
+                    "value": "trade"
+                  },
+                  {
+                    "path": "viewer.count",
+                    "value": 4
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "page",
+                    "value": "contact"
+                  }
+                ],
+                "expectedStatus": "blocked"
+              }
+            ]
+          },
+          {
+            "id": "c1ed14c5",
+            "name": "Select Logo",
+            "intent": "The logo in the header (and the footer) returns to the home page from any page.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "site.page",
+                "value": "home",
+                "description": "Home page.",
+                "id": "1aef47fc"
+              },
+              {
+                "type": "set_state",
+                "path": "site.trade",
+                "value": "none",
+                "description": "No trade page.",
+                "id": "133ba18d"
+              },
+              {
+                "type": "set_state",
+                "path": "nav.menuOpen",
+                "value": false,
+                "description": "Drawer closed.",
+                "id": "e9425a60"
+              },
+              {
+                "type": "transition_surface",
+                "target": "383e8321",
+                "description": "Home page.",
+                "id": "11d1e103"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "actor": "user",
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The logo cannot be used while the photo viewer covers the page.",
+                "description": "Nothing happens while the viewer is open.",
+                "id": "4a6cebda"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "e531653a",
+                "name": "Logo from a trade page",
+                "description": "The logo leaves a trade page for the home page.",
+                "stateOverrides": [
+                  {
+                    "path": "site.page",
+                    "value": "trade"
+                  },
+                  {
+                    "path": "site.trade",
+                    "value": "froid"
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "site.page",
+                    "operator": "equals",
+                    "value": "home",
+                    "description": "Home page"
+                  },
+                  {
+                    "path": "site.trade",
+                    "operator": "equals",
+                    "value": "none",
+                    "description": "No trade"
+                  }
+                ],
+                "expectedTransition": "383e8321"
+              }
+            ]
+          },
+          {
+            "id": "515c6c93",
+            "name": "Discuss Your Project",
+            "intent": "The Parler de votre projet button in the header or the drawer opens the contact page.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "site.page",
+                "value": "contact",
+                "description": "Contact page.",
+                "id": "eaacce75"
+              },
+              {
+                "type": "set_state",
+                "path": "site.trade",
+                "value": "none",
+                "description": "No trade page.",
+                "id": "9fe82326"
+              },
+              {
+                "type": "set_state",
+                "path": "nav.menuOpen",
+                "value": false,
+                "description": "Drawer closed.",
+                "id": "e277dc2c"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "actor": "user",
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The button cannot be used while the photo viewer covers the page.",
+                "description": "Nothing happens while the viewer is open.",
+                "id": "967a4a75"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "a1d6d7c9",
+                "name": "Project button from the drawer",
+                "description": "The drawer's project button opens the contact page.",
+                "stateOverrides": [
+                  {
+                    "path": "nav.menuOpen",
+                    "value": true
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "site.page",
+                    "operator": "equals",
+                    "value": "contact",
+                    "description": "Contact page"
+                  },
+                  {
+                    "path": "nav.menuOpen",
+                    "operator": "equals",
+                    "value": false,
+                    "description": "Drawer closed"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "325e2d83",
+            "name": "Switch Language",
+            "intent": "The language link in the header, the drawer and the footer opens the same page in the other language: a trade page opens the same trade, the contact page the English contact page. Only the other language is offered as a link.",
+            "parameters": [
+              {
+                "id": "6912a35f",
+                "name": "target",
+                "type": "enum",
+                "required": true,
+                "description": "Language of the link chosen.",
+                "enumValues": [
+                  "fr",
+                  "en"
+                ],
+                "defaultValue": "en"
+              }
+            ],
+            "requiredStates": [],
+            "rules": [
+              {
+                "id": "112c3f24",
+                "category": "ux_feedback",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "target"
+                  },
+                  "operator": "equals",
+                  "right": {
+                    "kind": "state",
+                    "path": "site.language"
+                  }
+                },
+                "effect": {
+                  "type": "block_action",
+                  "reason": "Only the other language is offered as a link.",
+                  "description": "The current language is not a link.",
+                  "id": "920668aa"
+                },
+                "description": "Only the other language can be chosen."
+              }
+            ],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "site.language",
+                "value": {
+                  "kind": "param",
+                  "name": "target"
+                },
+                "description": "Same page, other language.",
+                "id": "15a63d1b"
+              },
+              {
+                "type": "set_state",
+                "path": "nav.menuOpen",
+                "value": false,
+                "description": "Drawer closed.",
+                "id": "ec630238"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "actor": "user",
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The current language is not a link, and nothing can be chosen while the viewer is open.",
+                "description": "Nothing happens.",
+                "id": "fc2ecbe9"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "e4da407b",
+                "name": "French trade page to English keeps the trade",
+                "description": "Switching from the French smoke-control page opens the English smoke-control page.",
+                "stateOverrides": [
+                  {
+                    "path": "site.page",
+                    "value": "trade"
+                  },
+                  {
+                    "path": "site.trade",
+                    "value": "desenfumage"
+                  },
+                  {
+                    "path": "site.language",
+                    "value": "fr"
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "target",
+                    "value": "en"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "site.language",
+                    "operator": "equals",
+                    "value": "en",
+                    "description": "English"
+                  },
+                  {
+                    "path": "site.page",
+                    "operator": "equals",
+                    "value": "trade",
+                    "description": "Still a trade page"
+                  },
+                  {
+                    "path": "site.trade",
+                    "operator": "equals",
+                    "value": "desenfumage",
+                    "description": "Same trade"
+                  }
+                ]
+              },
+              {
+                "id": "2af9fbbd",
+                "name": "Current language is not a link",
+                "description": "On an English page only FR is offered.",
+                "stateOverrides": [
+                  {
+                    "path": "site.language",
+                    "value": "en"
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "target",
+                    "value": "en"
+                  }
+                ],
+                "expectedStatus": "blocked"
+              }
+            ]
+          },
+          {
+            "id": "f7ae7206",
+            "name": "Add a back-to-top button on long pages",
+            "intent": "After scrolling down a long page on a phone, a small button brings the visitor back to the top and the menu.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [],
+            "emittedEvents": [],
+            "transitions": [],
+            "evolution": {
+              "rationale": "ALFEC said the pages feel long on a phone, and this saves a lot of scrolling back up.",
+              "category": "ux",
+              "source": "client questionnaire, question 19"
+            }
+          }
+        ],
+        "rules": [
+          {
+            "id": "8082548a",
+            "category": "ux_feedback",
+            "condition": {
+              "left": "viewer.open",
+              "operator": "equals",
+              "right": true
+            },
+            "effect": {
+              "type": "block_action",
+              "reason": "The photo viewer covers the page.",
+              "description": "The page behind the viewer cannot be used until it closes.",
+              "id": "ecb270ab"
+            },
+            "description": "The photo viewer covers the page."
+          }
+        ],
+        "invariants": [],
+        "transitions": [
+          {
+            "id": "93eac42c",
+            "target": "383e8321",
+            "label": "Logo or Accueil",
+            "description": "The logo and the Accueil link open the home page."
+          },
+          {
+            "id": "4bae039d",
+            "target": "87d29428",
+            "label": "Métiers",
+            "description": "Navigation link to the trades hub."
+          },
+          {
+            "id": "8e06cc49",
+            "target": "da0d9816",
+            "label": "Réalisations",
+            "description": "Navigation link to the projects page."
+          }
+        ]
+      },
+      {
+        "id": "383e8321",
+        "name": "Home",
+        "type": "screen",
+        "description": "Home page: an opening slideshow of four photos behind the headline « À chaque défi technique, la solution adaptée. » (rises in with CSS on first paint, no script needed) with a pause button, the six trades as photo panels under « Six métiers. Plusieurs équipes spécialisées. Une solution coordonnée. » (Génie climatique first and open), the Ingénierie, Réalisation, Maintenance cycle, the network map « Des réalisations à travers le territoire national. » with two still figures (22 wilayas, 6 métiers), the references and the call to action « Votre projet est unique. Construisons la solution technique qui lui correspond. ».",
+        "stateDefinitions": [
+          {
+            "id": "33f4d765",
+            "path": "home.slideshowHeld",
+            "type": "boolean",
+            "defaultValue": false,
+            "description": "The visitor paused the slideshow with its pause button; only that button restarts it."
+          }
+        ],
+        "actions": [
+          {
+            "id": "abc0235d",
+            "name": "Advance Opening Photo",
+            "intent": "Every 7 seconds the next of the four opening photos cross-fades in with a slow zoom, looping after the fourth; a progress bar above each photo name shows the time left.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [
+              {
+                "id": "41f59c12",
+                "category": "ux_feedback",
+                "condition": {
+                  "left": "home.slideshow",
+                  "operator": "equals",
+                  "right": "paused"
+                },
+                "effect": {
+                  "type": "block_action",
+                  "reason": "The slideshow is paused.",
+                  "description": "Paused while pointed at, focused, hidden or under reduced motion.",
+                  "id": "9c070e52"
+                },
+                "description": "A paused slideshow does not advance."
+              }
+            ],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "home.slide",
+                "value": {
+                  "kind": "add",
+                  "left": {
+                    "kind": "mod",
+                    "left": {
+                      "kind": "state",
+                      "path": "home.slide"
+                    },
+                    "right": {
+                      "kind": "literal",
+                      "value": 4
+                    }
+                  },
+                  "right": {
+                    "kind": "literal",
+                    "value": 1
+                  }
+                },
+                "description": "Next photo, back to the first after the fourth.",
+                "id": "29983f85"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "actor": "schedule",
+            "scenarios": [
+              {
+                "id": "6822fc03",
+                "name": "Second photo after the first",
+                "description": "The slideshow moves from photo 1 to photo 2.",
+                "stateOverrides": [
+                  {
+                    "path": "site.page",
+                    "value": "home"
+                  },
+                  {
+                    "path": "home.slide",
+                    "value": 1
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "home.slide",
+                    "operator": "equals",
+                    "value": 2,
+                    "description": "Photo 2"
+                  }
+                ]
+              },
+              {
+                "id": "0dc53251",
+                "name": "Loops after the fourth",
+                "description": "After photo 4 comes photo 1.",
+                "stateOverrides": [
+                  {
+                    "path": "site.page",
+                    "value": "home"
+                  },
+                  {
+                    "path": "home.slide",
+                    "value": 4
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "home.slide",
+                    "operator": "equals",
+                    "value": 1,
+                    "description": "Photo 1"
+                  }
+                ]
+              },
+              {
+                "id": "941e2b05",
+                "name": "Paused slideshow holds",
+                "description": "While paused the photo does not change.",
+                "stateOverrides": [
+                  {
+                    "path": "site.page",
+                    "value": "home"
+                  },
+                  {
+                    "path": "home.slideshow",
+                    "value": "paused"
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "blocked"
+              }
+            ]
+          },
+          {
+            "id": "3528a85b",
+            "name": "Choose Opening Photo",
+            "intent": "The four photo names under the opening (Génie climatique, Désenfumage, Électricité & régulation, Détection & gaines) jump to that photo, mark it pressed and restart its timer. Below 1024 px only the bars show.",
+            "parameters": [
+              {
+                "id": "9c836487",
+                "name": "index",
+                "type": "number",
+                "required": true,
+                "description": "Photo chosen, 1 to 4.",
+                "defaultValue": 3,
+                "validations": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "min",
+                    "value": 1
+                  },
+                  {
+                    "type": "max",
+                    "value": 4
+                  }
+                ]
+              }
+            ],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "home.slide",
+                "value": {
+                  "kind": "param",
+                  "name": "index"
+                },
+                "description": "That photo is shown.",
+                "id": "f2576d7d"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "actor": "user",
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The opening is only on the home page.",
+                "description": "Nothing happens elsewhere.",
+                "id": "b3265991"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "03703e65",
+                "name": "Third photo",
+                "description": "Choosing Électricité & régulation shows photo 3.",
+                "stateOverrides": [
+                  {
+                    "path": "site.page",
+                    "value": "home"
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "index",
+                    "value": 3
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "home.slide",
+                    "operator": "equals",
+                    "value": 3,
+                    "description": "Photo 3"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "8c93040a",
+            "name": "Pause Opening Photos",
+            "intent": "Pointing at or focusing inside the opening, or leaving the browser tab, pauses the slideshow; the current progress bar shows full.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "home.slideshow",
+                "value": "paused",
+                "description": "Slideshow paused.",
+                "id": "18b35d25"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "actor": "user",
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The opening is only on the home page.",
+                "description": "Nothing happens elsewhere.",
+                "id": "2219f341"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "56cfdb25",
+                "name": "Pointer over the opening",
+                "description": "Pointing at the opening pauses it.",
+                "stateOverrides": [
+                  {
+                    "path": "site.page",
+                    "value": "home"
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "home.slideshow",
+                    "operator": "equals",
+                    "value": "paused",
+                    "description": "Paused"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "da637d0b",
+            "name": "Resume Opening Photos",
+            "intent": "Moving the pointer or focus out of the opening, or coming back to the tab, resumes the slideshow, unless the visitor's system asks for reduced motion.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [
+              {
+                "id": "d5a0f82f",
+                "category": "ux_feedback",
+                "condition": {
+                  "left": "site.reducedMotion",
+                  "operator": "equals",
+                  "right": true
+                },
+                "effect": {
+                  "type": "block_action",
+                  "reason": "Reduced motion keeps the photos still.",
+                  "description": "No automatic motion for visitors who ask for less.",
+                  "id": "7fe9a2db"
+                },
+                "description": "Reduced motion wins."
+              },
+              {
+                "id": "45715e58",
+                "category": "ux_feedback",
+                "condition": {
+                  "left": "home.slideshowHeld",
+                  "operator": "is_true"
+                },
+                "effect": {
+                  "type": "block_action",
+                  "reason": "The visitor paused the slideshow.",
+                  "id": "8316fb8c"
+                },
+                "description": "Only the play button restarts a slideshow the visitor paused."
+              }
+            ],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "home.slideshow",
+                "value": "playing",
+                "description": "Slideshow running.",
+                "id": "0d85e1bf"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "actor": "user",
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The photos stay still by design under reduced motion.",
+                "description": "Nothing happens.",
+                "id": "1fd5dfdc"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "43fa1110",
+                "name": "Pointer leaves the opening",
+                "description": "Leaving the opening resumes the slideshow.",
+                "stateOverrides": [
+                  {
+                    "path": "site.page",
+                    "value": "home"
+                  },
+                  {
+                    "path": "home.slideshow",
+                    "value": "paused"
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "home.slideshow",
+                    "operator": "equals",
+                    "value": "playing",
+                    "description": "Running"
+                  }
+                ]
+              },
+              {
+                "id": "91ec1ec5",
+                "name": "Reduced motion stays still",
+                "description": "With reduced motion the slideshow never resumes.",
+                "stateOverrides": [
+                  {
+                    "path": "site.page",
+                    "value": "home"
+                  },
+                  {
+                    "path": "home.slideshow",
+                    "value": "paused"
+                  },
+                  {
+                    "path": "site.reducedMotion",
+                    "value": true
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "blocked"
+              },
+              {
+                "id": "5f3d0feb",
+                "name": "Visitor's pause survives the pointer leaving",
+                "description": "After the pause button, leaving the opening does not restart it.",
+                "stateOverrides": [
+                  {
+                    "path": "site.page",
+                    "value": "home"
+                  },
+                  {
+                    "path": "home.slideshow",
+                    "value": "paused"
+                  },
+                  {
+                    "path": "home.slideshowHeld",
+                    "value": true
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "blocked"
+              }
+            ]
+          },
+          {
+            "id": "f3634fcf",
+            "name": "Open Trade Panel",
+            "intent": "On screens 1024 px and wider, resting the pointer on a trade panel for 120 ms (or focusing it, at once) widens it to show its photo in colour, name, summary and Discover link; the others narrow to a vertical label. Sweeping across the row does not open each panel in turn. Below 1024 px every panel is open in a swipeable row.",
+            "parameters": [
+              {
+                "id": "f67349a3",
+                "name": "trade",
+                "type": "enum",
+                "required": true,
+                "description": "Panel pointed at or focused.",
+                "enumValues": [
+                  "climatique",
+                  "incendie",
+                  "desenfumage",
+                  "electricite",
+                  "froid",
+                  "industriel"
+                ],
+                "defaultValue": "froid"
+              }
+            ],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "home.openPanel",
+                "value": {
+                  "kind": "param",
+                  "name": "trade"
+                },
+                "description": "That panel opens, the others close.",
+                "id": "216c12fd"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "actor": "user",
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The panels are only on the home page.",
+                "description": "Nothing happens elsewhere.",
+                "id": "2cbbe111"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "ada43872",
+                "name": "Hover Froid industriel",
+                "description": "Pointing at the refrigeration panel opens it.",
+                "stateOverrides": [
+                  {
+                    "path": "site.page",
+                    "value": "home"
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "trade",
+                    "value": "froid"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "home.openPanel",
+                    "operator": "equals",
+                    "value": "froid",
+                    "description": "Refrigeration open"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "acecd60b",
+            "name": "Open Trade From Home",
+            "intent": "Choosing a trade panel opens that trade's page.",
+            "parameters": [
+              {
+                "id": "3e43af8c",
+                "name": "trade",
+                "type": "enum",
+                "required": true,
+                "description": "Panel chosen.",
+                "enumValues": [
+                  "climatique",
+                  "incendie",
+                  "desenfumage",
+                  "electricite",
+                  "froid",
+                  "industriel"
+                ],
+                "defaultValue": "desenfumage"
+              }
+            ],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "site.page",
+                "value": "trade",
+                "description": "Trade page.",
+                "id": "63b368e1"
+              },
+              {
+                "type": "set_state",
+                "path": "site.trade",
+                "value": {
+                  "kind": "param",
+                  "name": "trade"
+                },
+                "description": "That trade.",
+                "id": "ac07b629"
+              },
+              {
+                "type": "transition_surface",
+                "target": "49c64dc3",
+                "description": "The trade page is shown.",
+                "id": "c71234bc"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "actor": "user",
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The panels are only on the home page.",
+                "description": "Nothing happens elsewhere.",
+                "id": "e2fbf1b6"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "b78a5a28",
+                "name": "Smoke control panel",
+                "description": "The smoke-control panel opens its page.",
+                "stateOverrides": [
+                  {
+                    "path": "site.page",
+                    "value": "home"
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "trade",
+                    "value": "desenfumage"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "site.page",
+                    "operator": "equals",
+                    "value": "trade",
+                    "description": "Trade page"
+                  },
+                  {
+                    "path": "site.trade",
+                    "operator": "equals",
+                    "value": "desenfumage",
+                    "description": "Smoke control"
+                  }
+                ],
+                "expectedTransition": "49c64dc3"
+              }
+            ]
+          },
+          {
+            "id": "a9ba0470",
+            "name": "Toggle Slideshow Pause",
+            "intent": "A 44 px pause button after the photo names stops the slideshow and keeps it stopped (pointer and focus no longer restart it); pressed again it restarts from the current photo. Its label switches between « Mettre le diaporama en pause » and « Relancer le diaporama ».",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "home.slideshowHeld",
+                "value": {
+                  "kind": "switch",
+                  "cases": [
+                    {
+                      "when": {
+                        "left": "home.slideshowHeld",
+                        "operator": "is_true"
+                      },
+                      "then": {
+                        "kind": "literal",
+                        "value": false
+                      }
+                    }
+                  ],
+                  "default": {
+                    "kind": "literal",
+                    "value": true
+                  }
+                },
+                "description": "Flip the visitor's pause.",
+                "id": "17b1b8f1"
+              },
+              {
+                "type": "set_state",
+                "path": "home.slideshow",
+                "value": {
+                  "kind": "switch",
+                  "cases": [
+                    {
+                      "when": {
+                        "left": "home.slideshowHeld",
+                        "operator": "is_true"
+                      },
+                      "then": {
+                        "kind": "literal",
+                        "value": "paused"
+                      }
+                    }
+                  ],
+                  "default": {
+                    "kind": "literal",
+                    "value": "playing"
+                  }
+                },
+                "description": "Paused when held, running otherwise.",
+                "id": "af62b7a8"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "scenarios": [
+              {
+                "id": "29a44e82",
+                "name": "Pause button holds the slideshow",
+                "description": "Pressing pause stops the photos.",
+                "stateOverrides": [
+                  {
+                    "path": "site.page",
+                    "value": "home"
+                  },
+                  {
+                    "path": "home.slideshow",
+                    "value": "playing"
+                  },
+                  {
+                    "path": "home.slideshowHeld",
+                    "value": false
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "home.slideshowHeld",
+                    "operator": "equals",
+                    "value": true,
+                    "description": "Held"
+                  },
+                  {
+                    "path": "home.slideshow",
+                    "operator": "equals",
+                    "value": "paused",
+                    "description": "Paused"
+                  }
+                ]
+              },
+              {
+                "id": "df7481ac",
+                "name": "Play button restarts it",
+                "description": "Pressing play again restarts the photos.",
+                "stateOverrides": [
+                  {
+                    "path": "site.page",
+                    "value": "home"
+                  },
+                  {
+                    "path": "home.slideshow",
+                    "value": "paused"
+                  },
+                  {
+                    "path": "home.slideshowHeld",
+                    "value": true
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "home.slideshowHeld",
+                    "operator": "equals",
+                    "value": false,
+                    "description": "Released"
+                  },
+                  {
+                    "path": "home.slideshow",
+                    "operator": "equals",
+                    "value": "playing",
+                    "description": "Running"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "rules": [
+          {
+            "id": "eca1e9b1",
+            "category": "ux_feedback",
+            "condition": {
+              "kind": "any",
+              "conditions": [
+                {
+                  "left": "site.page",
+                  "operator": "not_equals",
+                  "right": "home"
+                },
+                {
+                  "left": "viewer.open",
+                  "operator": "equals",
+                  "right": true
+                },
+                {
+                  "left": "nav.menuOpen",
+                  "operator": "equals",
+                  "right": true
+                }
+              ]
+            },
+            "effect": {
+              "type": "block_action",
+              "reason": "The home page is not usable on screen.",
+              "description": "Home interactions need the home page, not covered by the menu drawer or the viewer (the page behind them is inert).",
+              "id": "6d6be00a"
+            },
+            "description": "The home page is not usable on screen."
+          }
+        ],
+        "invariants": [],
+        "transitions": [
+          {
+            "id": "be09e4fe",
+            "target": "49c64dc3",
+            "label": "Trade panel",
+            "description": "A trade panel opens its trade page."
+          },
+          {
+            "id": "f07bcbd5",
+            "target": "87d29428",
+            "label": "Les métiers",
+            "description": "Link under the panels to the trades hub."
+          },
+          {
+            "id": "5b0298fd",
+            "target": "da0d9816",
+            "label": "Nos références",
+            "description": "Opening button and reference cards to the projects page."
+          }
+        ],
+        "parentSurfaceId": "58347ae9"
+      },
+      {
+        "id": "59f1acf4",
+        "name": "Photo Viewer",
+        "type": "dialog",
+        "description": "Photo viewer: a modal dialog that enlarges a gallery photo with its caption and a count (1 sur 6), pages through the set in a loop, and closes back to the thumbnail that opened it.",
+        "stateDefinitions": [],
+        "actions": [
+          {
+            "id": "21510f6c",
+            "name": "Page Through Photos",
+            "intent": "The arrow buttons or the left and right arrow keys show the next or previous photo of the set, looping at both ends, and update the caption and the count (2 sur 6).",
+            "parameters": [
+              {
+                "id": "708e41f6",
+                "name": "direction",
+                "type": "enum",
+                "required": true,
+                "description": "Direction.",
+                "enumValues": [
+                  "next",
+                  "previous"
+                ]
+              }
+            ],
+            "requiredStates": [],
+            "rules": [
+              {
+                "id": "05e4f303",
+                "category": "business",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "direction"
+                  },
+                  "operator": "equals",
+                  "right": "next"
+                },
+                "effect": {
+                  "type": "set_state",
+                  "path": "viewer.index",
+                  "value": {
+                    "kind": "add",
+                    "left": {
+                      "kind": "mod",
+                      "left": {
+                        "kind": "state",
+                        "path": "viewer.index"
+                      },
+                      "right": {
+                        "kind": "state",
+                        "path": "viewer.count"
+                      }
+                    },
+                    "right": {
+                      "kind": "literal",
+                      "value": 1
+                    }
+                  },
+                  "description": "Next photo, back to the first after the last.",
+                  "id": "38f630ad"
+                },
+                "description": "Forward."
+              },
+              {
+                "id": "a285dc21",
+                "category": "business",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "direction"
+                  },
+                  "operator": "equals",
+                  "right": "previous"
+                },
+                "effect": {
+                  "type": "set_state",
+                  "path": "viewer.index",
+                  "value": {
+                    "kind": "add",
+                    "left": {
+                      "kind": "mod",
+                      "left": {
+                        "kind": "add",
+                        "left": {
+                          "kind": "state",
+                          "path": "viewer.index"
+                        },
+                        "right": {
+                          "kind": "sub",
+                          "left": {
+                            "kind": "state",
+                            "path": "viewer.count"
+                          },
+                          "right": {
+                            "kind": "literal",
+                            "value": 2
+                          }
+                        }
+                      },
+                      "right": {
+                        "kind": "state",
+                        "path": "viewer.count"
+                      }
+                    },
+                    "right": {
+                      "kind": "literal",
+                      "value": 1
+                    }
+                  },
+                  "description": "Previous photo, to the last before the first.",
+                  "id": "3e5032f0"
+                },
+                "description": "Backward."
+              }
+            ],
+            "invariants": [],
+            "effects": [],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The viewer is closed.",
+                "description": "The viewer is closed.",
+                "id": "e214f567"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "a1919672",
+                "name": "Next photo",
+                "description": "From photo 1 of 6 to photo 2.",
+                "stateOverrides": [
+                  {
+                    "path": "viewer.open",
+                    "value": true
+                  },
+                  {
+                    "path": "viewer.set",
+                    "value": "trade"
+                  },
+                  {
+                    "path": "viewer.index",
+                    "value": 1
+                  },
+                  {
+                    "path": "viewer.count",
+                    "value": 6
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "direction",
+                    "value": "next"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "viewer.index",
+                    "operator": "equals",
+                    "value": 2,
+                    "description": "Photo 2"
+                  }
+                ]
+              },
+              {
+                "id": "2f328e33",
+                "name": "Next loops to the first",
+                "description": "After the last photo comes the first.",
+                "stateOverrides": [
+                  {
+                    "path": "viewer.open",
+                    "value": true
+                  },
+                  {
+                    "path": "viewer.set",
+                    "value": "projects"
+                  },
+                  {
+                    "path": "viewer.index",
+                    "value": 3
+                  },
+                  {
+                    "path": "viewer.count",
+                    "value": 3
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "direction",
+                    "value": "next"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "viewer.index",
+                    "operator": "equals",
+                    "value": 1,
+                    "description": "Photo 1"
+                  }
+                ]
+              },
+              {
+                "id": "0820c808",
+                "name": "Previous loops to the last",
+                "description": "Before the first photo comes the last.",
+                "stateOverrides": [
+                  {
+                    "path": "viewer.open",
+                    "value": true
+                  },
+                  {
+                    "path": "viewer.set",
+                    "value": "trade"
+                  },
+                  {
+                    "path": "viewer.index",
+                    "value": 1
+                  },
+                  {
+                    "path": "viewer.count",
+                    "value": 6
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "direction",
+                    "value": "previous"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "viewer.index",
+                    "operator": "equals",
+                    "value": 6,
+                    "description": "Photo 6"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "a13465f6",
+            "name": "Close Photo Viewer",
+            "intent": "The Fermer button, the Escape key or a click outside the photo closes the viewer; focus returns to the thumbnail that opened it, which keeps its photo.",
+            "parameters": [
+              {
+                "id": "725a3562",
+                "name": "how",
+                "type": "enum",
+                "required": true,
+                "description": "What closed the viewer.",
+                "enumValues": [
+                  "button",
+                  "escape",
+                  "backdrop"
+                ],
+                "defaultValue": "button"
+              }
+            ],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "viewer.open",
+                "value": false,
+                "description": "Viewer closed.",
+                "id": "0ffcd4a3"
+              },
+              {
+                "type": "set_state",
+                "path": "viewer.set",
+                "value": "none",
+                "description": "No set.",
+                "id": "3ded08dd"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The viewer is closed.",
+                "description": "The viewer is closed.",
+                "id": "d783dfe1"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "c9c606b0",
+                "name": "Escape closes the viewer",
+                "description": "Escape closes the viewer and returns to the page.",
+                "stateOverrides": [
+                  {
+                    "path": "viewer.open",
+                    "value": true
+                  },
+                  {
+                    "path": "viewer.set",
+                    "value": "trade"
+                  },
+                  {
+                    "path": "viewer.index",
+                    "value": 2
+                  },
+                  {
+                    "path": "viewer.count",
+                    "value": 4
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "how",
+                    "value": "escape"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "viewer.open",
+                    "operator": "equals",
+                    "value": false,
+                    "description": "Viewer closed"
+                  },
+                  {
+                    "path": "viewer.set",
+                    "operator": "equals",
+                    "value": "none",
+                    "description": "No set"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "rules": [
+          {
+            "id": "6114975d",
+            "category": "ux_feedback",
+            "condition": {
+              "left": "viewer.open",
+              "operator": "equals",
+              "right": false
+            },
+            "effect": {
+              "type": "block_action",
+              "reason": "The photo viewer is closed.",
+              "description": "The photo viewer is closed.",
+              "id": "34eb2e4e"
+            },
+            "description": "The photo viewer is closed."
+          }
+        ],
+        "invariants": [],
+        "transitions": [
+          {
+            "id": "3a0d3c22",
+            "target": "58347ae9",
+            "label": "Close viewer",
+            "description": "Closing the viewer returns to whatever was underneath."
+          }
+        ],
+        "parentSurfaceId": "58347ae9"
+      },
+      {
+        "id": "87d29428",
+        "name": "Trades",
+        "type": "screen",
+        "description": "Trades hub (/metiers/ and /en/expertise/): the six trades as rows with photo, number, name, summary, scope and a link to each trade page. Génie climatique comes first as ALFEC's founding trade.",
+        "stateDefinitions": [],
+        "actions": [
+          {
+            "id": "ad99eabc",
+            "name": "Open Trade Page",
+            "intent": "A trade's photo, name or En savoir plus link opens its page.",
+            "parameters": [
+              {
+                "id": "e3e27a79",
+                "name": "trade",
+                "type": "enum",
+                "required": true,
+                "description": "Trade chosen.",
+                "enumValues": [
+                  "climatique",
+                  "incendie",
+                  "desenfumage",
+                  "electricite",
+                  "froid",
+                  "industriel"
+                ],
+                "defaultValue": "climatique"
+              }
+            ],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "site.page",
+                "value": "trade",
+                "description": "Trade page.",
+                "id": "c85c5a92"
+              },
+              {
+                "type": "set_state",
+                "path": "site.trade",
+                "value": {
+                  "kind": "param",
+                  "name": "trade"
+                },
+                "description": "That trade.",
+                "id": "3589d9bf"
+              },
+              {
+                "type": "transition_surface",
+                "target": "49c64dc3",
+                "description": "The trade page is shown.",
+                "id": "57d4643b"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "actor": "user",
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "Hub links only exist on the hub.",
+                "description": "Nothing happens elsewhere.",
+                "id": "0c6ce440"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "0faa42f4",
+                "name": "HVAC from the hub",
+                "description": "The first row opens the Génie climatique page.",
+                "stateOverrides": [
+                  {
+                    "path": "site.page",
+                    "value": "trades"
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "trade",
+                    "value": "climatique"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "site.trade",
+                    "operator": "equals",
+                    "value": "climatique",
+                    "description": "HVAC page"
+                  }
+                ],
+                "expectedTransition": "49c64dc3"
+              }
+            ]
+          }
+        ],
+        "rules": [
+          {
+            "id": "891547e1",
+            "category": "ux_feedback",
+            "condition": {
+              "kind": "any",
+              "conditions": [
+                {
+                  "left": "site.page",
+                  "operator": "not_equals",
+                  "right": "trades"
+                },
+                {
+                  "left": "nav.menuOpen",
+                  "operator": "equals",
+                  "right": true
+                }
+              ]
+            },
+            "effect": {
+              "type": "block_action",
+              "reason": "The trades hub is not usable on screen.",
+              "description": "Hub links need the hub, not covered by the menu drawer.",
+              "id": "182386d4"
+            },
+            "description": "The trades hub is not usable on screen."
+          }
+        ],
+        "invariants": [],
+        "transitions": [
+          {
+            "id": "6d98dfad",
+            "target": "49c64dc3",
+            "label": "En savoir plus",
+            "description": "Each row opens its trade page."
+          }
+        ]
+      },
+      {
+        "id": "49c64dc3",
+        "name": "Trade Page",
+        "type": "screen",
+        "description": "One page per trade (/metiers/<slug>/ and /en/expertise/<slug>/): head with the trade photo, description, scope, an enquiry button that pre-selects the trade, installation photos that open the viewer, and links to the previous and next trade.",
+        "stateDefinitions": [],
+        "actions": [
+          {
+            "id": "461eab61",
+            "name": "Go To Next Trade",
+            "intent": "The Métier suivant link opens the following trade in order (Génie climatique, Protection & détection incendie, Désenfumage, Électricité & régulation, Froid industriel, Génie industriel), from the last back to the first.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "site.trade",
+                "value": {
+                  "kind": "switch",
+                  "cases": [
+                    {
+                      "when": {
+                        "left": "site.trade",
+                        "operator": "equals",
+                        "right": "climatique"
+                      },
+                      "then": {
+                        "kind": "literal",
+                        "value": "incendie"
+                      }
+                    },
+                    {
+                      "when": {
+                        "left": "site.trade",
+                        "operator": "equals",
+                        "right": "incendie"
+                      },
+                      "then": {
+                        "kind": "literal",
+                        "value": "desenfumage"
+                      }
+                    },
+                    {
+                      "when": {
+                        "left": "site.trade",
+                        "operator": "equals",
+                        "right": "desenfumage"
+                      },
+                      "then": {
+                        "kind": "literal",
+                        "value": "electricite"
+                      }
+                    },
+                    {
+                      "when": {
+                        "left": "site.trade",
+                        "operator": "equals",
+                        "right": "electricite"
+                      },
+                      "then": {
+                        "kind": "literal",
+                        "value": "froid"
+                      }
+                    },
+                    {
+                      "when": {
+                        "left": "site.trade",
+                        "operator": "equals",
+                        "right": "froid"
+                      },
+                      "then": {
+                        "kind": "literal",
+                        "value": "industriel"
+                      }
+                    }
+                  ],
+                  "default": {
+                    "kind": "literal",
+                    "value": "climatique"
+                  }
+                },
+                "description": "The next trade, looping.",
+                "id": "e1e865ad"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "actor": "user",
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The link is on the trade page, under the viewer when it is open.",
+                "description": "Nothing happens.",
+                "id": "ddc2794f"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "a3c5247f",
+                "name": "Smoke control to electrical",
+                "description": "The next trade after Désenfumage is Électricité & régulation.",
+                "stateOverrides": [
+                  {
+                    "path": "site.page",
+                    "value": "trade"
+                  },
+                  {
+                    "path": "site.trade",
+                    "value": "desenfumage"
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "site.trade",
+                    "operator": "equals",
+                    "value": "electricite",
+                    "description": "Electrical"
+                  }
+                ]
+              },
+              {
+                "id": "ef762535",
+                "name": "Last trade loops to the first",
+                "description": "After Génie industriel comes Génie climatique.",
+                "stateOverrides": [
+                  {
+                    "path": "site.page",
+                    "value": "trade"
+                  },
+                  {
+                    "path": "site.trade",
+                    "value": "industriel"
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "site.trade",
+                    "operator": "equals",
+                    "value": "climatique",
+                    "description": "HVAC"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "8fe7c1f1",
+            "name": "Go To Previous Trade",
+            "intent": "The Métier précédent link opens the preceding trade, from the first back to the last.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "site.trade",
+                "value": {
+                  "kind": "switch",
+                  "cases": [
+                    {
+                      "when": {
+                        "left": "site.trade",
+                        "operator": "equals",
+                        "right": "industriel"
+                      },
+                      "then": {
+                        "kind": "literal",
+                        "value": "froid"
+                      }
+                    },
+                    {
+                      "when": {
+                        "left": "site.trade",
+                        "operator": "equals",
+                        "right": "froid"
+                      },
+                      "then": {
+                        "kind": "literal",
+                        "value": "electricite"
+                      }
+                    },
+                    {
+                      "when": {
+                        "left": "site.trade",
+                        "operator": "equals",
+                        "right": "electricite"
+                      },
+                      "then": {
+                        "kind": "literal",
+                        "value": "desenfumage"
+                      }
+                    },
+                    {
+                      "when": {
+                        "left": "site.trade",
+                        "operator": "equals",
+                        "right": "desenfumage"
+                      },
+                      "then": {
+                        "kind": "literal",
+                        "value": "incendie"
+                      }
+                    },
+                    {
+                      "when": {
+                        "left": "site.trade",
+                        "operator": "equals",
+                        "right": "incendie"
+                      },
+                      "then": {
+                        "kind": "literal",
+                        "value": "climatique"
+                      }
+                    }
+                  ],
+                  "default": {
+                    "kind": "literal",
+                    "value": "industriel"
+                  }
+                },
+                "description": "The previous trade, looping.",
+                "id": "532ea352"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "actor": "user",
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The link is on the trade page, under the viewer when it is open.",
+                "description": "Nothing happens.",
+                "id": "35115abf"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "bff3aab6",
+                "name": "First trade loops to the last",
+                "description": "Before Génie climatique comes Génie industriel.",
+                "stateOverrides": [
+                  {
+                    "path": "site.page",
+                    "value": "trade"
+                  },
+                  {
+                    "path": "site.trade",
+                    "value": "climatique"
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "site.trade",
+                    "operator": "equals",
+                    "value": "industriel",
+                    "description": "Industrial engineering"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "5649219f",
+            "name": "Open Installation Photo",
+            "intent": "An installation photo opens the viewer on the trade's photo set. Without JavaScript the thumbnail links to the large image.",
+            "parameters": [
+              {
+                "id": "68b8af76",
+                "name": "index",
+                "type": "number",
+                "required": true,
+                "description": "Position of the photo chosen.",
+                "defaultValue": 1,
+                "validations": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "min",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "id": "2e0b5198",
+                "name": "count",
+                "type": "number",
+                "required": true,
+                "description": "Number of photos in the trade's set.",
+                "defaultValue": 4,
+                "validations": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "min",
+                    "value": 1
+                  }
+                ]
+              }
+            ],
+            "requiredStates": [],
+            "rules": [
+              {
+                "id": "17e47a34",
+                "category": "validation",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "index"
+                  },
+                  "operator": "greater_than",
+                  "right": {
+                    "kind": "param",
+                    "name": "count"
+                  }
+                },
+                "effect": {
+                  "type": "block_action",
+                  "reason": "There is no photo at that position.",
+                  "description": "Only existing thumbnails can be chosen.",
+                  "id": "80e06f98"
+                },
+                "description": "The photo must belong to the set."
+              }
+            ],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "viewer.open",
+                "value": true,
+                "description": "Viewer opens.",
+                "id": "34c01bce"
+              },
+              {
+                "type": "set_state",
+                "path": "viewer.set",
+                "value": "trade",
+                "description": "Paging through the trade's installations.",
+                "id": "09f4287e"
+              },
+              {
+                "type": "set_state",
+                "path": "viewer.index",
+                "value": {
+                  "kind": "param",
+                  "name": "index"
+                },
+                "description": "The chosen photo.",
+                "id": "f0a77169"
+              },
+              {
+                "type": "set_state",
+                "path": "viewer.count",
+                "value": {
+                  "kind": "param",
+                  "name": "count"
+                },
+                "description": "Size of the set.",
+                "id": "e13e9043"
+              },
+              {
+                "type": "transition_surface",
+                "target": "59f1acf4",
+                "description": "The viewer opens over the page.",
+                "id": "3b3fa3fc"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "actor": "user",
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The photos are on the trade page.",
+                "description": "Nothing happens.",
+                "id": "a6027f1e"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "e962be6d",
+                "name": "Second installation photo",
+                "description": "Choosing the second of four photos opens the viewer on it.",
+                "stateOverrides": [
+                  {
+                    "path": "site.page",
+                    "value": "trade"
+                  },
+                  {
+                    "path": "site.trade",
+                    "value": "electricite"
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "index",
+                    "value": 2
+                  },
+                  {
+                    "parameterName": "count",
+                    "value": 4
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "viewer.open",
+                    "operator": "equals",
+                    "value": true,
+                    "description": "Viewer open"
+                  },
+                  {
+                    "path": "viewer.index",
+                    "operator": "equals",
+                    "value": 2,
+                    "description": "On photo 2"
+                  }
+                ],
+                "expectedTransition": "59f1acf4"
+              }
+            ]
+          },
+          {
+            "id": "3ca93a05",
+            "name": "Ask About This Trade",
+            "intent": "The Parler de votre projet buttons next to the scope and in the call to action open the contact page with this trade pre-selected (?metier=<trade>).",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "site.page",
+                "value": "contact",
+                "description": "Contact page, the trade pre-selected in the form.",
+                "id": "53a16f4d"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "actor": "user",
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The buttons are on the trade page.",
+                "description": "Nothing happens.",
+                "id": "f8d7fdc1"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "c7ca196c",
+                "name": "Ask about refrigeration",
+                "description": "The enquiry button of the refrigeration page opens the contact page.",
+                "stateOverrides": [
+                  {
+                    "path": "site.page",
+                    "value": "trade"
+                  },
+                  {
+                    "path": "site.trade",
+                    "value": "froid"
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "site.page",
+                    "operator": "equals",
+                    "value": "contact",
+                    "description": "Contact page"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "3c8005db",
+            "name": "Show matching projects on each trade page",
+            "intent": "Each trade page lists the references and project sheets done in that trade, with a link to each.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [],
+            "emittedEvents": [],
+            "transitions": [],
+            "evolution": {
+              "rationale": "A buyer reading about smoke control wants proof that ALFEC has done it before, right there on the page.",
+              "category": "competitor",
+              "source": "cegelec-clim-ouest.fr (client's reference site)"
+            }
+          }
+        ],
+        "rules": [
+          {
+            "id": "ee314886",
+            "category": "ux_feedback",
+            "condition": {
+              "kind": "any",
+              "conditions": [
+                {
+                  "left": "site.page",
+                  "operator": "not_equals",
+                  "right": "trade"
+                },
+                {
+                  "left": "viewer.open",
+                  "operator": "equals",
+                  "right": true
+                },
+                {
+                  "left": "nav.menuOpen",
+                  "operator": "equals",
+                  "right": true
+                }
+              ]
+            },
+            "effect": {
+              "type": "block_action",
+              "reason": "No trade page is usable on screen.",
+              "description": "Trade page actions need the page, not covered by the menu drawer or the viewer.",
+              "id": "1730d545"
+            },
+            "description": "No trade page is usable on screen."
+          }
+        ],
+        "invariants": [],
+        "transitions": [
+          {
+            "id": "569c7789",
+            "target": "59f1acf4",
+            "label": "Enlarge photo",
+            "description": "Installation photos open the viewer."
+          }
+        ]
+      },
+      {
+        "id": "da0d9816",
+        "name": "Projects",
+        "type": "screen",
+        "description": "Projects page (/realisations/ and /en/projects/): the Sonelgaz Tiaret and Banque BEA Oran references, photo galleries grouped by field, and the NAPEC 2018 exhibition with its photos and YouTube video.",
+        "stateDefinitions": [],
+        "actions": [
+          {
+            "id": "031dbec0",
+            "name": "Open Project Photo",
+            "intent": "A photo of a gallery group (Climatisation, Désenfumage, Câblage, Industrie, Banques et établissements publics) or of the NAPEC 2018 exhibition opens the viewer on its own set.",
+            "parameters": [
+              {
+                "id": "6eec6dda",
+                "name": "set",
+                "type": "enum",
+                "required": true,
+                "description": "Gallery group or NAPEC photos.",
+                "enumValues": [
+                  "projects",
+                  "napec"
+                ],
+                "defaultValue": "projects"
+              },
+              {
+                "id": "526df073",
+                "name": "index",
+                "type": "number",
+                "required": true,
+                "description": "Position of the photo chosen.",
+                "defaultValue": 1,
+                "validations": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "min",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "id": "bee6861b",
+                "name": "count",
+                "type": "number",
+                "required": true,
+                "description": "Number of photos in the set (2 or 3).",
+                "defaultValue": 3,
+                "validations": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "min",
+                    "value": 1
+                  }
+                ]
+              }
+            ],
+            "requiredStates": [],
+            "rules": [
+              {
+                "id": "6cb1666f",
+                "category": "validation",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "index"
+                  },
+                  "operator": "greater_than",
+                  "right": {
+                    "kind": "param",
+                    "name": "count"
+                  }
+                },
+                "effect": {
+                  "type": "block_action",
+                  "reason": "There is no photo at that position.",
+                  "description": "Only existing thumbnails can be chosen.",
+                  "id": "86fd6c79"
+                },
+                "description": "The photo must belong to the set."
+              }
+            ],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "viewer.open",
+                "value": true,
+                "description": "Viewer opens.",
+                "id": "af692277"
+              },
+              {
+                "type": "set_state",
+                "path": "viewer.set",
+                "value": {
+                  "kind": "param",
+                  "name": "set"
+                },
+                "description": "Paging through that set only.",
+                "id": "9ed15ab5"
+              },
+              {
+                "type": "set_state",
+                "path": "viewer.index",
+                "value": {
+                  "kind": "param",
+                  "name": "index"
+                },
+                "description": "The chosen photo.",
+                "id": "9b5ae74d"
+              },
+              {
+                "type": "set_state",
+                "path": "viewer.count",
+                "value": {
+                  "kind": "param",
+                  "name": "count"
+                },
+                "description": "Size of the set.",
+                "id": "06bec96d"
+              },
+              {
+                "type": "transition_surface",
+                "target": "59f1acf4",
+                "description": "The viewer opens over the page.",
+                "id": "7f341277"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "actor": "user",
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The photos are on the projects page.",
+                "description": "Nothing happens.",
+                "id": "d3f7cb2a"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "67f655f6",
+                "name": "NAPEC photo",
+                "description": "A NAPEC photo opens the viewer on the three exhibition photos.",
+                "stateOverrides": [
+                  {
+                    "path": "site.page",
+                    "value": "projects"
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "set",
+                    "value": "napec"
+                  },
+                  {
+                    "parameterName": "index",
+                    "value": 1
+                  },
+                  {
+                    "parameterName": "count",
+                    "value": 3
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "viewer.set",
+                    "operator": "equals",
+                    "value": "napec",
+                    "description": "NAPEC set"
+                  },
+                  {
+                    "path": "viewer.count",
+                    "operator": "equals",
+                    "value": 3,
+                    "description": "Three photos"
+                  }
+                ],
+                "expectedTransition": "59f1acf4"
+              }
+            ]
+          },
+          {
+            "id": "34c3da69",
+            "name": "Watch NAPEC Video",
+            "intent": "The Voir la vidéo sur YouTube link opens the NAPEC 2018 video in a new tab, with rel=noopener noreferrer.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "external.lastOpened",
+                "value": "napecVideo",
+                "description": "Video opened in a new tab.",
+                "id": "c1c669b6"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "actor": "user",
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The link is on the projects page.",
+                "description": "Nothing happens.",
+                "id": "f4edf516"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "b1a0c33c",
+                "name": "Open the video",
+                "description": "The video opens in a new tab.",
+                "stateOverrides": [
+                  {
+                    "path": "site.page",
+                    "value": "projects"
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "external.lastOpened",
+                    "operator": "equals",
+                    "value": "napecVideo",
+                    "description": "Video opened"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "rules": [
+          {
+            "id": "71a26da3",
+            "category": "ux_feedback",
+            "condition": {
+              "kind": "any",
+              "conditions": [
+                {
+                  "left": "site.page",
+                  "operator": "not_equals",
+                  "right": "projects"
+                },
+                {
+                  "left": "viewer.open",
+                  "operator": "equals",
+                  "right": true
+                },
+                {
+                  "left": "nav.menuOpen",
+                  "operator": "equals",
+                  "right": true
+                }
+              ]
+            },
+            "effect": {
+              "type": "block_action",
+              "reason": "The projects page is not usable on screen.",
+              "description": "Projects actions need the page, not covered by the menu drawer or the viewer.",
+              "id": "cab8fe30"
+            },
+            "description": "The projects page is not usable on screen."
+          }
+        ],
+        "invariants": [],
+        "transitions": [
+          {
+            "id": "1c7e18bb",
+            "target": "59f1acf4",
+            "label": "Enlarge photo",
+            "description": "Gallery and NAPEC photos open the viewer."
+          }
+        ]
+      }
+    ],
+    "personas": [],
+    "resources": [],
+    "entities": [],
+    "events": [],
+    "createdAt": "2026-09-26T11:06:22.638Z",
+    "updatedAt": "2026-10-31T16:48:01.933Z",
+    "tags": [
+      {
+        "type": "core",
+        "value": "discover"
+      }
+    ],
+    "elementVersions": {
+      "invariant:46a3fb90": "2026-09-26T11:12:46.847Z",
+      "invariant:2aaf29be": "2026-09-27T15:57:02.659Z",
+      "invariant:4bfa35d7": "2026-09-27T15:57:02.659Z",
+      "invariant:0d4c08fd": "2026-09-27T15:57:02.659Z",
+      "invariant:067c89e3": "2026-09-27T15:57:02.659Z",
+      "criterion:5de4c6bf": "2026-09-27T15:57:17.734Z",
+      "criterion:24af514c": "2026-09-27T15:57:17.765Z",
+      "criterion:fc18ab1e": "2026-09-26T11:12:46.847Z",
+      "surface:6c0c0b52": "2026-09-27T15:51:52.785Z",
+      "transition:ef17dde8": "2026-09-26T11:14:10.419Z",
+      "action:bf713687": "2026-09-27T15:54:28.740Z",
+      "scenario:816dc426": "2026-09-26T11:12:46.847Z",
+      "action:2896acb5": "2026-09-27T15:54:28.740Z",
+      "rule:447d8ebd": "2026-09-27T15:54:28.740Z",
+      "rule:ff9232ba": "2026-09-27T15:54:28.740Z",
+      "rule:8bcd267b": "2026-09-27T15:54:28.740Z",
+      "rule:efb7266b": "2026-09-27T15:54:28.740Z",
+      "rule:db4dbf77": "2026-09-27T15:54:28.740Z",
+      "scenario:5b8fc652": "2026-09-27T15:54:28.740Z",
+      "scenario:fdc24fe6": "2026-09-27T15:54:28.740Z",
+      "scenario:0c8e52db": "2026-09-27T15:54:28.740Z",
+      "scenario:9189e4eb": "2026-09-27T15:54:28.740Z",
+      "action:af3b4239": "2026-09-27T15:54:28.740Z",
+      "scenario:5e68138d": "2026-09-27T15:54:28.740Z",
+      "scenario:2b5d5c4b": "2026-09-27T15:54:28.740Z",
+      "surface:58347ae9": "2026-09-27T15:51:52.785Z",
+      "state:site.language": "2026-09-27T15:51:52.785Z",
+      "state:nav.menuOpen": "2026-09-27T15:51:52.785Z",
+      "state:viewer.open": "2026-09-27T15:51:52.785Z",
+      "state:viewer.set": "2026-09-27T15:51:52.785Z",
+      "state:external.lastOpened": "2026-09-27T15:51:52.785Z",
+      "state:request.redirected": "2026-09-27T15:51:52.785Z",
+      "state:site.page": "2026-09-27T15:51:52.785Z",
+      "state:site.trade": "2026-09-27T15:51:52.785Z",
+      "state:site.reducedMotion": "2026-09-27T15:51:52.785Z",
+      "state:home.slide": "2026-09-27T15:51:52.785Z",
+      "state:home.slideshow": "2026-09-27T15:51:52.785Z",
+      "state:home.openPanel": "2026-09-27T15:51:52.785Z",
+      "state:viewer.index": "2026-09-27T15:51:52.785Z",
+      "state:viewer.count": "2026-09-27T15:51:52.785Z",
+      "rule:8082548a": "2026-09-27T15:51:52.785Z",
+      "transition:93eac42c": "2026-09-27T15:55:18.246Z",
+      "transition:4bae039d": "2026-09-27T15:55:18.246Z",
+      "transition:8e06cc49": "2026-09-27T15:55:18.246Z",
+      "action:7599a07e": "2026-09-27T15:55:18.246Z",
+      "rule:bdb172f2": "2026-09-27T15:55:18.246Z",
+      "scenario:69b4ea8c": "2026-09-27T15:55:18.246Z",
+      "action:52ae5b96": "2026-09-27T15:55:18.246Z",
+      "rule:5e3e4253": "2026-09-27T15:55:18.246Z",
+      "scenario:20c0c03e": "2026-09-27T15:55:18.246Z",
+      "action:df0b881c": "2026-09-27T15:55:18.246Z",
+      "scenario:fcd79cde": "2026-09-27T15:55:18.246Z",
+      "action:a2694293": "2026-09-27T20:42:21.170Z",
+      "rule:ebda88ca": "2026-09-27T15:55:18.246Z",
+      "rule:27e8c8ea": "2026-09-27T15:55:18.246Z",
+      "rule:089eb420": "2026-09-27T15:55:18.246Z",
+      "scenario:5823220d": "2026-09-27T15:55:18.246Z",
+      "scenario:aca62141": "2026-09-27T15:55:18.246Z",
+      "action:c1ed14c5": "2026-09-27T15:55:18.246Z",
+      "scenario:e531653a": "2026-09-27T15:55:18.246Z",
+      "action:515c6c93": "2026-09-27T15:55:18.246Z",
+      "scenario:a1d6d7c9": "2026-09-27T15:55:18.246Z",
+      "action:325e2d83": "2026-09-27T15:55:18.246Z",
+      "rule:112c3f24": "2026-09-27T15:55:18.246Z",
+      "scenario:e4da407b": "2026-09-27T15:55:18.246Z",
+      "scenario:2af9fbbd": "2026-09-27T15:55:18.246Z",
+      "action:f7ae7206": "2026-09-27T15:57:17.828Z",
+      "surface:383e8321": "2026-10-31T16:39:44.407Z",
+      "state:home.slideshowHeld": "2026-10-31T16:34:02.094Z",
+      "rule:eca1e9b1": "2026-09-27T16:07:08.072Z",
+      "transition:be09e4fe": "2026-09-27T15:57:02.659Z",
+      "transition:f07bcbd5": "2026-09-27T20:42:21.132Z",
+      "transition:5b0298fd": "2026-09-27T15:57:02.659Z",
+      "action:abc0235d": "2026-09-27T15:57:02.659Z",
+      "rule:41f59c12": "2026-09-27T15:57:02.659Z",
+      "scenario:6822fc03": "2026-09-27T15:57:02.659Z",
+      "scenario:0dc53251": "2026-09-27T15:57:02.659Z",
+      "scenario:941e2b05": "2026-09-27T15:57:02.659Z",
+      "action:3528a85b": "2026-09-27T15:57:02.659Z",
+      "scenario:03703e65": "2026-09-27T15:57:02.659Z",
+      "action:8c93040a": "2026-09-27T15:57:02.659Z",
+      "scenario:56cfdb25": "2026-09-27T15:57:02.659Z",
+      "action:da637d0b": "2026-09-27T15:57:02.659Z",
+      "rule:d5a0f82f": "2026-09-27T15:57:02.659Z",
+      "rule:45715e58": "2026-10-31T16:34:02.094Z",
+      "scenario:43fa1110": "2026-09-27T15:57:02.659Z",
+      "scenario:91ec1ec5": "2026-09-27T15:57:02.659Z",
+      "scenario:5f3d0feb": "2026-10-31T16:34:02.094Z",
+      "action:f3634fcf": "2026-10-31T16:34:02.094Z",
+      "scenario:ada43872": "2026-09-27T15:57:02.659Z",
+      "action:acecd60b": "2026-09-27T15:57:02.659Z",
+      "scenario:b78a5a28": "2026-09-27T15:57:02.659Z",
+      "action:a9ba0470": "2026-10-31T16:34:02.094Z",
+      "scenario:29a44e82": "2026-10-31T16:34:02.094Z",
+      "scenario:df7481ac": "2026-10-31T16:34:02.094Z",
+      "surface:59f1acf4": "2026-09-27T15:51:52.785Z",
+      "rule:6114975d": "2026-09-26T11:12:46.847Z",
+      "transition:3a0d3c22": "2026-09-26T11:17:26.708Z",
+      "action:21510f6c": "2026-09-27T15:57:02.659Z",
+      "rule:05e4f303": "2026-09-27T15:57:02.659Z",
+      "rule:a285dc21": "2026-09-27T15:57:02.659Z",
+      "scenario:a1919672": "2026-09-27T15:57:02.659Z",
+      "scenario:2f328e33": "2026-09-27T15:57:02.659Z",
+      "scenario:0820c808": "2026-09-27T15:57:02.659Z",
+      "action:a13465f6": "2026-09-27T15:57:02.659Z",
+      "scenario:c9c606b0": "2026-09-27T15:57:02.659Z",
+      "surface:87d29428": "2026-09-27T15:51:52.785Z",
+      "rule:891547e1": "2026-09-27T16:07:08.072Z",
+      "transition:6d98dfad": "2026-09-27T15:57:02.659Z",
+      "action:ad99eabc": "2026-09-27T15:57:02.659Z",
+      "scenario:0faa42f4": "2026-09-27T15:57:02.659Z",
+      "surface:49c64dc3": "2026-09-27T15:51:52.785Z",
+      "rule:ee314886": "2026-09-27T16:07:08.072Z",
+      "transition:569c7789": "2026-09-27T15:57:02.659Z",
+      "action:461eab61": "2026-09-27T15:57:02.659Z",
+      "scenario:a3c5247f": "2026-09-27T15:57:02.659Z",
+      "scenario:ef762535": "2026-09-27T15:57:02.659Z",
+      "action:8fe7c1f1": "2026-09-27T15:57:02.659Z",
+      "scenario:bff3aab6": "2026-09-27T15:57:02.659Z",
+      "action:5649219f": "2026-09-27T15:57:02.659Z",
+      "rule:17e47a34": "2026-09-27T15:57:02.659Z",
+      "scenario:e962be6d": "2026-09-27T15:57:02.659Z",
+      "action:3ca93a05": "2026-09-27T15:57:02.659Z",
+      "scenario:c7ca196c": "2026-09-27T15:57:02.659Z",
+      "action:3c8005db": "2026-09-27T15:57:17.797Z",
+      "surface:da0d9816": "2026-09-27T15:51:52.785Z",
+      "rule:71a26da3": "2026-09-27T16:07:08.072Z",
+      "transition:1c7e18bb": "2026-09-27T15:57:02.659Z",
+      "action:031dbec0": "2026-09-27T15:57:02.659Z",
+      "rule:6cb1666f": "2026-09-27T15:57:02.659Z",
+      "scenario:67f655f6": "2026-09-27T15:57:02.659Z",
+      "action:34c3da69": "2026-09-27T15:57:02.659Z",
+      "scenario:b1a0c33c": "2026-09-27T15:57:02.659Z"
+    },
+    "featureInvariants": [
+      {
+        "id": "46a3fb90",
+        "name": "An open viewer always has a photo set",
+        "condition": {
+          "kind": "any",
+          "conditions": [
+            {
+              "left": "viewer.open",
+              "operator": "equals",
+              "right": false
+            },
+            {
+              "left": "viewer.set",
+              "operator": "not_equals",
+              "right": "none"
+            }
+          ]
+        },
+        "message": "Viewer open without photos.",
+        "description": "The viewer only opens from a photo that belongs to a set."
+      },
+      {
+        "id": "2aaf29be",
+        "name": "Opening photo stays within the four photos",
+        "condition": {
+          "kind": "all",
+          "conditions": [
+            {
+              "left": "home.slide",
+              "operator": "greater_or_equal",
+              "right": 1
+            },
+            {
+              "left": "home.slide",
+              "operator": "lower_or_equal",
+              "right": 4
+            }
+          ]
+        },
+        "message": "Opening photo out of range.",
+        "description": "The slideshow loops over exactly four photos."
+      },
+      {
+        "id": "4bfa35d7",
+        "name": "Viewer position stays within its set",
+        "condition": {
+          "kind": "any",
+          "conditions": [
+            {
+              "left": "viewer.open",
+              "operator": "equals",
+              "right": false
+            },
+            {
+              "kind": "all",
+              "conditions": [
+                {
+                  "left": "viewer.index",
+                  "operator": "greater_or_equal",
+                  "right": 1
+                },
+                {
+                  "left": "viewer.index",
+                  "operator": "lower_or_equal",
+                  "right": {
+                    "kind": "state",
+                    "path": "viewer.count"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "message": "Viewer shows a photo outside its set.",
+        "description": "Paging loops inside the set."
+      },
+      {
+        "id": "0d4c08fd",
+        "name": "A trade page always names a trade",
+        "condition": {
+          "kind": "any",
+          "conditions": [
+            {
+              "left": "site.page",
+              "operator": "not_equals",
+              "right": "trade"
+            },
+            {
+              "left": "site.trade",
+              "operator": "not_equals",
+              "right": "none"
+            }
+          ]
+        },
+        "message": "Trade page without a trade.",
+        "description": "An unknown trade address shows the not-found page instead."
+      },
+      {
+        "id": "067c89e3",
+        "name": "Menu drawer and viewer are never open together",
+        "condition": {
+          "kind": "any",
+          "conditions": [
+            {
+              "left": "nav.menuOpen",
+              "operator": "equals",
+              "right": false
+            },
+            {
+              "left": "viewer.open",
+              "operator": "equals",
+              "right": false
+            }
+          ]
+        },
+        "message": "Drawer and viewer open at once.",
+        "description": "The open drawer makes the page inert, so no photo can open; the viewer covers the page, so the menu cannot open."
+      }
+    ],
+    "reachabilityGoals": [
+      {
+        "id": "4f1432cd",
+        "name": "Home always reachable",
+        "kind": "always_reachable",
+        "condition": {
+          "left": "site.page",
+          "operator": "equals",
+          "right": "home"
+        },
+        "description": "From any state a visitor can get back to the home page: close the viewer, then use the logo or the Home link."
+      },
+      {
+        "id": "825736a0",
+        "name": "Contact reachable",
+        "kind": "always_reachable",
+        "condition": {
+          "left": "site.page",
+          "operator": "equals",
+          "right": "contact"
+        },
+        "description": "The contact page can always be reached, from the navigation, the project button or the call to action."
+      },
+      {
+        "id": "fd9318ab",
+        "name": "Each trade can be read",
+        "kind": "reachable",
+        "condition": {
+          "kind": "all",
+          "conditions": [
+            {
+              "left": "site.page",
+              "operator": "equals",
+              "right": "trade"
+            },
+            {
+              "left": "site.trade",
+              "operator": "equals",
+              "right": "industriel"
+            }
+          ]
+        },
+        "description": "Every trade page can be read (here Génie industriel)."
+      },
+      {
+        "id": "3e8ff6f3",
+        "name": "English reachable",
+        "kind": "reachable",
+        "condition": {
+          "left": "site.language",
+          "operator": "equals",
+          "right": "en"
+        },
+        "description": "The English site is reachable."
+      }
+    ],
+    "acceptanceCriteria": [
+      {
+        "id": "5de4c6bf",
+        "title": "Indexed URLs keep resolving",
+        "given": "the addresses indexed for the old site: /, /index.php, /index.php?lg=fr and /index.php?lg=en, plus the old form's ?msg=success and ?msg=success_en",
+        "when": "a crawler or a bookmark requests any of them",
+        "then": "it reaches the matching page of the new site in the right language, directly or through a 301 (or a 303 for the old confirmation addresses)",
+        "expectedOutcome": "success",
+        "description": "Implemented by public/index.php; checked by tests/e2e/legacy.spec.ts."
+      },
+      {
+        "id": "24af514c",
+        "title": "Each language has its own title and description",
+        "given": "every French and English page",
+        "when": "it is served",
+        "then": "it carries a title, a meta description and html lang in its own language, a canonical URL, hreflang links to its counterpart and to x-default, and appears in the sitemap with those alternates",
+        "expectedOutcome": "success",
+        "description": "Checked by tests/e2e/routes.spec.ts for all 22 pages."
+      },
+      {
+        "id": "fc18ab1e",
+        "title": "All captured content stays available in both languages",
+        "given": "the company facts and FR/EN copy in the audit (sections 7 and 8)",
+        "when": "the redesign ships",
+        "then": "every fact and every trade, sector, competence and commitment text is still published in French and English",
+        "expectedOutcome": "success",
+        "description": "The redesign may restructure content, not drop it."
+      }
+    ]
+  }
+}

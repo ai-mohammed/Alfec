@@ -1,0 +1,217 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import Gallery from '../components/Gallery.astro';
+import EnquiryBand from '../components/EnquiryBand.astro';
+import { trades, type Trade } from '../data/trades';
+import { photos } from '../data/photos';
+import { pagePath, tradePath } from '../i18n/routes.mjs';
+import { tx, ui, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  trade: Trade;
+}
+
+const { lang, trade } = Astro.props;
+const name = tx(trade.name, lang);
+const index = trades.findIndex((t) => t.key === trade.key);
+const prev = trades[(index - 1 + trades.length) % trades.length];
+const next = trades[(index + 1) % trades.length];
+const gallery = trade.gallery.filter((k) => k !== trade.cover);
+
+const copy = {
+  title: { fr: `${trade.name.fr} · ALFEC Oran`, en: `${trade.name.en} · ALFEC Oran` },
+  number: { fr: `Métier ${trade.number}`, en: `Trade ${trade.number}` },
+  scopeTitle: { fr: 'Domaines', en: 'Scope' },
+  galleryKicker: { fr: 'Sur le terrain', en: 'On site' },
+  galleryTitle: { fr: 'Installations', en: 'Installations' },
+  otherTrades: { fr: 'Les autres métiers', en: 'Other trades' },
+  prev: { fr: 'Métier précédent', en: 'Previous trade' },
+  next: { fr: 'Métier suivant', en: 'Next trade' },
+};
+
+const serviceLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name,
+  serviceType: name,
+  description: tx(trade.summary, lang),
+  provider: { '@id': 'https://alfec.net/#organization' },
+  areaServed: { '@type': 'Country', name: lang === 'fr' ? 'Algérie' : 'Algeria' },
+};
+const arrow = '<path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square" />';
+---
+
+<Base
+  lang={lang}
+  title={tx(copy.title, lang)}
+  description={tx(trade.summary, lang)}
+  current="trades"
+  shareImage={photos[trade.cover].src}
+  jsonLd={[serviceLd]}
+>
+  <PageHead
+    lang={lang}
+    title={name}
+    number={tx(copy.number, lang)}
+    lead={tx(trade.summary, lang)}
+    trail={[{ label: tx(ui.nav.trades, lang), href: pagePath('trades', lang) }]}
+    image={photos[trade.cover].src}
+  />
+
+  <section class="section" aria-label={name}>
+    <div class="wrap grid detail">
+      <div class="text" data-reveal>
+        {tx(trade.body, lang).map((para, i) => <p class:list={{ big: i === 0 }}>{para}</p>)}
+      </div>
+      <div class="side" data-reveal style="--d: 0.1s">
+        <h2 class="kicker scope-title">{tx(copy.scopeTitle, lang)}</h2>
+        <ul class="scope" role="list">
+          {tx(trade.scope, lang).map((s) => <li>{s}</li>)}
+        </ul>
+        <a class="btn" href={`${pagePath('contact', lang)}?metier=${trade.key}`}>
+          <span>{tx(ui.cta.project, lang)}</span>
+          <svg class="arrow" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" set:html={arrow} />
+        </a>
+      </div>
+    </div>
+  </section>
+
+  {
+    gallery.length > 0 && (
+      <section class="section light" aria-labelledby="installations-title">
+        <div class="wrap">
+          <div class="sec-head">
+            <div>
+              <p class="kicker">{tx(copy.galleryKicker, lang)}</p>
+              <h2 id="installations-title">{tx(copy.galleryTitle, lang)}</h2>
+            </div>
+          </div>
+          <Gallery lang={lang} items={gallery} label={`${tx(copy.galleryTitle, lang)} · ${name}`} context={name} />
+        </div>
+      </section>
+    )
+  }
+
+  <nav class="pager" aria-label={tx(copy.otherTrades, lang)}>
+    <div class="wrap pager-inner">
+      <a class="pager-link" href={tradePath(prev.key, lang)} rel="prev">
+        <span class="pager-dir">← {tx(copy.prev, lang)}</span>
+        <span class="pager-name">{tx(prev.name, lang)}</span>
+      </a>
+      <a class="pager-link to-next" href={tradePath(next.key, lang)} rel="next">
+        <span class="pager-dir">{tx(copy.next, lang)} →</span>
+        <span class="pager-name">{tx(next.name, lang)}</span>
+      </a>
+    </div>
+  </nav>
+
+  <EnquiryBand lang={lang} trade={trade.key} />
+</Base>
+
+<style>
+  .detail {
+    row-gap: var(--s-7);
+    align-items: start;
+  }
+
+  .text {
+    grid-column: 1 / span 7;
+    color: var(--fg-2);
+    max-width: 64ch;
+  }
+
+  .big {
+    font-size: clamp(1.3rem, 1.1rem + 0.6vw, 1.7rem);
+    font-weight: 500;
+    line-height: 1.45;
+    color: var(--fg);
+  }
+
+  .side {
+    grid-column: 9 / span 4;
+    display: grid;
+    gap: var(--s-5);
+    justify-items: start;
+  }
+
+  .scope {
+    list-style: none;
+    width: 100%;
+    border-top: 1px solid var(--edge);
+  }
+
+  .scope li {
+    padding-block: var(--s-3);
+    border-bottom: 1px solid var(--edge);
+    font-family: var(--cond);
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.1;
+    text-transform: uppercase;
+  }
+
+  .pager {
+    border-top: 1px solid var(--line);
+  }
+
+  .pager-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .pager-link {
+    display: grid;
+    gap: var(--s-2);
+    padding-block: clamp(32px, 4vw, 56px);
+    text-decoration: none;
+  }
+
+  .pager-link.to-next {
+    padding-left: var(--col-gap);
+    border-left: 1px solid var(--line);
+    text-align: right;
+  }
+
+  .pager-dir {
+    font-family: var(--cond);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .pager-name {
+    font-family: var(--cond);
+    font-size: clamp(1.8rem, 1.3rem + 1.6vw, 3rem);
+    font-weight: 800;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .pager-link:hover .pager-name {
+    color: var(--accent);
+  }
+
+  @media (max-width: 1023px) {
+    .text,
+    .side {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 599px) {
+    .pager-inner {
+      grid-template-columns: 1fr;
+    }
+
+    .pager-link.to-next {
+      padding-left: 0;
+      border-left: 0;
+      border-top: 1px solid var(--line);
+      text-align: left;
+    }
+  }
+</style>

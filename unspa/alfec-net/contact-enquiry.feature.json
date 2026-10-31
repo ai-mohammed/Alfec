@@ -1,0 +1,3429 @@
+{
+  "format": "unspaghettit",
+  "version": 1,
+  "feature": {
+    "id": "9505fbbc",
+    "name": "Contact Enquiry",
+    "description": "How a visitor reaches ALFEC from the contact page, in French or English. The page shows the head-office details, a map loaded only on request, and one-tap phone and e-mail links. The project enquiry form checks every field in the browser and posts to contact/send.php. The server validates everything again, checks the optional attachment, filters automated senders invisibly (hidden field, timing token, rate limit, origin) and e-mails ALFEC. The visitor lands on a confirmation page in their language, or sees precise errors and keeps what they typed. Without JavaScript the same send ends on the confirmation or the error page. Rebuilt in September 2026.",
+    "surfaces": [
+      {
+        "id": "eb28f85f",
+        "name": "Contact Page",
+        "type": "screen",
+        "description": "/contact/ and /en/contact/: head-office details (38, Rue El Moudjahid Kacha Lahouari, Coopérative Tekkouk Adda, Canastel, 31000 Oran; +213 (0)41 73 73 37 and 38; mobile +213 (0)555 07 19 30; fax +213 (0)41 73 73 39; contact@alfec.net), a locator map that loads OpenStreetMap only on request, links to directions, and the project enquiry form. Below 1024 px the form comes first, with a one-line phone and e-mail reminder above it.",
+        "stateDefinitions": [
+          {
+            "id": "987190e2",
+            "path": "contact.mapLoaded",
+            "type": "boolean",
+            "defaultValue": false,
+            "description": "The OpenStreetMap embed was requested and is shown."
+          },
+          {
+            "id": "7b01dcc6",
+            "path": "contact.lastChannel",
+            "type": "enum",
+            "defaultValue": "none",
+            "enumValues": [
+              "none",
+              "phone",
+              "mobile",
+              "email"
+            ],
+            "description": "Last direct contact link used."
+          }
+        ],
+        "actions": [
+          {
+            "id": "bd0eccc4",
+            "name": "Call Or E-mail ALFEC",
+            "intent": "Every phone number and the e-mail address are tel: and mailto: links: the header call button, the drawer, the contact details, the call to action, the footer and the confirmation page. On a phone one tap starts the call or the e-mail.",
+            "parameters": [
+              {
+                "id": "d00a4030",
+                "name": "channel",
+                "type": "enum",
+                "required": true,
+                "description": "Link used.",
+                "enumValues": [
+                  "phone",
+                  "mobile",
+                  "email"
+                ],
+                "defaultValue": "phone"
+              }
+            ],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "contact.lastChannel",
+                "value": {
+                  "kind": "param",
+                  "name": "channel"
+                },
+                "description": "The phone or mail app opens.",
+                "id": "00db7796"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "scenarios": [
+              {
+                "id": "fef6152a",
+                "name": "Tap the mobile number",
+                "description": "The mobile number starts a call.",
+                "stateOverrides": [],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "channel",
+                    "value": "mobile"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "contact.lastChannel",
+                    "operator": "equals",
+                    "value": "mobile",
+                    "description": "Call started"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "d14358f4",
+            "name": "Open Contact Page",
+            "intent": "Open /contact/ or /en/contact/. With ?metier=<trade> (from a trade page's enquiry button) the Métier concerné menu starts on that trade; an unknown value is ignored. The map is not loaded yet.",
+            "parameters": [
+              {
+                "id": "4446c58e",
+                "name": "lang",
+                "type": "enum",
+                "required": true,
+                "description": "Page language.",
+                "enumValues": [
+                  "fr",
+                  "en"
+                ],
+                "defaultValue": "fr"
+              },
+              {
+                "id": "664229f3",
+                "name": "metier",
+                "type": "enum",
+                "required": true,
+                "description": "The ?metier= value, none when absent or unknown.",
+                "enumValues": [
+                  "none",
+                  "climatique",
+                  "incendie",
+                  "desenfumage",
+                  "electricite",
+                  "froid",
+                  "industriel"
+                ],
+                "defaultValue": "none"
+              }
+            ],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "site.language",
+                "value": {
+                  "kind": "param",
+                  "name": "lang"
+                },
+                "description": "Page language.",
+                "id": "ffcc4a87"
+              },
+              {
+                "type": "set_state",
+                "path": "enquiry.trade",
+                "value": {
+                  "kind": "param",
+                  "name": "metier"
+                },
+                "description": "Trade pre-selected from the address.",
+                "id": "76e5ce87"
+              },
+              {
+                "type": "set_state",
+                "path": "enquiry.status",
+                "value": "editing",
+                "description": "A fresh form.",
+                "id": "501d2148"
+              },
+              {
+                "type": "set_state",
+                "path": "enquiry.error",
+                "value": "none",
+                "description": "No error shown.",
+                "id": "7cd796a0"
+              },
+              {
+                "type": "set_state",
+                "path": "contact.mapLoaded",
+                "value": false,
+                "description": "Only the locator drawing is shown.",
+                "id": "c31dd9d6"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "actor": "user",
+            "scenarios": [
+              {
+                "id": "e7c71d9c",
+                "name": "From the smoke-control page",
+                "description": "/contact/?metier=desenfumage pre-selects Désenfumage.",
+                "stateOverrides": [],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "metier",
+                    "value": "desenfumage"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "enquiry.trade",
+                    "operator": "equals",
+                    "value": "desenfumage",
+                    "description": "Smoke control pre-selected"
+                  },
+                  {
+                    "path": "contact.mapLoaded",
+                    "operator": "equals",
+                    "value": false,
+                    "description": "No map loaded yet"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "fe633b36",
+            "name": "Load Map",
+            "intent": "Afficher la carte replaces the locator drawing with an OpenStreetMap embed of the head office. Nothing is requested from OpenStreetMap before. Directions (Google Maps) and OpenStreetMap links open in a new tab.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [
+              {
+                "id": "3936b3bc",
+                "category": "ux_feedback",
+                "condition": {
+                  "left": "contact.mapLoaded",
+                  "operator": "equals",
+                  "right": true
+                },
+                "effect": {
+                  "type": "block_action",
+                  "reason": "The map is already shown.",
+                  "description": "The button is gone once the map loads.",
+                  "id": "6adeb045"
+                },
+                "description": "The map loads once."
+              }
+            ],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "contact.mapLoaded",
+                "value": true,
+                "description": "Map embed shown.",
+                "id": "3d3e5892"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "actor": "user",
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The button no longer exists once the map is shown.",
+                "description": "Nothing happens.",
+                "id": "295e4dd9"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "65b98af2",
+                "name": "Show the map",
+                "description": "The button loads the map.",
+                "stateOverrides": [],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "contact.mapLoaded",
+                    "operator": "equals",
+                    "value": true,
+                    "description": "Map shown"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "48433e3d",
+            "name": "Add a WhatsApp contact button",
+            "intent": "Show a WhatsApp link next to the phone numbers that opens a chat with ALFEC's mobile number.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [],
+            "emittedEvents": [],
+            "transitions": [],
+            "evolution": {
+              "rationale": "Many clients in Algeria prefer to write on WhatsApp, and ALFEC mentioned it as a possible addition.",
+              "category": "ux",
+              "source": "client questionnaires"
+            }
+          }
+        ],
+        "rules": [],
+        "invariants": [],
+        "transitions": [
+          {
+            "id": "13f626cd",
+            "target": "d8f63efd",
+            "label": "Fill in the form",
+            "description": "The form sits beside the contact details; below 1024 px it comes first."
+          }
+        ]
+      },
+      {
+        "id": "d8f63efd",
+        "name": "Enquiry Form",
+        "type": "form",
+        "description": "Project enquiry form, posted to contact/send.php (multipart). Fieldsets Vous (name, organisation optional, role with Autre), Coordonnées (e-mail, one phone, city optional, country optional defaulting to Algeria) and Votre projet (trade optional, nature of works with Autre, activity with Autre, message, one optional attachment). A hidden field, a signed load-time token and a per-address rate limit filter automated sends without any puzzle. The browser checks every field, the server checks everything again; errors appear under each field and in a summary that links to them, and what was typed is kept.",
+        "stateDefinitions": [
+          {
+            "id": "8c5df6c5",
+            "path": "site.language",
+            "type": "enum",
+            "defaultValue": "fr",
+            "enumValues": [
+              "fr",
+              "en"
+            ],
+            "description": "Page language from the lg query parameter (shared name with Site Navigation & Language).",
+            "sharedWith": [
+              "eb28f85f",
+              "885a73eb",
+              "c8f146da"
+            ]
+          },
+          {
+            "id": "9dd84b0b",
+            "path": "enquiry.activity",
+            "type": "enum",
+            "defaultValue": "placeholder",
+            "enumValues": [
+              "placeholder",
+              "batiment",
+              "hotellerie",
+              "industrie",
+              "agroalimentaire",
+              "sante",
+              "autre"
+            ],
+            "description": "Activite select. \"placeholder\" is the first option (Activite / Activity), which has no value attribute and can be submitted.",
+            "sharedWith": [
+              "eb28f85f",
+              "885a73eb"
+            ]
+          },
+          {
+            "id": "4e0372e4",
+            "path": "enquiry.activityOtherVisible",
+            "type": "boolean",
+            "defaultValue": false,
+            "description": "Whether the free-text box for \"Autre\" activity is shown.",
+            "sharedWith": [
+              "eb28f85f",
+              "885a73eb"
+            ]
+          },
+          {
+            "id": "58d27e2a",
+            "path": "enquiry.activityText",
+            "type": "string",
+            "defaultValue": "",
+            "description": "Text typed for \"Autre\" activity; it replaces the option value that gets submitted.",
+            "sharedWith": [
+              "eb28f85f",
+              "885a73eb"
+            ]
+          },
+          {
+            "id": "a6409493",
+            "path": "enquiry.role",
+            "type": "enum",
+            "defaultValue": "placeholder",
+            "enumValues": [
+              "placeholder",
+              "maitre_oeuvre",
+              "bureau_etudes",
+              "maitre_ouvrage",
+              "entreprise_generale",
+              "collectivite",
+              "autre"
+            ],
+            "description": "Vous êtes: role chosen, placeholder until a real choice.",
+            "sharedWith": [
+              "eb28f85f",
+              "885a73eb"
+            ]
+          },
+          {
+            "id": "8854edd0",
+            "path": "enquiry.roleOtherVisible",
+            "type": "boolean",
+            "defaultValue": false,
+            "description": "Whether the free-text box for \"Autre\" role is shown.",
+            "sharedWith": [
+              "eb28f85f",
+              "885a73eb"
+            ]
+          },
+          {
+            "id": "ce7294ea",
+            "path": "enquiry.roleText",
+            "type": "string",
+            "defaultValue": "",
+            "description": "Text typed for \"Autre\" role.",
+            "sharedWith": [
+              "eb28f85f",
+              "885a73eb"
+            ]
+          },
+          {
+            "id": "246d529d",
+            "path": "enquiry.works",
+            "type": "enum",
+            "defaultValue": "placeholder",
+            "enumValues": [
+              "placeholder",
+              "travaux_neufs",
+              "maintenance",
+              "autre"
+            ],
+            "description": "Nature des travaux select (Travaux Neufs, Maintenance, Autre).",
+            "sharedWith": [
+              "eb28f85f",
+              "885a73eb"
+            ]
+          },
+          {
+            "id": "7749ed93",
+            "path": "enquiry.worksOtherVisible",
+            "type": "boolean",
+            "defaultValue": false,
+            "description": "Whether the free-text box for \"Autre\" works is shown.",
+            "sharedWith": [
+              "eb28f85f",
+              "885a73eb"
+            ]
+          },
+          {
+            "id": "b1c0fee0",
+            "path": "enquiry.worksText",
+            "type": "string",
+            "defaultValue": "",
+            "description": "Text typed for \"Autre\" works.",
+            "sharedWith": [
+              "eb28f85f",
+              "885a73eb"
+            ]
+          },
+          {
+            "id": "61fb391d",
+            "path": "enquiry.attachment",
+            "type": "enum",
+            "defaultValue": "none",
+            "enumValues": [
+              "none",
+              "attached"
+            ],
+            "description": "One optional attachment that passed the browser checks.",
+            "sharedWith": [
+              "eb28f85f",
+              "885a73eb"
+            ]
+          },
+          {
+            "id": "d390fb53",
+            "path": "enquiry.status",
+            "type": "enum",
+            "defaultValue": "editing",
+            "enumValues": [
+              "editing",
+              "invalid",
+              "sending",
+              "sent",
+              "failed",
+              "confirmed"
+            ],
+            "description": "Where the enquiry stands: being filled in, refused with field errors, on its way, sent, failed, or confirmed on the confirmation page.",
+            "sharedWith": [
+              "eb28f85f",
+              "885a73eb",
+              "c8f146da"
+            ]
+          },
+          {
+            "id": "b0f57b2a",
+            "path": "enquiry.confirmationLanguage",
+            "type": "enum",
+            "defaultValue": "none",
+            "enumValues": [
+              "none",
+              "fr",
+              "en"
+            ],
+            "description": "Language of the confirmation message, taken from msg.",
+            "sharedWith": [
+              "eb28f85f",
+              "885a73eb",
+              "c8f146da"
+            ]
+          },
+          {
+            "id": "e7018a45",
+            "path": "enquiry.delivery",
+            "type": "enum",
+            "defaultValue": "unknown",
+            "enumValues": [
+              "unknown",
+              "accepted",
+              "discarded"
+            ],
+            "description": "What the server did with the last send: accepted and e-mailed, or silently discarded as automated.",
+            "sharedWith": [
+              "eb28f85f",
+              "885a73eb"
+            ]
+          },
+          {
+            "id": "acdf761e",
+            "path": "enquiry.fileError",
+            "type": "enum",
+            "defaultValue": "none",
+            "enumValues": [
+              "none",
+              "fileType",
+              "fileSize"
+            ],
+            "description": "Why the chosen file was refused: not a PDF, JPG, PNG, DOCX or XLSX, or over 10 MB.",
+            "sharedWith": [
+              "eb28f85f",
+              "885a73eb",
+              "c8f146da"
+            ]
+          },
+          {
+            "id": "77e08619",
+            "path": "enquiry.trade",
+            "type": "enum",
+            "defaultValue": "none",
+            "enumValues": [
+              "none",
+              "climatique",
+              "incendie",
+              "desenfumage",
+              "electricite",
+              "froid",
+              "industriel"
+            ],
+            "description": "Métier concerné (optional), pre-selected when arriving from a trade page.",
+            "sharedWith": [
+              "eb28f85f",
+              "885a73eb",
+              "c8f146da"
+            ]
+          },
+          {
+            "id": "e986f6b9",
+            "path": "enquiry.error",
+            "type": "enum",
+            "defaultValue": "none",
+            "enumValues": [
+              "none",
+              "fields",
+              "rate",
+              "server",
+              "network"
+            ],
+            "description": "Message shown in the summary after a failed send.",
+            "sharedWith": [
+              "eb28f85f",
+              "885a73eb",
+              "c8f146da"
+            ]
+          }
+        ],
+        "actions": [
+          {
+            "id": "66d12684",
+            "name": "Choose Activity",
+            "intent": "Pick a value in Secteur d'activité (Bâtiment, Hôtellerie, Industrie, Agroalimentaire, Santé or Autre). Choosing Autre reveals a required free-text field; any other value hides it.",
+            "parameters": [
+              {
+                "id": "1a56d9db",
+                "name": "value",
+                "type": "enum",
+                "required": true,
+                "description": "Option chosen in sectur_activite.",
+                "enumValues": [
+                  "placeholder",
+                  "batiment",
+                  "hotellerie",
+                  "industrie",
+                  "agroalimentaire",
+                  "sante",
+                  "autre"
+                ]
+              }
+            ],
+            "requiredStates": [],
+            "rules": [
+              {
+                "id": "b38c0f6e",
+                "category": "ux_feedback",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "value"
+                  },
+                  "operator": "equals",
+                  "right": "autre"
+                },
+                "effect": {
+                  "type": "set_state",
+                  "path": "enquiry.activityOtherVisible",
+                  "value": true,
+                  "description": "Free-text box shown.",
+                  "id": "3913c6d9"
+                },
+                "description": "Autre reveals the free-text box."
+              },
+              {
+                "id": "c0848421",
+                "category": "ux_feedback",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "value"
+                  },
+                  "operator": "not_equals",
+                  "right": "autre"
+                },
+                "effect": {
+                  "type": "set_state",
+                  "path": "enquiry.activityOtherVisible",
+                  "value": false,
+                  "description": "Free-text box hidden.",
+                  "id": "c5c5721a"
+                },
+                "description": "Any other option hides it."
+              }
+            ],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "enquiry.activity",
+                "value": {
+                  "kind": "param",
+                  "name": "value"
+                },
+                "description": "Selection recorded.",
+                "id": "224a4591"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "scenarios": [
+              {
+                "id": "26ebfef2",
+                "name": "Activity: Autre shows the box",
+                "description": "Selecting Autre reveals the free-text input.",
+                "stateOverrides": [],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "value",
+                    "value": "autre"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "enquiry.activity",
+                    "operator": "equals",
+                    "value": "autre",
+                    "description": "enquiry.activity is autre"
+                  },
+                  {
+                    "path": "enquiry.activityOtherVisible",
+                    "operator": "equals",
+                    "value": true,
+                    "description": "enquiry.activityOtherVisible is true"
+                  }
+                ]
+              },
+              {
+                "id": "a251c241",
+                "name": "Activity: listed value hides the box",
+                "description": "Selecting a listed value hides the free-text input.",
+                "stateOverrides": [
+                  {
+                    "path": "enquiry.activityOtherVisible",
+                    "value": true
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "value",
+                    "value": "hotellerie"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "enquiry.activityOtherVisible",
+                    "operator": "equals",
+                    "value": false,
+                    "description": "enquiry.activityOtherVisible is false"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "12eba127",
+            "name": "Describe Other Activity",
+            "intent": "Type the activity in the field shown for Autre; it is sent as activite_autre and is required while Autre is chosen.",
+            "parameters": [
+              {
+                "id": "905804e6",
+                "name": "text",
+                "type": "string",
+                "required": true,
+                "description": "Free text typed.",
+                "validations": [
+                  {
+                    "type": "non_empty"
+                  }
+                ],
+                "defaultValue": "Autre précision"
+              }
+            ],
+            "requiredStates": [],
+            "rules": [
+              {
+                "id": "5bb0cd9a",
+                "category": "ux_feedback",
+                "condition": {
+                  "left": "enquiry.activityOtherVisible",
+                  "operator": "equals",
+                  "right": false
+                },
+                "effect": {
+                  "type": "block_action",
+                  "reason": "The Autre box is hidden.",
+                  "description": "Nothing to type into.",
+                  "id": "0255187e"
+                },
+                "description": "The box only exists while Autre is selected."
+              }
+            ],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "enquiry.activityText",
+                "value": {
+                  "kind": "param",
+                  "name": "text"
+                },
+                "description": "Typed text becomes the submitted value.",
+                "id": "13954dc5"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The input is not on screen.",
+                "description": "The input is not on screen.",
+                "id": "d4609d92"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "922c30ab",
+                "name": "Activity: type other value",
+                "description": "Typed text is kept.",
+                "stateOverrides": [
+                  {
+                    "path": "enquiry.activityOtherVisible",
+                    "value": true
+                  },
+                  {
+                    "path": "enquiry.activity",
+                    "value": "autre"
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "text",
+                    "value": "Data centre"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "enquiry.activityText",
+                    "operator": "equals",
+                    "value": "Data centre",
+                    "description": "enquiry.activityText is Data centre"
+                  }
+                ]
+              },
+              {
+                "id": "777feea4",
+                "name": "Activity: box hidden",
+                "description": "No typing while the box is hidden.",
+                "stateOverrides": [
+                  {
+                    "path": "enquiry.activityOtherVisible",
+                    "value": false
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "text",
+                    "value": "x"
+                  }
+                ],
+                "expectedStatus": "blocked"
+              }
+            ]
+          },
+          {
+            "id": "a89c103a",
+            "name": "Choose Role",
+            "intent": "Pick a value in Vous êtes: Maître d'œuvre, Bureau d'études, Maître d'ouvrage, Société générale de bâtiment, Collectivité locale or Autre. Choosing Autre reveals a required free-text field; any other value hides it.",
+            "parameters": [
+              {
+                "id": "b4c2523c",
+                "name": "value",
+                "type": "enum",
+                "required": true,
+                "description": "Option chosen in Vous êtes (role).",
+                "enumValues": [
+                  "placeholder",
+                  "maitre_oeuvre",
+                  "bureau_etudes",
+                  "maitre_ouvrage",
+                  "entreprise_generale",
+                  "collectivite",
+                  "autre"
+                ]
+              }
+            ],
+            "requiredStates": [],
+            "rules": [
+              {
+                "id": "fa39f08a",
+                "category": "ux_feedback",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "value"
+                  },
+                  "operator": "equals",
+                  "right": "autre"
+                },
+                "effect": {
+                  "type": "set_state",
+                  "path": "enquiry.roleOtherVisible",
+                  "value": true,
+                  "description": "Free-text box shown.",
+                  "id": "0b0a99d8"
+                },
+                "description": "Autre reveals the free-text box."
+              },
+              {
+                "id": "761a6318",
+                "category": "ux_feedback",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "value"
+                  },
+                  "operator": "not_equals",
+                  "right": "autre"
+                },
+                "effect": {
+                  "type": "set_state",
+                  "path": "enquiry.roleOtherVisible",
+                  "value": false,
+                  "description": "Free-text box hidden.",
+                  "id": "9c32a91b"
+                },
+                "description": "Any other option hides it."
+              }
+            ],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "enquiry.role",
+                "value": {
+                  "kind": "param",
+                  "name": "value"
+                },
+                "description": "Selection recorded.",
+                "id": "a2e193b3"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "scenarios": [
+              {
+                "id": "4d3108f0",
+                "name": "Role: Autre shows the box",
+                "description": "Selecting Autre reveals the free-text input.",
+                "stateOverrides": [],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "value",
+                    "value": "autre"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "enquiry.role",
+                    "operator": "equals",
+                    "value": "autre",
+                    "description": "enquiry.role is autre"
+                  },
+                  {
+                    "path": "enquiry.roleOtherVisible",
+                    "operator": "equals",
+                    "value": true,
+                    "description": "enquiry.roleOtherVisible is true"
+                  }
+                ]
+              },
+              {
+                "id": "a405f17b",
+                "name": "Role: listed value hides the box",
+                "description": "Selecting a listed value hides the free-text input.",
+                "stateOverrides": [
+                  {
+                    "path": "enquiry.roleOtherVisible",
+                    "value": true
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "value",
+                    "value": "maitre_ouvrage"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "enquiry.roleOtherVisible",
+                    "operator": "equals",
+                    "value": false,
+                    "description": "enquiry.roleOtherVisible is false"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "135cf2e1",
+            "name": "Describe Other Role",
+            "intent": "Type the role in the field shown for Autre; it is sent as role_autre and is required while Autre is chosen.",
+            "parameters": [
+              {
+                "id": "f3001ac6",
+                "name": "text",
+                "type": "string",
+                "required": true,
+                "description": "Free text typed.",
+                "validations": [
+                  {
+                    "type": "non_empty"
+                  }
+                ],
+                "defaultValue": "Autre précision"
+              }
+            ],
+            "requiredStates": [],
+            "rules": [
+              {
+                "id": "5fd8f183",
+                "category": "ux_feedback",
+                "condition": {
+                  "left": "enquiry.roleOtherVisible",
+                  "operator": "equals",
+                  "right": false
+                },
+                "effect": {
+                  "type": "block_action",
+                  "reason": "The Autre box is hidden.",
+                  "description": "Nothing to type into.",
+                  "id": "6e7c5f58"
+                },
+                "description": "The box only exists while Autre is selected."
+              }
+            ],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "enquiry.roleText",
+                "value": {
+                  "kind": "param",
+                  "name": "text"
+                },
+                "description": "Typed text becomes the submitted value.",
+                "id": "a8a35076"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The input is not on screen.",
+                "description": "The input is not on screen.",
+                "id": "bc5f02e6"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "ff012977",
+                "name": "Role: type other value",
+                "description": "Typed text is kept.",
+                "stateOverrides": [
+                  {
+                    "path": "enquiry.roleOtherVisible",
+                    "value": true
+                  },
+                  {
+                    "path": "enquiry.role",
+                    "value": "autre"
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "text",
+                    "value": "Data centre"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "enquiry.roleText",
+                    "operator": "equals",
+                    "value": "Data centre",
+                    "description": "enquiry.roleText is Data centre"
+                  }
+                ]
+              },
+              {
+                "id": "2995a436",
+                "name": "Role: box hidden",
+                "description": "No typing while the box is hidden.",
+                "stateOverrides": [
+                  {
+                    "path": "enquiry.roleOtherVisible",
+                    "value": false
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "text",
+                    "value": "x"
+                  }
+                ],
+                "expectedStatus": "blocked"
+              }
+            ]
+          },
+          {
+            "id": "9b8f5d02",
+            "name": "Choose Nature Of Works",
+            "intent": "Pick a value in Nature des travaux (Travaux neufs, Maintenance or Autre). Choosing Autre reveals a required free-text field; any other value hides it.",
+            "parameters": [
+              {
+                "id": "37d53676",
+                "name": "value",
+                "type": "enum",
+                "required": true,
+                "description": "Option chosen in nature_travaux.",
+                "enumValues": [
+                  "placeholder",
+                  "travaux_neufs",
+                  "maintenance",
+                  "autre"
+                ]
+              }
+            ],
+            "requiredStates": [],
+            "rules": [
+              {
+                "id": "0a5d3958",
+                "category": "ux_feedback",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "value"
+                  },
+                  "operator": "equals",
+                  "right": "autre"
+                },
+                "effect": {
+                  "type": "set_state",
+                  "path": "enquiry.worksOtherVisible",
+                  "value": true,
+                  "description": "Free-text box shown.",
+                  "id": "4b1bb7b6"
+                },
+                "description": "Autre reveals the free-text box."
+              },
+              {
+                "id": "9eb5c800",
+                "category": "ux_feedback",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "value"
+                  },
+                  "operator": "not_equals",
+                  "right": "autre"
+                },
+                "effect": {
+                  "type": "set_state",
+                  "path": "enquiry.worksOtherVisible",
+                  "value": false,
+                  "description": "Free-text box hidden.",
+                  "id": "44711712"
+                },
+                "description": "Any other option hides it."
+              }
+            ],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "enquiry.works",
+                "value": {
+                  "kind": "param",
+                  "name": "value"
+                },
+                "description": "Selection recorded.",
+                "id": "4f3228e7"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "scenarios": [
+              {
+                "id": "3ef34d02",
+                "name": "Nature Of Works: Autre shows the box",
+                "description": "Selecting Autre reveals the free-text input.",
+                "stateOverrides": [],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "value",
+                    "value": "autre"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "enquiry.works",
+                    "operator": "equals",
+                    "value": "autre",
+                    "description": "enquiry.works is autre"
+                  },
+                  {
+                    "path": "enquiry.worksOtherVisible",
+                    "operator": "equals",
+                    "value": true,
+                    "description": "enquiry.worksOtherVisible is true"
+                  }
+                ]
+              },
+              {
+                "id": "3ce5d479",
+                "name": "Nature Of Works: listed value hides the box",
+                "description": "Selecting a listed value hides the free-text input.",
+                "stateOverrides": [
+                  {
+                    "path": "enquiry.worksOtherVisible",
+                    "value": true
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "value",
+                    "value": "maintenance"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "enquiry.worksOtherVisible",
+                    "operator": "equals",
+                    "value": false,
+                    "description": "enquiry.worksOtherVisible is false"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "a03a4963",
+            "name": "Describe Other Nature Of Works",
+            "intent": "Type the nature of works in the field shown for Autre; it is sent as travaux_autre and is required while Autre is chosen.",
+            "parameters": [
+              {
+                "id": "962c1cba",
+                "name": "text",
+                "type": "string",
+                "required": true,
+                "description": "Free text typed.",
+                "validations": [
+                  {
+                    "type": "non_empty"
+                  }
+                ],
+                "defaultValue": "Autre précision"
+              }
+            ],
+            "requiredStates": [],
+            "rules": [
+              {
+                "id": "60d4d74b",
+                "category": "ux_feedback",
+                "condition": {
+                  "left": "enquiry.worksOtherVisible",
+                  "operator": "equals",
+                  "right": false
+                },
+                "effect": {
+                  "type": "block_action",
+                  "reason": "The Autre box is hidden.",
+                  "description": "Nothing to type into.",
+                  "id": "4ce7d9d7"
+                },
+                "description": "The box only exists while Autre is selected."
+              }
+            ],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "enquiry.worksText",
+                "value": {
+                  "kind": "param",
+                  "name": "text"
+                },
+                "description": "Typed text becomes the submitted value.",
+                "id": "caad4940"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The input is not on screen.",
+                "description": "The input is not on screen.",
+                "id": "fb7dbf37"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "9cd1a73b",
+                "name": "Nature Of Works: type other value",
+                "description": "Typed text is kept.",
+                "stateOverrides": [
+                  {
+                    "path": "enquiry.worksOtherVisible",
+                    "value": true
+                  },
+                  {
+                    "path": "enquiry.works",
+                    "value": "autre"
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "text",
+                    "value": "Data centre"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "enquiry.worksText",
+                    "operator": "equals",
+                    "value": "Data centre",
+                    "description": "enquiry.worksText is Data centre"
+                  }
+                ]
+              },
+              {
+                "id": "cda9be6f",
+                "name": "Nature Of Works: box hidden",
+                "description": "No typing while the box is hidden.",
+                "stateOverrides": [
+                  {
+                    "path": "enquiry.worksOtherVisible",
+                    "value": false
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "text",
+                    "value": "x"
+                  }
+                ],
+                "expectedStatus": "blocked"
+              }
+            ]
+          },
+          {
+            "id": "3588de7a",
+            "name": "Attach File",
+            "intent": "Choisir un fichier picks one optional file. The browser refuses anything but PDF, JPG, PNG, DOCX or XLSX, or a file over 10 MB, with a message under the field; the server checks the type, the real content (MIME, image, Office structure) and the size again, and sends it under a safe name.",
+            "parameters": [
+              {
+                "id": "f35ed1f1",
+                "name": "type",
+                "type": "enum",
+                "required": true,
+                "description": "Kind of file picked; other for anything else (an .exe, a .zip, ...).",
+                "enumValues": [
+                  "pdf",
+                  "jpg",
+                  "png",
+                  "docx",
+                  "xlsx",
+                  "other"
+                ],
+                "defaultValue": "pdf"
+              },
+              {
+                "id": "9180cdd4",
+                "name": "sizeMb",
+                "type": "number",
+                "required": true,
+                "description": "File size in megabytes.",
+                "defaultValue": 2,
+                "validations": [
+                  {
+                    "type": "min",
+                    "value": 0
+                  }
+                ]
+              }
+            ],
+            "requiredStates": [],
+            "rules": [
+              {
+                "id": "d95d6053",
+                "category": "validation",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "type"
+                  },
+                  "operator": "equals",
+                  "right": "other"
+                },
+                "effect": {
+                  "type": "show_message",
+                  "message": "Ce type de fichier n’est pas accepté. Formats acceptés : PDF, JPG, PNG, DOCX, XLSX.",
+                  "tone": "error",
+                  "description": "Shown under the field.",
+                  "id": "af960009"
+                },
+                "description": "Only the five accepted formats."
+              },
+              {
+                "id": "f25cb952",
+                "category": "validation",
+                "condition": {
+                  "kind": "all",
+                  "conditions": [
+                    {
+                      "left": {
+                        "kind": "param",
+                        "name": "type"
+                      },
+                      "operator": "not_equals",
+                      "right": "other"
+                    },
+                    {
+                      "left": {
+                        "kind": "param",
+                        "name": "sizeMb"
+                      },
+                      "operator": "greater_than",
+                      "right": 10
+                    }
+                  ]
+                },
+                "effect": {
+                  "type": "show_message",
+                  "message": "Le fichier dépasse 10 Mo. Envoyez une version plus légère, ou envoyez-la par e-mail.",
+                  "tone": "error",
+                  "description": "Shown under the field.",
+                  "id": "788eaa4c"
+                },
+                "description": "10 MB at most."
+              }
+            ],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "enquiry.fileError",
+                "value": {
+                  "kind": "switch",
+                  "cases": [
+                    {
+                      "when": {
+                        "left": {
+                          "kind": "param",
+                          "name": "type"
+                        },
+                        "operator": "equals",
+                        "right": "other"
+                      },
+                      "then": {
+                        "kind": "literal",
+                        "value": "fileType"
+                      }
+                    },
+                    {
+                      "when": {
+                        "left": {
+                          "kind": "param",
+                          "name": "sizeMb"
+                        },
+                        "operator": "greater_than",
+                        "right": 10
+                      },
+                      "then": {
+                        "kind": "literal",
+                        "value": "fileSize"
+                      }
+                    }
+                  ],
+                  "default": {
+                    "kind": "literal",
+                    "value": "none"
+                  }
+                },
+                "description": "Type checked first, then size.",
+                "id": "d076a71c"
+              },
+              {
+                "type": "set_state",
+                "path": "enquiry.attachment",
+                "value": {
+                  "kind": "switch",
+                  "cases": [
+                    {
+                      "when": {
+                        "left": {
+                          "kind": "param",
+                          "name": "type"
+                        },
+                        "operator": "equals",
+                        "right": "other"
+                      },
+                      "then": {
+                        "kind": "literal",
+                        "value": "none"
+                      }
+                    },
+                    {
+                      "when": {
+                        "left": {
+                          "kind": "param",
+                          "name": "sizeMb"
+                        },
+                        "operator": "greater_than",
+                        "right": 10
+                      },
+                      "then": {
+                        "kind": "literal",
+                        "value": "none"
+                      }
+                    }
+                  ],
+                  "default": {
+                    "kind": "literal",
+                    "value": "attached"
+                  }
+                },
+                "description": "Only an accepted file is kept, replacing any previous one.",
+                "id": "16e86f0c"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "scenarios": [
+              {
+                "id": "5fff68f3",
+                "name": "Attach a file",
+                "description": "A file is attached.",
+                "stateOverrides": [],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "enquiry.attachment",
+                    "operator": "equals",
+                    "value": "attached",
+                    "description": "enquiry.attachment is attached"
+                  }
+                ]
+              },
+              {
+                "id": "a621e7d7",
+                "name": "Executable refused",
+                "description": "A file that is not one of the five formats is refused.",
+                "stateOverrides": [],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "type",
+                    "value": "other"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "enquiry.fileError",
+                    "operator": "equals",
+                    "value": "fileType",
+                    "description": "Type error"
+                  },
+                  {
+                    "path": "enquiry.attachment",
+                    "operator": "equals",
+                    "value": "none",
+                    "description": "Nothing kept"
+                  }
+                ]
+              },
+              {
+                "id": "a70bdb4a",
+                "name": "File over 10 MB refused",
+                "description": "A 12 MB PDF is refused.",
+                "stateOverrides": [],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "type",
+                    "value": "pdf"
+                  },
+                  {
+                    "parameterName": "sizeMb",
+                    "value": 12
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "enquiry.fileError",
+                    "operator": "equals",
+                    "value": "fileSize",
+                    "description": "Size error"
+                  },
+                  {
+                    "path": "enquiry.attachment",
+                    "operator": "equals",
+                    "value": "none",
+                    "description": "Nothing kept"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "27a6b205",
+            "name": "Choose Trade",
+            "intent": "Pick the trade concerned in Métier concerné (optional; Plusieurs métiers ou je ne sais pas leaves it open). It may already be set from a trade page.",
+            "parameters": [
+              {
+                "id": "841b8285",
+                "name": "value",
+                "type": "enum",
+                "required": true,
+                "description": "Trade chosen, none for several or unsure.",
+                "enumValues": [
+                  "none",
+                  "climatique",
+                  "incendie",
+                  "desenfumage",
+                  "electricite",
+                  "froid",
+                  "industriel"
+                ],
+                "defaultValue": "froid"
+              }
+            ],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "enquiry.trade",
+                "value": {
+                  "kind": "param",
+                  "name": "value"
+                },
+                "description": "Trade recorded.",
+                "id": "4f0b2ddc"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "actor": "user",
+            "scenarios": [
+              {
+                "id": "74de79e0",
+                "name": "Refrigeration chosen",
+                "description": "Choosing Froid industriel records it.",
+                "stateOverrides": [],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "value",
+                    "value": "froid"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "enquiry.trade",
+                    "operator": "equals",
+                    "value": "froid",
+                    "description": "Refrigeration"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "5ca4e10e",
+            "name": "Remove Attachment",
+            "intent": "Retirer le fichier clears the chosen file and its error message.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [
+              {
+                "id": "b1d24c43",
+                "category": "ux_feedback",
+                "condition": {
+                  "kind": "all",
+                  "conditions": [
+                    {
+                      "left": "enquiry.attachment",
+                      "operator": "equals",
+                      "right": "none"
+                    },
+                    {
+                      "left": "enquiry.fileError",
+                      "operator": "equals",
+                      "right": "none"
+                    }
+                  ]
+                },
+                "effect": {
+                  "type": "block_action",
+                  "reason": "No file to remove.",
+                  "description": "The button only shows once a file was picked.",
+                  "id": "d0d1b048"
+                },
+                "description": "Something must be attached or refused."
+              }
+            ],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "enquiry.attachment",
+                "value": "none",
+                "description": "No file.",
+                "id": "aec60461"
+              },
+              {
+                "type": "set_state",
+                "path": "enquiry.fileError",
+                "value": "none",
+                "description": "Error cleared.",
+                "id": "923a3d8b"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "actor": "user",
+            "onBlockedEffects": [
+              {
+                "type": "no_feedback",
+                "reason": "The button is hidden until a file is picked.",
+                "description": "Nothing happens.",
+                "id": "8ab3de62"
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "250615c4",
+                "name": "Clear a refused file",
+                "description": "Removing a refused file clears its error.",
+                "stateOverrides": [
+                  {
+                    "path": "enquiry.fileError",
+                    "value": "fileSize"
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "enquiry.fileError",
+                    "operator": "equals",
+                    "value": "none",
+                    "description": "Error cleared"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "e8bd9b22",
+            "name": "Send Enquiry",
+            "intent": "Envoyer la demande checks every field in the browser, then posts the form to contact/send.php. Errors appear under each field and in a summary (Certains champs sont à corriger avant l’envoi :) whose links move focus to the field; what was typed is kept. The server checks everything again and answers: sent (the page moves to the confirmation), field errors, too many sends, or a failure message. A hidden field or a send faster than 3 seconds after the page loaded is treated as automated: answered like a success and never e-mailed.",
+            "parameters": [
+              {
+                "id": "68a20a55",
+                "name": "nom",
+                "type": "string",
+                "required": true,
+                "description": "Nom et prénom.",
+                "defaultValue": "Karim B.",
+                "validations": [
+                  {
+                    "type": "non_empty",
+                    "message": "Ce champ est obligatoire."
+                  },
+                  {
+                    "type": "max_length",
+                    "value": 120,
+                    "message": "Ce texte est trop long."
+                  }
+                ]
+              },
+              {
+                "id": "f2ce92c6",
+                "name": "organisme",
+                "type": "string",
+                "required": false,
+                "description": "Organisme (optional).",
+                "defaultValue": "",
+                "validations": [
+                  {
+                    "type": "max_length",
+                    "value": 160,
+                    "message": "Ce texte est trop long."
+                  }
+                ]
+              },
+              {
+                "id": "5e643f8c",
+                "name": "email",
+                "type": "string",
+                "required": true,
+                "description": "E-mail, also used as the reply-to address.",
+                "defaultValue": "k.b@example.com",
+                "validations": [
+                  {
+                    "type": "non_empty",
+                    "message": "Ce champ est obligatoire."
+                  },
+                  {
+                    "type": "email",
+                    "message": "Saisissez une adresse e-mail valide, par exemple nom@entreprise.dz."
+                  },
+                  {
+                    "type": "max_length",
+                    "value": 254
+                  }
+                ]
+              },
+              {
+                "id": "c08028d9",
+                "name": "tel",
+                "type": "string",
+                "required": true,
+                "description": "One phone number: digits, spaces, +, dots, dashes and brackets, at least 6 digits.",
+                "defaultValue": "+213 41 00 00 00",
+                "validations": [
+                  {
+                    "type": "non_empty",
+                    "message": "Ce champ est obligatoire."
+                  },
+                  {
+                    "type": "pattern",
+                    "value": "^[0-9+().\\s-]{6,30}$",
+                    "message": "Saisissez un numéro de téléphone valide (chiffres, espaces, +, parenthèses)."
+                  }
+                ]
+              },
+              {
+                "id": "5f054abc",
+                "name": "ville",
+                "type": "string",
+                "required": false,
+                "description": "Ville (optional).",
+                "defaultValue": "Oran",
+                "validations": [
+                  {
+                    "type": "max_length",
+                    "value": 120
+                  }
+                ]
+              },
+              {
+                "id": "effcfd9a",
+                "name": "pays",
+                "type": "string",
+                "required": false,
+                "description": "Pays (optional): an ISO country code from the list, Algeria (DZ) by default.",
+                "defaultValue": "DZ",
+                "validations": [
+                  {
+                    "type": "pattern",
+                    "value": "^([A-Z]{2})?$",
+                    "message": "Choisissez une option."
+                  }
+                ]
+              },
+              {
+                "id": "20a93d83",
+                "name": "message",
+                "type": "string",
+                "required": true,
+                "description": "Votre message, 10 to 5 000 characters.",
+                "defaultValue": "Étude de désenfumage pour un entrepôt.",
+                "validations": [
+                  {
+                    "type": "non_empty",
+                    "message": "Ce champ est obligatoire."
+                  },
+                  {
+                    "type": "min_length",
+                    "value": 10,
+                    "message": "Votre message est trop court : quelques lignes suffisent."
+                  },
+                  {
+                    "type": "max_length",
+                    "value": 5000,
+                    "message": "Ce texte est trop long."
+                  }
+                ]
+              },
+              {
+                "id": "a0d454d8",
+                "name": "honeypot",
+                "type": "enum",
+                "required": true,
+                "description": "The hidden website field people never see: filled only by automated senders.",
+                "enumValues": [
+                  "empty",
+                  "filled"
+                ],
+                "defaultValue": "empty"
+              },
+              {
+                "id": "496fb07d",
+                "name": "secondsOnPage",
+                "type": "number",
+                "required": true,
+                "description": "Seconds between the page load (signed token from token.php) and the send.",
+                "defaultValue": 20,
+                "validations": [
+                  {
+                    "type": "min",
+                    "value": 0
+                  }
+                ]
+              },
+              {
+                "id": "56a10547",
+                "name": "serverAnswer",
+                "type": "enum",
+                "required": true,
+                "description": "How the server or the network answers (environment): ok, 422 field errors, 429 rate limit (5 sends per address per 10 minutes), 403 foreign origin, 500 failure, or no answer.",
+                "enumValues": [
+                  "ok",
+                  "invalid",
+                  "rateLimited",
+                  "forbidden",
+                  "error",
+                  "network"
+                ],
+                "defaultValue": "ok"
+              }
+            ],
+            "requiredStates": [],
+            "rules": [
+              {
+                "id": "ffc50705",
+                "category": "validation",
+                "condition": {
+                  "left": "enquiry.role",
+                  "operator": "equals",
+                  "right": "placeholder"
+                },
+                "effect": {
+                  "type": "block_action",
+                  "reason": "Choisissez une option. (Vous êtes)",
+                  "description": "The role menu needs a real choice.",
+                  "id": "cbaf5864"
+                },
+                "description": "Role required."
+              },
+              {
+                "id": "7e31c8ff",
+                "category": "validation",
+                "condition": {
+                  "kind": "all",
+                  "conditions": [
+                    {
+                      "left": "enquiry.role",
+                      "operator": "equals",
+                      "right": "autre"
+                    },
+                    {
+                      "left": "enquiry.roleText",
+                      "operator": "equals",
+                      "right": ""
+                    }
+                  ]
+                },
+                "effect": {
+                  "type": "block_action",
+                  "reason": "Ce champ est obligatoire. (Précisez votre rôle)",
+                  "description": "Autre needs its text.",
+                  "id": "e410fedc"
+                },
+                "description": "Role text required with Autre."
+              },
+              {
+                "id": "4b94b78e",
+                "category": "validation",
+                "condition": {
+                  "left": "enquiry.works",
+                  "operator": "equals",
+                  "right": "placeholder"
+                },
+                "effect": {
+                  "type": "block_action",
+                  "reason": "Choisissez une option. (Nature des travaux)",
+                  "description": "The works menu needs a real choice.",
+                  "id": "d156bb7f"
+                },
+                "description": "Nature of works required."
+              },
+              {
+                "id": "82e71246",
+                "category": "validation",
+                "condition": {
+                  "kind": "all",
+                  "conditions": [
+                    {
+                      "left": "enquiry.works",
+                      "operator": "equals",
+                      "right": "autre"
+                    },
+                    {
+                      "left": "enquiry.worksText",
+                      "operator": "equals",
+                      "right": ""
+                    }
+                  ]
+                },
+                "effect": {
+                  "type": "block_action",
+                  "reason": "Ce champ est obligatoire. (Précisez la nature des travaux)",
+                  "description": "Autre needs its text.",
+                  "id": "a51d7b92"
+                },
+                "description": "Works text required with Autre."
+              },
+              {
+                "id": "e3971a58",
+                "category": "validation",
+                "condition": {
+                  "left": "enquiry.activity",
+                  "operator": "equals",
+                  "right": "placeholder"
+                },
+                "effect": {
+                  "type": "block_action",
+                  "reason": "Choisissez une option. (Secteur d’activité)",
+                  "description": "The activity menu needs a real choice.",
+                  "id": "f223f85f"
+                },
+                "description": "Activity required."
+              },
+              {
+                "id": "a3582739",
+                "category": "validation",
+                "condition": {
+                  "kind": "all",
+                  "conditions": [
+                    {
+                      "left": "enquiry.activity",
+                      "operator": "equals",
+                      "right": "autre"
+                    },
+                    {
+                      "left": "enquiry.activityText",
+                      "operator": "equals",
+                      "right": ""
+                    }
+                  ]
+                },
+                "effect": {
+                  "type": "block_action",
+                  "reason": "Ce champ est obligatoire. (Précisez le secteur)",
+                  "description": "Autre needs its text.",
+                  "id": "92092650"
+                },
+                "description": "Activity text required with Autre."
+              },
+              {
+                "id": "81916cad",
+                "category": "validation",
+                "condition": {
+                  "left": "enquiry.fileError",
+                  "operator": "not_equals",
+                  "right": "none"
+                },
+                "effect": {
+                  "type": "block_action",
+                  "reason": "Corrigez ou retirez la pièce jointe.",
+                  "description": "A refused file must be replaced or removed first.",
+                  "id": "ddf0a5a9"
+                },
+                "description": "No send with a refused file."
+              },
+              {
+                "id": "4d55df00",
+                "category": "async",
+                "condition": {
+                  "left": "enquiry.status",
+                  "operator": "equals",
+                  "right": "sending"
+                },
+                "effect": {
+                  "type": "block_action",
+                  "reason": "Envoi en cours.",
+                  "description": "The button is disabled while a send is on its way.",
+                  "id": "4fb4b2f9"
+                },
+                "description": "No double send."
+              }
+            ],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "enquiry.error",
+                "value": "none",
+                "description": "Previous error cleared.",
+                "id": "73fb1e45"
+              },
+              {
+                "type": "invoke_operation",
+                "dependencyId": "f597366c",
+                "operation": "sendEnquiry",
+                "resultPath": "enquiry.delivery",
+                "resultValue": "accepted",
+                "description": "POST to contact/send.php with Accept: application/json.",
+                "id": "f0d5fce0"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "actor": "user",
+            "onBlockedEffects": [
+              {
+                "type": "show_message",
+                "message": "Certains champs sont à corriger avant l’envoi :",
+                "tone": "error",
+                "description": "Summary above the form listing the fields to correct, with links; focus moves to the first one.",
+                "id": "ea3cb8bb"
+              }
+            ],
+            "outcomes": [
+              {
+                "id": "1baafae0",
+                "name": "Automated send discarded",
+                "kind": "success",
+                "condition": {
+                  "kind": "any",
+                  "conditions": [
+                    {
+                      "left": {
+                        "kind": "param",
+                        "name": "honeypot"
+                      },
+                      "operator": "equals",
+                      "right": "filled"
+                    },
+                    {
+                      "left": {
+                        "kind": "param",
+                        "name": "secondsOnPage"
+                      },
+                      "operator": "lower_than",
+                      "right": 3
+                    }
+                  ]
+                },
+                "effects": [
+                  {
+                    "type": "set_state",
+                    "path": "enquiry.status",
+                    "value": "sent",
+                    "description": "Answered like a success.",
+                    "id": "68ca5a20"
+                  },
+                  {
+                    "type": "set_state",
+                    "path": "enquiry.delivery",
+                    "value": "discarded",
+                    "description": "Nothing is e-mailed.",
+                    "id": "82edf399"
+                  },
+                  {
+                    "type": "transition_surface",
+                    "target": "885a73eb",
+                    "description": "The sender sees the confirmation and learns nothing.",
+                    "id": "19d9cf5b"
+                  }
+                ],
+                "description": "Hidden field filled or sent under 3 seconds after the page loaded."
+              },
+              {
+                "id": "3794edbf",
+                "name": "Field refused by the server",
+                "kind": "rejected",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "serverAnswer"
+                  },
+                  "operator": "equals",
+                  "right": "invalid"
+                },
+                "effects": [
+                  {
+                    "type": "set_state",
+                    "path": "enquiry.status",
+                    "value": "invalid",
+                    "description": "Errors shown under the refused fields.",
+                    "id": "12d2d136"
+                  },
+                  {
+                    "type": "set_state",
+                    "path": "enquiry.error",
+                    "value": "fields",
+                    "description": "Summary shown.",
+                    "id": "fcba2bb8"
+                  },
+                  {
+                    "type": "set_state",
+                    "path": "enquiry.delivery",
+                    "value": "unknown",
+                    "description": "Nothing sent.",
+                    "id": "980b7a8c"
+                  },
+                  {
+                    "type": "show_message",
+                    "message": "Certains champs sont à corriger avant l’envoi :",
+                    "tone": "error",
+                    "description": "422 with the refused fields.",
+                    "id": "e1006bbb"
+                  }
+                ],
+                "description": "The server's own checks refused a field or the attachment (422)."
+              },
+              {
+                "id": "8bcd75d9",
+                "name": "Too many sends",
+                "kind": "rejected",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "serverAnswer"
+                  },
+                  "operator": "equals",
+                  "right": "rateLimited"
+                },
+                "effects": [
+                  {
+                    "type": "set_state",
+                    "path": "enquiry.status",
+                    "value": "failed",
+                    "description": "Not sent.",
+                    "id": "eefec0e6"
+                  },
+                  {
+                    "type": "set_state",
+                    "path": "enquiry.error",
+                    "value": "rate",
+                    "description": "Rate message.",
+                    "id": "5318f9e0"
+                  },
+                  {
+                    "type": "set_state",
+                    "path": "enquiry.delivery",
+                    "value": "unknown",
+                    "description": "Nothing sent.",
+                    "id": "ed3d0eb1"
+                  },
+                  {
+                    "type": "show_message",
+                    "message": "Trop de demandes ont été envoyées depuis votre connexion. Réessayez dans quelques minutes, ou appelez-nous.",
+                    "tone": "error",
+                    "description": "429.",
+                    "id": "bb308a80"
+                  }
+                ],
+                "description": "More than 5 accepted sends from this address in 10 minutes (429)."
+              },
+              {
+                "id": "74cc49ae",
+                "name": "Refused origin",
+                "kind": "rejected",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "serverAnswer"
+                  },
+                  "operator": "equals",
+                  "right": "forbidden"
+                },
+                "effects": [
+                  {
+                    "type": "set_state",
+                    "path": "enquiry.status",
+                    "value": "failed",
+                    "description": "Not sent.",
+                    "id": "60210896"
+                  },
+                  {
+                    "type": "set_state",
+                    "path": "enquiry.error",
+                    "value": "server",
+                    "description": "Generic failure message.",
+                    "id": "de0e7cc3"
+                  },
+                  {
+                    "type": "set_state",
+                    "path": "enquiry.delivery",
+                    "value": "unknown",
+                    "description": "Nothing sent.",
+                    "id": "d92c1b0e"
+                  }
+                ],
+                "description": "Posted from another site (403); answered with the generic failure message."
+              },
+              {
+                "id": "5414b32b",
+                "name": "Server failure",
+                "kind": "failure",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "serverAnswer"
+                  },
+                  "operator": "equals",
+                  "right": "error"
+                },
+                "effects": [
+                  {
+                    "type": "set_state",
+                    "path": "enquiry.status",
+                    "value": "failed",
+                    "description": "Not sent.",
+                    "id": "d76b2c25"
+                  },
+                  {
+                    "type": "set_state",
+                    "path": "enquiry.error",
+                    "value": "server",
+                    "description": "Failure message.",
+                    "id": "24f93566"
+                  },
+                  {
+                    "type": "set_state",
+                    "path": "enquiry.delivery",
+                    "value": "unknown",
+                    "description": "Nothing sent.",
+                    "id": "cad563f2"
+                  },
+                  {
+                    "type": "show_message",
+                    "message": "Votre demande n’a pas pu être envoyée. Réessayez dans quelques minutes, ou écrivez-nous à contact@alfec.net.",
+                    "tone": "error",
+                    "description": "500; details only go to the server log.",
+                    "id": "0a37da08"
+                  }
+                ],
+                "description": "Missing configuration or mail failure (500); the details stay in the server log."
+              },
+              {
+                "id": "c1136939",
+                "name": "Network failure",
+                "kind": "failure",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "serverAnswer"
+                  },
+                  "operator": "equals",
+                  "right": "network"
+                },
+                "effects": [
+                  {
+                    "type": "set_state",
+                    "path": "enquiry.status",
+                    "value": "failed",
+                    "description": "Not sent.",
+                    "id": "fa55006c"
+                  },
+                  {
+                    "type": "set_state",
+                    "path": "enquiry.error",
+                    "value": "network",
+                    "description": "Connection message.",
+                    "id": "0a59958e"
+                  },
+                  {
+                    "type": "set_state",
+                    "path": "enquiry.delivery",
+                    "value": "unknown",
+                    "description": "Nothing sent.",
+                    "id": "2a4d9063"
+                  },
+                  {
+                    "type": "show_message",
+                    "message": "La connexion a échoué. Vérifiez votre accès à Internet et réessayez.",
+                    "tone": "error",
+                    "description": "No answer.",
+                    "id": "7f59c336"
+                  }
+                ],
+                "description": "No answer from the server."
+              },
+              {
+                "id": "bf709b12",
+                "name": "Sent",
+                "kind": "success",
+                "effects": [
+                  {
+                    "type": "set_state",
+                    "path": "enquiry.status",
+                    "value": "sent",
+                    "description": "Sent.",
+                    "id": "6bb518a4"
+                  },
+                  {
+                    "type": "set_state",
+                    "path": "enquiry.delivery",
+                    "value": "accepted",
+                    "description": "E-mailed to ALFEC with the attachment, reply-to the visitor.",
+                    "id": "52a79b9b"
+                  },
+                  {
+                    "type": "transition_surface",
+                    "target": "885a73eb",
+                    "description": "The page moves to the confirmation in its language.",
+                    "id": "0c5039ad"
+                  }
+                ],
+                "description": "Accepted and e-mailed (200)."
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "3a2d81cc",
+                "name": "Complete enquiry is sent",
+                "description": "All required fields filled, the server accepts.",
+                "stateOverrides": [
+                  {
+                    "path": "enquiry.role",
+                    "value": "maitre_ouvrage"
+                  },
+                  {
+                    "path": "enquiry.works",
+                    "value": "maintenance"
+                  },
+                  {
+                    "path": "enquiry.activity",
+                    "value": "industrie"
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "enquiry.status",
+                    "operator": "equals",
+                    "value": "sent",
+                    "description": "Sent"
+                  },
+                  {
+                    "path": "enquiry.delivery",
+                    "operator": "equals",
+                    "value": "accepted",
+                    "description": "E-mailed"
+                  }
+                ],
+                "expectedTransition": "885a73eb"
+              },
+              {
+                "id": "475f0d78",
+                "name": "Role left on its placeholder",
+                "description": "Vous êtes still shows Choisir.",
+                "stateOverrides": [
+                  {
+                    "path": "enquiry.works",
+                    "value": "maintenance"
+                  },
+                  {
+                    "path": "enquiry.activity",
+                    "value": "industrie"
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "blocked"
+              },
+              {
+                "id": "8eceeed7",
+                "name": "Autre without its text",
+                "description": "Autre chosen for the role but nothing typed.",
+                "stateOverrides": [
+                  {
+                    "path": "enquiry.role",
+                    "value": "autre"
+                  },
+                  {
+                    "path": "enquiry.roleText",
+                    "value": ""
+                  },
+                  {
+                    "path": "enquiry.works",
+                    "value": "maintenance"
+                  },
+                  {
+                    "path": "enquiry.activity",
+                    "value": "industrie"
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "blocked"
+              },
+              {
+                "id": "26a06d05",
+                "name": "Message too short",
+                "description": "Five characters are not enough.",
+                "stateOverrides": [
+                  {
+                    "path": "enquiry.role",
+                    "value": "maitre_ouvrage"
+                  },
+                  {
+                    "path": "enquiry.works",
+                    "value": "maintenance"
+                  },
+                  {
+                    "path": "enquiry.activity",
+                    "value": "industrie"
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "message",
+                    "value": "court"
+                  }
+                ],
+                "expectedStatus": "blocked"
+              },
+              {
+                "id": "6729ceac",
+                "name": "Invalid e-mail",
+                "description": "An address without @ is refused.",
+                "stateOverrides": [
+                  {
+                    "path": "enquiry.role",
+                    "value": "maitre_ouvrage"
+                  },
+                  {
+                    "path": "enquiry.works",
+                    "value": "maintenance"
+                  },
+                  {
+                    "path": "enquiry.activity",
+                    "value": "industrie"
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "email",
+                    "value": "not-an-email"
+                  }
+                ],
+                "expectedStatus": "blocked"
+              },
+              {
+                "id": "33bca408",
+                "name": "Hidden field filled",
+                "description": "An automated sender fills the hidden field: it sees a success, nothing is e-mailed.",
+                "stateOverrides": [
+                  {
+                    "path": "enquiry.role",
+                    "value": "maitre_ouvrage"
+                  },
+                  {
+                    "path": "enquiry.works",
+                    "value": "maintenance"
+                  },
+                  {
+                    "path": "enquiry.activity",
+                    "value": "industrie"
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "honeypot",
+                    "value": "filled"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "enquiry.status",
+                    "operator": "equals",
+                    "value": "sent",
+                    "description": "Looks sent"
+                  },
+                  {
+                    "path": "enquiry.delivery",
+                    "operator": "equals",
+                    "value": "discarded",
+                    "description": "Not e-mailed"
+                  }
+                ]
+              },
+              {
+                "id": "adf9c816",
+                "name": "Sent too fast",
+                "description": "A send one second after the page loaded is discarded.",
+                "stateOverrides": [
+                  {
+                    "path": "enquiry.role",
+                    "value": "maitre_ouvrage"
+                  },
+                  {
+                    "path": "enquiry.works",
+                    "value": "maintenance"
+                  },
+                  {
+                    "path": "enquiry.activity",
+                    "value": "industrie"
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "secondsOnPage",
+                    "value": 1
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "enquiry.delivery",
+                    "operator": "equals",
+                    "value": "discarded",
+                    "description": "Not e-mailed"
+                  }
+                ]
+              },
+              {
+                "id": "012c3813",
+                "name": "Server refuses a field",
+                "description": "The server's checks refuse a field (422).",
+                "stateOverrides": [
+                  {
+                    "path": "enquiry.role",
+                    "value": "maitre_ouvrage"
+                  },
+                  {
+                    "path": "enquiry.works",
+                    "value": "maintenance"
+                  },
+                  {
+                    "path": "enquiry.activity",
+                    "value": "industrie"
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "serverAnswer",
+                    "value": "invalid"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "enquiry.status",
+                    "operator": "equals",
+                    "value": "invalid",
+                    "description": "Field errors"
+                  },
+                  {
+                    "path": "enquiry.error",
+                    "operator": "equals",
+                    "value": "fields",
+                    "description": "Summary shown"
+                  }
+                ]
+              },
+              {
+                "id": "4216b6d5",
+                "name": "Too many sends",
+                "description": "The sixth send in ten minutes is refused (429).",
+                "stateOverrides": [
+                  {
+                    "path": "enquiry.role",
+                    "value": "maitre_ouvrage"
+                  },
+                  {
+                    "path": "enquiry.works",
+                    "value": "maintenance"
+                  },
+                  {
+                    "path": "enquiry.activity",
+                    "value": "industrie"
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "serverAnswer",
+                    "value": "rateLimited"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "enquiry.status",
+                    "operator": "equals",
+                    "value": "failed",
+                    "description": "Not sent"
+                  },
+                  {
+                    "path": "enquiry.error",
+                    "operator": "equals",
+                    "value": "rate",
+                    "description": "Rate message"
+                  }
+                ]
+              },
+              {
+                "id": "57a43de2",
+                "name": "Mail server down",
+                "description": "Sending fails on the server (500).",
+                "stateOverrides": [
+                  {
+                    "path": "enquiry.role",
+                    "value": "maitre_ouvrage"
+                  },
+                  {
+                    "path": "enquiry.works",
+                    "value": "maintenance"
+                  },
+                  {
+                    "path": "enquiry.activity",
+                    "value": "industrie"
+                  }
+                ],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "serverAnswer",
+                    "value": "error"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "enquiry.status",
+                    "operator": "equals",
+                    "value": "failed",
+                    "description": "Not sent"
+                  },
+                  {
+                    "path": "enquiry.error",
+                    "operator": "equals",
+                    "value": "server",
+                    "description": "Failure message"
+                  }
+                ]
+              },
+              {
+                "id": "b8636d4e",
+                "name": "Refused attachment blocks sending",
+                "description": "A refused file must be fixed first.",
+                "stateOverrides": [
+                  {
+                    "path": "enquiry.role",
+                    "value": "maitre_ouvrage"
+                  },
+                  {
+                    "path": "enquiry.works",
+                    "value": "maintenance"
+                  },
+                  {
+                    "path": "enquiry.activity",
+                    "value": "industrie"
+                  },
+                  {
+                    "path": "enquiry.fileError",
+                    "value": "fileType"
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "blocked"
+              },
+              {
+                "id": "96198dde",
+                "name": "No double send",
+                "description": "While a send is on its way the button does nothing.",
+                "stateOverrides": [
+                  {
+                    "path": "enquiry.role",
+                    "value": "maitre_ouvrage"
+                  },
+                  {
+                    "path": "enquiry.works",
+                    "value": "maintenance"
+                  },
+                  {
+                    "path": "enquiry.activity",
+                    "value": "industrie"
+                  },
+                  {
+                    "path": "enquiry.status",
+                    "value": "sending"
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "blocked"
+              }
+            ]
+          },
+          {
+            "id": "e6258e10",
+            "name": "Send Without JavaScript",
+            "intent": "Without JavaScript the browser posts the form itself (no timing token, so that check is skipped). The server answers with a 303 to the confirmation page, or to the error page when a field or the attachment is refused, the sender is rate-limited or sending fails.",
+            "parameters": [
+              {
+                "id": "45e37e07",
+                "name": "serverAnswer",
+                "type": "enum",
+                "required": true,
+                "description": "How the server answers.",
+                "enumValues": [
+                  "ok",
+                  "invalid",
+                  "rateLimited",
+                  "error"
+                ],
+                "defaultValue": "ok"
+              }
+            ],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "invoke_operation",
+                "dependencyId": "f597366c",
+                "operation": "sendEnquiry",
+                "resultPath": "enquiry.delivery",
+                "resultValue": "accepted",
+                "description": "Plain form POST to contact/send.php.",
+                "id": "effd2748"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "actor": "user",
+            "outcomes": [
+              {
+                "id": "f1f49d36",
+                "name": "Error page",
+                "kind": "failure",
+                "condition": {
+                  "left": {
+                    "kind": "param",
+                    "name": "serverAnswer"
+                  },
+                  "operator": "not_equals",
+                  "right": "ok"
+                },
+                "effects": [
+                  {
+                    "type": "set_state",
+                    "path": "enquiry.status",
+                    "value": "failed",
+                    "description": "Not sent.",
+                    "id": "c05a77c2"
+                  },
+                  {
+                    "type": "set_state",
+                    "path": "enquiry.delivery",
+                    "value": "unknown",
+                    "description": "Nothing sent.",
+                    "id": "32bcd38d"
+                  },
+                  {
+                    "type": "transition_surface",
+                    "target": "c8f146da",
+                    "description": "303 to the error page.",
+                    "id": "b1fbf44c"
+                  }
+                ],
+                "description": "Any refusal or failure lands on the error page."
+              },
+              {
+                "id": "21beb694",
+                "name": "Confirmation page",
+                "kind": "success",
+                "effects": [
+                  {
+                    "type": "set_state",
+                    "path": "enquiry.status",
+                    "value": "sent",
+                    "description": "Sent.",
+                    "id": "34b3a53c"
+                  },
+                  {
+                    "type": "transition_surface",
+                    "target": "885a73eb",
+                    "description": "303 to the confirmation page.",
+                    "id": "39201138"
+                  }
+                ],
+                "description": "Accepted and e-mailed."
+              }
+            ],
+            "scenarios": [
+              {
+                "id": "7cd8747a",
+                "name": "Accepted without JavaScript",
+                "description": "The server accepts and redirects to the confirmation.",
+                "stateOverrides": [],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "enquiry.status",
+                    "operator": "equals",
+                    "value": "sent",
+                    "description": "Sent"
+                  }
+                ],
+                "expectedTransition": "885a73eb"
+              },
+              {
+                "id": "cba1b2da",
+                "name": "Refused without JavaScript",
+                "description": "A refused field redirects to the error page.",
+                "stateOverrides": [],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "serverAnswer",
+                    "value": "invalid"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "enquiry.status",
+                    "operator": "equals",
+                    "value": "failed",
+                    "description": "Not sent"
+                  }
+                ],
+                "expectedTransition": "c8f146da"
+              }
+            ]
+          },
+          {
+            "id": "fdb58c75",
+            "name": "Allow several attachments in one request",
+            "intent": "Let the visitor attach up to three files (plans, photos, a specification) in the same enquiry, within the same total size limit.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [],
+            "emittedEvents": [],
+            "transitions": [],
+            "evolution": {
+              "rationale": "A project request often comes with a plan and a few photos, and one file forces people to zip them or send a second e-mail.",
+              "category": "ux",
+              "source": "project enquiry forms of engineering contractors"
+            }
+          }
+        ],
+        "rules": [],
+        "invariants": [],
+        "transitions": [
+          {
+            "id": "6e9f588d",
+            "target": "885a73eb",
+            "label": "Enquiry sent",
+            "description": "After a successful send the page moves to /contact/merci/ or /en/contact/thank-you/."
+          },
+          {
+            "id": "fe91c2bd",
+            "target": "c8f146da",
+            "label": "Send failed without JavaScript",
+            "description": "The no-JavaScript fallback redirects failures to the error page."
+          }
+        ],
+        "parentSurfaceId": "eb28f85f"
+      },
+      {
+        "id": "885a73eb",
+        "name": "Confirmation",
+        "type": "screen",
+        "description": "/contact/merci/ and /en/contact/thank-you/: Votre message a bien été envoyé, a reminder to call for anything urgent with the phone number and e-mail, and a link home. Not indexed.",
+        "presentation": true,
+        "stateDefinitions": [],
+        "actions": [
+          {
+            "id": "94a8009d",
+            "name": "Show Confirmation",
+            "intent": "The confirmation page opens in the language the enquiry was sent from: Votre message a bien été envoyé (or Your message has been sent), a reminder to call for anything urgent, the phone number and the e-mail address.",
+            "parameters": [
+              {
+                "id": "566d9bbc",
+                "name": "lang",
+                "type": "enum",
+                "required": true,
+                "description": "Language of the page the enquiry was sent from.",
+                "enumValues": [
+                  "fr",
+                  "en"
+                ],
+                "defaultValue": "fr"
+              }
+            ],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "enquiry.status",
+                "value": "confirmed",
+                "description": "Confirmation shown.",
+                "id": "65911318"
+              },
+              {
+                "type": "set_state",
+                "path": "enquiry.confirmationLanguage",
+                "value": {
+                  "kind": "param",
+                  "name": "lang"
+                },
+                "description": "In that language.",
+                "id": "9155e60f"
+              },
+              {
+                "type": "set_state",
+                "path": "site.language",
+                "value": {
+                  "kind": "param",
+                  "name": "lang"
+                },
+                "description": "The page itself is in that language.",
+                "id": "28956171"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "actor": "system",
+            "scenarios": [
+              {
+                "id": "14b2fd99",
+                "name": "English confirmation",
+                "description": "A send from the English page confirms in English.",
+                "stateOverrides": [],
+                "parameterOverrides": [
+                  {
+                    "parameterName": "lang",
+                    "value": "en"
+                  }
+                ],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "enquiry.confirmationLanguage",
+                    "operator": "equals",
+                    "value": "en",
+                    "description": "English"
+                  },
+                  {
+                    "path": "site.language",
+                    "operator": "equals",
+                    "value": "en",
+                    "description": "English page"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "rules": [],
+        "invariants": [],
+        "transitions": [
+          {
+            "id": "3e3a96bc",
+            "target": "eb28f85f",
+            "label": "Contact details",
+            "description": "Address, phones and map stay visible next to the confirmation."
+          }
+        ],
+        "parentSurfaceId": "eb28f85f"
+      },
+      {
+        "id": "c8f146da",
+        "name": "Send Error Page",
+        "type": "screen",
+        "description": "/contact/erreur/ and /en/contact/error/, the no-JavaScript fallback when a send fails: Votre demande n'a pas pu être envoyée, advice to check the required fields or to call or e-mail, and a link back to the form. Not indexed.",
+        "stateDefinitions": [],
+        "actions": [
+          {
+            "id": "8f248368",
+            "name": "Return To Form",
+            "intent": "Revenir au formulaire goes back to the contact page to try again; the phone number and e-mail are shown as alternatives.",
+            "parameters": [],
+            "requiredStates": [],
+            "rules": [],
+            "invariants": [],
+            "effects": [
+              {
+                "type": "set_state",
+                "path": "enquiry.status",
+                "value": "editing",
+                "description": "A fresh try.",
+                "id": "ee573eeb"
+              },
+              {
+                "type": "set_state",
+                "path": "enquiry.error",
+                "value": "none",
+                "description": "No error shown.",
+                "id": "291bd32a"
+              },
+              {
+                "type": "transition_surface",
+                "target": "eb28f85f",
+                "description": "Back to the contact page.",
+                "id": "13b166b7"
+              }
+            ],
+            "emittedEvents": [],
+            "transitions": [],
+            "actor": "user",
+            "scenarios": [
+              {
+                "id": "ef9f47af",
+                "name": "Try again",
+                "description": "The link returns to the form.",
+                "stateOverrides": [
+                  {
+                    "path": "enquiry.status",
+                    "value": "failed"
+                  }
+                ],
+                "parameterOverrides": [],
+                "expectedStatus": "success",
+                "expectedAssertions": [
+                  {
+                    "path": "enquiry.status",
+                    "operator": "equals",
+                    "value": "editing",
+                    "description": "Editing again"
+                  }
+                ],
+                "expectedTransition": "eb28f85f"
+              }
+            ]
+          }
+        ],
+        "rules": [],
+        "invariants": [],
+        "transitions": [
+          {
+            "id": "90bbaf3f",
+            "target": "eb28f85f",
+            "label": "Revenir au formulaire",
+            "description": "Back to the contact page."
+          }
+        ]
+      }
+    ],
+    "personas": [],
+    "resources": [],
+    "entities": [],
+    "events": [],
+    "createdAt": "2026-09-26T11:06:22.660Z",
+    "updatedAt": "2026-09-27T16:06:40.989Z",
+    "tags": [
+      {
+        "type": "core",
+        "value": "enquire"
+      }
+    ],
+    "elementVersions": {
+      "invariant:c8746ca0": "2026-09-26T11:21:41.325Z",
+      "invariant:970b13e5": "2026-09-26T11:21:41.325Z",
+      "invariant:e6dc9a8b": "2026-09-26T11:21:41.325Z",
+      "invariant:288e1db8": "2026-09-27T16:06:23.693Z",
+      "invariant:dd0968f7": "2026-09-27T16:06:23.693Z",
+      "criterion:c1df1e75": "2026-09-27T16:06:40.917Z",
+      "criterion:c3dda10e": "2026-09-27T16:06:40.942Z",
+      "surface:eb28f85f": "2026-09-27T16:03:59.886Z",
+      "state:contact.mapLoaded": "2026-09-27T16:03:59.886Z",
+      "state:contact.lastChannel": "2026-09-27T16:03:59.886Z",
+      "transition:13f626cd": "2026-09-27T16:03:59.886Z",
+      "action:bd0eccc4": "2026-09-27T16:06:23.693Z",
+      "scenario:fef6152a": "2026-09-27T16:03:59.886Z",
+      "action:d14358f4": "2026-09-27T16:03:59.886Z",
+      "scenario:e7c71d9c": "2026-09-27T16:03:59.886Z",
+      "action:fe633b36": "2026-09-27T16:03:59.886Z",
+      "rule:3936b3bc": "2026-09-27T16:03:59.886Z",
+      "scenario:65b98af2": "2026-09-27T16:03:59.886Z",
+      "action:48433e3d": "2026-09-27T16:06:40.989Z",
+      "surface:d8f63efd": "2026-09-27T16:03:59.886Z",
+      "state:site.language": "2026-09-27T16:03:59.886Z",
+      "state:enquiry.activity": "2026-09-26T11:21:41.325Z",
+      "state:enquiry.activityOtherVisible": "2026-09-26T11:21:41.325Z",
+      "state:enquiry.activityText": "2026-09-26T11:21:41.325Z",
+      "state:enquiry.role": "2026-09-27T16:03:59.886Z",
+      "state:enquiry.roleOtherVisible": "2026-09-26T11:21:41.325Z",
+      "state:enquiry.roleText": "2026-09-26T11:21:41.325Z",
+      "state:enquiry.works": "2026-09-26T11:21:41.325Z",
+      "state:enquiry.worksOtherVisible": "2026-09-26T11:21:41.325Z",
+      "state:enquiry.worksText": "2026-09-26T11:21:41.325Z",
+      "state:enquiry.attachment": "2026-09-27T16:03:59.886Z",
+      "state:enquiry.status": "2026-09-27T16:03:59.886Z",
+      "state:enquiry.confirmationLanguage": "2026-09-27T16:03:59.886Z",
+      "state:enquiry.delivery": "2026-09-27T16:03:59.886Z",
+      "state:enquiry.fileError": "2026-09-27T16:03:59.886Z",
+      "state:enquiry.trade": "2026-09-27T16:03:59.886Z",
+      "state:enquiry.error": "2026-09-27T16:03:59.886Z",
+      "transition:6e9f588d": "2026-09-27T16:06:23.693Z",
+      "transition:fe91c2bd": "2026-09-27T16:06:23.693Z",
+      "action:66d12684": "2026-09-27T16:03:59.886Z",
+      "rule:b38c0f6e": "2026-09-26T11:21:41.325Z",
+      "rule:c0848421": "2026-09-26T11:21:41.325Z",
+      "scenario:26ebfef2": "2026-09-26T11:21:41.325Z",
+      "scenario:a251c241": "2026-09-26T11:21:41.325Z",
+      "action:12eba127": "2026-09-27T16:03:59.886Z",
+      "rule:5bb0cd9a": "2026-09-26T11:21:41.325Z",
+      "scenario:922c30ab": "2026-09-26T11:21:41.325Z",
+      "scenario:777feea4": "2026-09-26T11:21:41.325Z",
+      "action:a89c103a": "2026-09-27T16:03:59.886Z",
+      "rule:fa39f08a": "2026-09-26T11:21:41.325Z",
+      "rule:761a6318": "2026-09-26T11:21:41.325Z",
+      "scenario:4d3108f0": "2026-09-26T11:21:41.325Z",
+      "scenario:a405f17b": "2026-09-26T11:21:41.325Z",
+      "action:135cf2e1": "2026-09-27T16:03:59.886Z",
+      "rule:5fd8f183": "2026-09-26T11:21:41.325Z",
+      "scenario:ff012977": "2026-09-26T11:21:41.325Z",
+      "scenario:2995a436": "2026-09-26T11:21:41.325Z",
+      "action:9b8f5d02": "2026-09-27T16:03:59.886Z",
+      "rule:0a5d3958": "2026-09-26T11:21:41.325Z",
+      "rule:9eb5c800": "2026-09-26T11:21:41.325Z",
+      "scenario:3ef34d02": "2026-09-26T11:21:41.325Z",
+      "scenario:3ce5d479": "2026-09-26T11:21:41.325Z",
+      "action:a03a4963": "2026-09-27T16:03:59.886Z",
+      "rule:60d4d74b": "2026-09-26T11:21:41.325Z",
+      "scenario:9cd1a73b": "2026-09-26T11:21:41.325Z",
+      "scenario:cda9be6f": "2026-09-26T11:21:41.325Z",
+      "action:3588de7a": "2026-09-27T16:06:23.693Z",
+      "rule:d95d6053": "2026-09-27T16:06:23.693Z",
+      "rule:f25cb952": "2026-09-27T16:06:23.693Z",
+      "scenario:5fff68f3": "2026-09-26T11:21:41.325Z",
+      "scenario:a621e7d7": "2026-09-27T16:06:23.693Z",
+      "scenario:a70bdb4a": "2026-09-27T16:06:23.693Z",
+      "action:27a6b205": "2026-09-27T16:06:23.693Z",
+      "scenario:74de79e0": "2026-09-27T16:06:23.693Z",
+      "action:5ca4e10e": "2026-09-27T16:06:23.693Z",
+      "rule:b1d24c43": "2026-09-27T16:06:23.693Z",
+      "scenario:250615c4": "2026-09-27T16:06:23.693Z",
+      "action:e8bd9b22": "2026-09-27T16:06:23.693Z",
+      "rule:ffc50705": "2026-09-27T16:06:23.693Z",
+      "rule:7e31c8ff": "2026-09-27T16:06:23.693Z",
+      "rule:4b94b78e": "2026-09-27T16:06:23.693Z",
+      "rule:82e71246": "2026-09-27T16:06:23.693Z",
+      "rule:e3971a58": "2026-09-27T16:06:23.693Z",
+      "rule:a3582739": "2026-09-27T16:06:23.693Z",
+      "rule:81916cad": "2026-09-27T16:06:23.693Z",
+      "rule:4d55df00": "2026-09-27T16:06:23.693Z",
+      "scenario:3a2d81cc": "2026-09-27T16:06:23.693Z",
+      "scenario:475f0d78": "2026-09-27T16:06:23.693Z",
+      "scenario:8eceeed7": "2026-09-27T16:06:23.693Z",
+      "scenario:26a06d05": "2026-09-27T16:06:23.693Z",
+      "scenario:6729ceac": "2026-09-27T16:06:23.693Z",
+      "scenario:33bca408": "2026-09-27T16:06:23.693Z",
+      "scenario:adf9c816": "2026-09-27T16:06:23.693Z",
+      "scenario:012c3813": "2026-09-27T16:06:23.693Z",
+      "scenario:4216b6d5": "2026-09-27T16:06:23.693Z",
+      "scenario:57a43de2": "2026-09-27T16:06:23.693Z",
+      "scenario:b8636d4e": "2026-09-27T16:06:23.693Z",
+      "scenario:96198dde": "2026-09-27T16:06:23.693Z",
+      "action:e6258e10": "2026-09-27T16:06:23.693Z",
+      "scenario:7cd8747a": "2026-09-27T16:06:23.693Z",
+      "scenario:cba1b2da": "2026-09-27T16:06:23.693Z",
+      "action:fdb58c75": "2026-09-27T16:06:40.966Z",
+      "surface:885a73eb": "2026-09-27T16:03:59.886Z",
+      "transition:3e3a96bc": "2026-09-26T11:21:41.325Z",
+      "action:94a8009d": "2026-09-27T16:06:23.693Z",
+      "scenario:14b2fd99": "2026-09-27T16:06:23.693Z",
+      "surface:c8f146da": "2026-09-27T16:03:59.886Z",
+      "transition:90bbaf3f": "2026-09-27T16:06:23.693Z",
+      "action:8f248368": "2026-09-27T16:06:23.693Z",
+      "scenario:ef9f47af": "2026-09-27T16:06:23.693Z"
+    },
+    "dependencies": [
+      {
+        "id": "f597366c",
+        "name": "Enquiry Endpoint",
+        "kind": "api",
+        "description": "Receives the multipart enquiry, validates every field and the attachment again, filters automated sends (hidden field, signed load-time token, per-address rate limit, origin check) and e-mails ALFEC in plain text with the attachment under a safe name. Answers JSON to the enhanced form and 303 redirects without JavaScript. Error details only go to the server log.",
+        "provider": "alfec.net PHP: contact/send.php with PHPMailer 7.1.1",
+        "operations": [
+          {
+            "id": "aaaeb3a6",
+            "name": "sendEnquiry",
+            "description": "POST the enquiry and its optional attachment.",
+            "failureModes": [
+              "422: a field or the attachment is refused (type, MIME, content or size)",
+              "429: more than 5 accepted sends from the same address in 10 minutes",
+              "403: posted from another site",
+              "500: configuration missing or the mail server fails (logged, generic message)",
+              "no answer: network failure"
+            ],
+            "retries": 0,
+            "idempotent": false
+          }
+        ],
+        "assumptions": [
+          "The SMTP or mail() settings and the recipient address are set at deploy time in alfec-config.php (docs/deploy.md).",
+          "Automated sends (hidden field filled, or under 3 seconds after the page loaded) are answered like a success and never e-mailed."
+        ]
+      }
+    ],
+    "featureInvariants": [
+      {
+        "id": "c8746ca0",
+        "name": "Activity free text only with Autre",
+        "condition": {
+          "kind": "any",
+          "conditions": [
+            {
+              "left": "enquiry.activityOtherVisible",
+              "operator": "equals",
+              "right": false
+            },
+            {
+              "left": "enquiry.activity",
+              "operator": "equals",
+              "right": "autre"
+            }
+          ]
+        },
+        "message": "Activity free-text box visible without Autre.",
+        "description": "The change handler shows the box for Autre and hides it for anything else."
+      },
+      {
+        "id": "970b13e5",
+        "name": "Role free text only with Autre",
+        "condition": {
+          "kind": "any",
+          "conditions": [
+            {
+              "left": "enquiry.roleOtherVisible",
+              "operator": "equals",
+              "right": false
+            },
+            {
+              "left": "enquiry.role",
+              "operator": "equals",
+              "right": "autre"
+            }
+          ]
+        },
+        "message": "Role free-text box visible without Autre.",
+        "description": "Same handler for Vous etes ?."
+      },
+      {
+        "id": "e6dc9a8b",
+        "name": "Works free text only with Autre",
+        "condition": {
+          "kind": "any",
+          "conditions": [
+            {
+              "left": "enquiry.worksOtherVisible",
+              "operator": "equals",
+              "right": false
+            },
+            {
+              "left": "enquiry.works",
+              "operator": "equals",
+              "right": "autre"
+            }
+          ]
+        },
+        "message": "Works free-text box visible without Autre.",
+        "description": "Same handler for Nature des travaux."
+      },
+      {
+        "id": "288e1db8",
+        "name": "A refused file is never kept",
+        "condition": {
+          "kind": "any",
+          "conditions": [
+            {
+              "left": "enquiry.fileError",
+              "operator": "equals",
+              "right": "none"
+            },
+            {
+              "left": "enquiry.attachment",
+              "operator": "equals",
+              "right": "none"
+            }
+          ]
+        },
+        "message": "A refused file is still attached.",
+        "description": "The browser clears a refused file; only accepted files can be sent."
+      },
+      {
+        "id": "dd0968f7",
+        "name": "The confirmation speaks the page's language",
+        "condition": {
+          "kind": "any",
+          "conditions": [
+            {
+              "left": "enquiry.status",
+              "operator": "not_equals",
+              "right": "confirmed"
+            },
+            {
+              "left": "enquiry.confirmationLanguage",
+              "operator": "equals",
+              "right": {
+                "kind": "state",
+                "path": "site.language"
+              }
+            }
+          ]
+        },
+        "message": "Confirmation in another language than its page.",
+        "description": "The old site could confirm in English on a French page; the new pages cannot."
+      }
+    ],
+    "reachabilityGoals": [
+      {
+        "id": "a18b4d2d",
+        "name": "An enquiry can be sent",
+        "kind": "reachable",
+        "condition": {
+          "left": "enquiry.status",
+          "operator": "equals",
+          "right": "sent"
+        },
+        "description": "A visitor can complete the form and send it."
+      },
+      {
+        "id": "592edd20",
+        "name": "An English confirmation can be shown",
+        "kind": "reachable",
+        "condition": {
+          "left": "enquiry.confirmationLanguage",
+          "operator": "equals",
+          "right": "en"
+        },
+        "description": "English visitors can get their confirmation in English."
+      }
+    ],
+    "acceptanceCriteria": [
+      {
+        "id": "c1df1e75",
+        "title": "Head-office details and map stay published",
+        "given": "a visitor on the contact page, in French or English",
+        "when": "the page is shown",
+        "then": "the head-office address, the two phone numbers, the mobile, the fax and the e-mail are visible as links where they can be tapped, and a map of the head office is available (loaded from OpenStreetMap only on request)",
+        "expectedOutcome": "success",
+        "description": "Values from the audit, section 7; map behaviour checked by tests/e2e/navigation.spec.ts."
+      },
+      {
+        "id": "c3dda10e",
+        "title": "The enquiry collects the same information",
+        "given": "the redesigned enquiry form",
+        "when": "a visitor sends it",
+        "then": "name, organisation (optional), role with Autre, e-mail, one phone, city (optional), country (optional), trade (optional), nature of works with Autre, activity with Autre, message and one optional attachment reach ALFEC by e-mail",
+        "expectedOutcome": "success",
+        "description": "Decided on 2026-09-26: one phone field replaces Telephone, Mobile and Fax; the Adresse field is dropped; the menus require a real choice; invisible spam checks replace reCAPTCHA; Bureau d'etudes added; city and country optional. Checked by tests/e2e/contact.spec.ts and tests/php/run.php."
+      }
+    ]
+  }
+}

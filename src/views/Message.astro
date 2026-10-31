@@ -1,0 +1,121 @@
+---
+// Short status pages: enquiry confirmation, enquiry failure (no-JS fallback) and 404.
+import Base from '../layouts/Base.astro';
+import { contact } from '../data/company';
+import { pagePath } from '../i18n/routes.mjs';
+import { tx, type Bilingual, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  kind: 'thanks' | 'error' | 'notFound';
+}
+
+const { lang, kind } = Astro.props;
+
+const pages: Record<Props['kind'], { title: Bilingual; heading: Bilingual; text: Bilingual; meta: Bilingual }> = {
+  thanks: {
+    title: { fr: 'Message envoyé · ALFEC', en: 'Message sent · ALFEC' },
+    heading: { fr: 'Votre message a bien été envoyé.', en: 'Your message has been sent.' },
+    text: {
+      fr: 'Nous vous répondrons dès que possible. Pour une demande urgente, appelez-nous directement.',
+      en: 'We will get back to you as soon as possible. For anything urgent, call us directly.',
+    },
+    meta: { fr: 'Confirmation d’envoi de votre demande à ALFEC.', en: 'Confirmation that your enquiry was sent to ALFEC.' },
+  },
+  error: {
+    title: { fr: 'Envoi impossible · ALFEC', en: 'Sending failed · ALFEC' },
+    heading: { fr: 'Votre demande n’a pas pu être envoyée.', en: 'Your enquiry could not be sent.' },
+    text: {
+      fr: 'Vérifiez les champs obligatoires et réessayez, ou contactez-nous directement par téléphone ou par e-mail.',
+      en: 'Check the required fields and try again, or contact us directly by phone or e-mail.',
+    },
+    meta: { fr: 'Erreur d’envoi du formulaire de contact.', en: 'Error sending the contact form.' },
+  },
+  notFound: {
+    title: { fr: 'Page introuvable · ALFEC', en: 'Page not found · ALFEC' },
+    heading: { fr: 'Cette page n’existe pas ou a été déplacée.', en: 'This page does not exist or has moved.' },
+    text: {
+      fr: 'Le site d’ALFEC a été entièrement renouvelé. Retrouvez nos métiers, nos réalisations et nos coordonnées depuis l’accueil.',
+      en: 'ALFEC’s website has been fully redesigned. Find our trades, projects and contact details from the home page.',
+    },
+    meta: { fr: 'Page introuvable.', en: 'Page not found.' },
+  },
+};
+
+const p = pages[kind];
+const primary =
+  kind === 'error'
+    ? { href: pagePath('contact', lang), label: { fr: 'Revenir au formulaire', en: 'Back to the form' } }
+    : { href: pagePath('home', lang), label: { fr: 'Retour à l’accueil', en: 'Back to home' } };
+---
+
+<Base lang={lang} title={tx(p.title, lang)} description={tx(p.meta, lang)} noindex>
+  <section class="message">
+    <div class="wrap grid">
+      <div class="body">
+        <h1>{tx(p.heading, lang)}</h1>
+        <p class="lead">{tx(p.text, lang)}</p>
+        <div class="actions">
+          <a class="btn" href={primary.href}>
+            <span>{tx(primary.label, lang)}</span>
+            <svg class="arrow" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square" /></svg>
+          </a>
+          <p class="direct tnum">
+            <a href={`tel:${contact.phones[0].tel}`}>{contact.phones[0].label}</a>
+            <a href={`mailto:${contact.email}`}>{contact.email}</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .message {
+    padding-block: calc(var(--header-h) + clamp(48px, 8vw, 128px)) clamp(64px, 10vw, 160px);
+    min-height: 70vh;
+  }
+
+  .body {
+    grid-column: 1 / span 9;
+    display: grid;
+    gap: var(--s-6);
+    justify-items: start;
+  }
+
+  h1 {
+    max-width: 16ch;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-4) var(--s-6);
+    margin-top: var(--s-4);
+  }
+
+  .direct {
+    display: grid;
+    gap: var(--s-1);
+    font-family: var(--cond);
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  .direct a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .direct a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 1023px) {
+    .body {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

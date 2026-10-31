@@ -1,0 +1,325 @@
+---
+// Photo set with an accessible viewer (native <dialog>). Without JavaScript each thumbnail links to the full image.
+import { getImage, Picture } from 'astro:assets';
+import { captionOf, photos, type PhotoKey } from '../data/photos';
+import { tx, type Bilingual, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  items: PhotoKey[];
+  /** Accessible name of the set, e.g. the trade name. */
+  label: string;
+  /** Heading the set sits under: its name is dropped from captions that would repeat it. */
+  context?: string;
+  /** Defaults to 2 for sets of 2 or 4 photos (no orphan), otherwise 3. */
+  columns?: 2 | 3;
+}
+
+const { lang, items, label, context, columns = items.length === 2 || items.length === 4 ? 2 : 3 } = Astro.props;
+
+const t = {
+  open: { fr: 'Agrandir : ', en: 'Enlarge: ' },
+  close: { fr: 'Fermer', en: 'Close' },
+  prev: { fr: 'Photo précédente', en: 'Previous photo' },
+  next: { fr: 'Photo suivante', en: 'Next photo' },
+  of: { fr: 'sur', en: 'of' },
+} satisfies Record<string, Bilingual>;
+
+const entries = await Promise.all(
+  items.map(async (key) => {
+    const photo = photos[key];
+    const large = await getImage({ src: photo.src, width: Math.min(photo.src.width, 1520), format: 'webp' });
+    return { key, photo, large: large.src, alt: tx(photo.alt, lang), caption: captionOf(photo, lang, context) };
+  }),
+);
+---
+
+<div class:list={['gallery', `cols-${columns}`]} data-gallery>
+  <ul class="grid-list" role="list" aria-label={label}>
+    {
+      entries.map((e, i) => (
+        <li>
+          <a
+            class="thumb"
+            href={e.large}
+            data-index={i}
+            data-src={e.large}
+            data-alt={e.alt}
+            data-caption={e.caption}
+            aria-label={`${tx(t.open, lang)}${e.alt}`}
+          >
+            <Picture
+              src={e.photo.src}
+              formats={['avif', 'webp']}
+              widths={[360, 540, 720].filter((w) => w < e.photo.src.width)}
+              sizes={columns === 3 ? '(min-width: 1024px) 30vw, (min-width: 600px) 45vw, 100vw' : '(min-width: 1024px) 45vw, 100vw'}
+              alt=""
+              loading="lazy"
+            />
+          </a>
+          <p class="cap">{e.caption}</p>
+        </li>
+      ))
+    }
+  </ul>
+
+  <dialog class="viewer" aria-label={label} data-viewer>
+    <div class="viewer-top">
+      <p class="count tnum" aria-live="polite" data-count></p>
+      <button type="button" class="v-btn close" data-close>
+        <span>{tx(t.close, lang)}</span>
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="1.8" /></svg>
+      </button>
+    </div>
+    <figure class="stage">
+      <img data-img src={entries[0]?.large} alt={entries[0]?.alt ?? ''} loading="lazy" />
+      <figcaption data-stage-caption>{entries[0]?.caption}</figcaption>
+    </figure>
+    <div class="viewer-nav">
+      <button type="button" class="v-btn" data-prev aria-label={tx(t.prev, lang)}>
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M20 12H5M11 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="1.8" /></svg>
+      </button>
+      <button type="button" class="v-btn" data-next aria-label={tx(t.next, lang)}>
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" /></svg>
+      </button>
+    </div>
+    <span hidden data-of>{tx(t.of, lang)}</span>
+  </dialog>
+</div>
+
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>('[data-gallery]')) {
+    const dialog = root.querySelector<HTMLDialogElement>('[data-viewer]');
+    const img = root.querySelector<HTMLImageElement>('[data-img]');
+    // The thumbnails also carry data-caption, so the viewer's own caption has its own hook.
+    const caption = root.querySelector<HTMLElement>('[data-stage-caption]');
+    const count = root.querySelector<HTMLElement>('[data-count]');
+    const of = root.querySelector<HTMLElement>('[data-of]')?.textContent ?? '/';
+    const thumbs = [...root.querySelectorAll<HTMLAnchorElement>('.thumb')];
+    if (!dialog || !img || !caption || !count || typeof dialog.showModal !== 'function') continue;
+
+    let index = 0;
+    let opener: HTMLElement | null = null;
+
+    const show = (i: number) => {
+      index = (i + thumbs.length) % thumbs.length;
+      const t = thumbs[index];
+      img.src = t.dataset.src ?? t.href;
+      img.alt = t.dataset.alt ?? '';
+      caption.textContent = t.dataset.caption ?? '';
+      count.textContent = `${index + 1} ${of} ${thumbs.length}`;
+    };
+
+    thumbs.forEach((t, i) =>
+      t.addEventListener('click', (event) => {
+        event.preventDefault();
+        opener = t;
+        show(i);
+        dialog.showModal();
+      }),
+    );
+
+    root.querySelector('[data-close]')?.addEventListener('click', () => dialog.close());
+    root.querySelector('[data-prev]')?.addEventListener('click', () => show(index - 1));
+    root.querySelector('[data-next]')?.addEventListener('click', () => show(index + 1));
+    dialog.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowLeft') show(index - 1);
+      if (event.key === 'ArrowRight') show(index + 1);
+    });
+    dialog.addEventListener('click', (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+    dialog.addEventListener('close', () => opener?.focus());
+  }
+</script>
+
+<style>
+  .grid-list {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--s-7) var(--col-gap);
+  }
+
+  .cols-2 .grid-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .thumb {
+    display: block;
+    overflow: hidden;
+    background: var(--surface);
+    cursor: zoom-in;
+  }
+
+  .thumb :global(img) {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    height: auto;
+    object-fit: cover;
+    transition: transform 0.5s var(--ease-out);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .thumb:hover :global(img) {
+      transform: scale(1.04);
+    }
+  }
+
+  .cap {
+    margin-top: var(--s-3);
+    font-size: var(--fs-meta);
+    font-weight: 500;
+    color: var(--fg-2);
+  }
+
+  .viewer {
+    width: min(100vw, 1400px);
+    max-width: 100vw;
+    height: 100dvh;
+    max-height: 100dvh;
+    margin: auto;
+    padding: var(--s-5) var(--gutter);
+    border: 0;
+    background: var(--night);
+    color: var(--white);
+    overscroll-behavior: contain;
+    --focus: var(--accent);
+  }
+
+  /* The page behind the open viewer stays still. */
+  :global(html:has(dialog[open])) {
+    overflow: hidden;
+  }
+
+  /* The viewer fades in and settles; photo changes inside it stay instant. */
+  @media (prefers-reduced-motion: no-preference) {
+    .viewer[open] {
+      animation: viewer-in 0.22s var(--ease-out);
+    }
+
+    .viewer[open]::backdrop {
+      animation: backdrop-in 0.22s var(--ease-out);
+    }
+
+    @keyframes viewer-in {
+      from {
+        opacity: 0;
+        transform: scale(0.98);
+      }
+    }
+
+    @keyframes backdrop-in {
+      from {
+        opacity: 0;
+      }
+    }
+  }
+
+  .viewer[open] {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: var(--s-4);
+  }
+
+  .viewer::backdrop {
+    background: rgb(5 22 41 / 0.94);
+  }
+
+  .viewer-top,
+  .viewer-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-4);
+  }
+
+  .viewer-nav {
+    justify-content: center;
+  }
+
+  .count {
+    font-family: var(--cond);
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--text-2);
+  }
+
+  .stage {
+    margin: 0;
+    min-height: 0;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: var(--s-3);
+    justify-items: center;
+  }
+
+  .stage img {
+    width: auto;
+    max-width: 100%;
+    height: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .stage figcaption {
+    font-size: var(--fs-small);
+    color: var(--text-2);
+  }
+
+  .v-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--s-3);
+    min-width: 48px;
+    min-height: 48px;
+    padding: 0 var(--s-3);
+    border: 1px solid var(--line-strong);
+    background: transparent;
+    color: var(--white);
+    font-family: var(--cond);
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition:
+      border-color 0.2s var(--ease-out),
+      scale 0.15s var(--ease-out);
+  }
+
+  .v-btn:hover {
+    border-color: var(--white);
+  }
+
+  .v-btn:active {
+    scale: 0.96;
+  }
+
+  @media (max-width: 1023px) {
+    .grid-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  /* Two small columns on phones keep long photo sets short to scroll. */
+  @media (max-width: 599px) {
+    .grid-list,
+    .cols-2 .grid-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--s-5) var(--s-3);
+    }
+
+    .cap {
+      margin-top: var(--s-2);
+      font-size: var(--fs-meta);
+    }
+
+    /* Odd-sized sets: the first photo spans the row so none is left alone at the end. */
+    .grid-list > li:first-child:nth-last-child(odd) {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

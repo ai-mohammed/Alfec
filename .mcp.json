@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "unspa": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "--no-install",
+        "unspa-mcp"
+      ],
+      "env": {
+        "UNSPA_SNAPSHOTS": "unspa"
+      }
+    }
+  }
+}
