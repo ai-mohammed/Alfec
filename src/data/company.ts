@@ -43,9 +43,9 @@ export const story: Bilingual<string[]> = {
     'L’écoute et la satisfaction de ses clients, la compétence, la créativité et l’efficacité de ses équipes, la garantie de performance et d’économie sont les moteurs de la politique qualité d’ALFEC.',
   ],
   en: [
-    'In the early 2000s, the Algerian market for climate engineering was expanding fast. Clients’ technical requirements on one side, and companies lacking the right technical structures on the other, led to the creation of ALFEC.',
+    'In the early 2000s, the Algerian HVAC market was expanding fast. Clients’ technical requirements on one side, and companies lacking the right technical structures on the other, led to the creation of ALFEC.',
     'Driven by a group of visionaries, ALFEC gradually moved into other activities and sectors to provide the solutions best suited to the needs of the Algerian market.',
-    'Listening to its clients and their satisfaction, the competence, creativity and efficiency of its teams, and a guarantee of performance and economy are the drivers of ALFEC’s quality policy.',
+    'Listening to clients and keeping them satisfied, the competence, creativity and efficiency of its teams, and guaranteed performance and cost-effectiveness drive ALFEC’s quality policy.',
   ],
 };
 
@@ -88,7 +88,7 @@ export const competences: { key: string; title: Bilingual; short: Bilingual; tex
     },
     text: {
       fr: 'ALFEC réalise pour ses clients des installations techniques conformes aux normes en vigueur et qui répondent parfaitement à leurs besoins : génie climatique dans le bâtiment, le tertiaire et l’industrie, protection et détection incendie, froid industriel, installations techniques industrielles. Des équipes techniques compétentes ainsi que des moyens matériels conséquents sont mis à la disposition des projets.',
-      en: 'ALFEC delivers technical installations that comply with current standards and meet its clients’ needs precisely: climate engineering in buildings, offices and industry, fire protection and detection, industrial refrigeration and industrial technical installations. Competent technical teams and substantial equipment are dedicated to each project.',
+      en: 'ALFEC delivers technical installations that comply with current standards and meet its clients’ needs precisely: HVAC for buildings, offices and industry, fire protection and detection, industrial refrigeration and industrial technical installations. Competent technical teams and substantial equipment are dedicated to each project.',
     },
   },
   {
@@ -107,7 +107,7 @@ export const competences: { key: string; title: Bilingual; short: Bilingual; tex
 
 export const locationsText: Bilingual = {
   fr: 'De par la qualité de ses réalisations et l’efficacité de ses interventions, unanimement reconnues par les professionnels, ALFEC jouit aujourd’hui d’une solide réputation. Avec une direction basée à Oran, ALFEC intervient sur l’ensemble du territoire national, grâce à une force d’intervention appréciable et à des équipes de maintenance disponibles et efficaces.',
-  en: 'Thanks to the quality of its work and the efficiency of its interventions, acknowledged by professionals, ALFEC enjoys a strong reputation. With its management based in Oran, ALFEC works across the whole country, backed by a substantial field force and available, effective maintenance teams.',
+  en: 'Thanks to the quality of its work and the efficiency of its service, widely recognised by professionals, ALFEC enjoys a strong reputation. With its management based in Oran, ALFEC works across the whole country, backed by a substantial field force and available, effective maintenance teams.',
 };
 
 /** The 22 wilayas marked on the "Nos implantations" map of alfec.net (marker coordinates as published). */
@@ -138,7 +138,7 @@ export const wilayas: { name: string; lat: number; lng: number }[] = [
 
 export const sectors: { key: string; name: Bilingual }[] = [
   { key: 'batiment', name: { fr: 'Bâtiment', en: 'Buildings' } },
-  { key: 'tertiaire', name: { fr: 'Tertiaire', en: 'Offices' } },
+  { key: 'tertiaire', name: { fr: 'Tertiaire', en: 'Commercial' } },
   { key: 'hopitaux', name: { fr: 'Hôpitaux', en: 'Hospitals' } },
   { key: 'hotellerie', name: { fr: 'Hôtellerie', en: 'Hotels' } },
   { key: 'industrie', name: { fr: 'Industrie', en: 'Industry' } },
@@ -147,7 +147,7 @@ export const sectors: { key: string; name: Bilingual }[] = [
 
 export const sectorsText: Bilingual = {
   fr: 'Grâce à une stratégie globale et multidisciplinaire, ALFEC intervient dans différents secteurs d’activité, du bâtiment à l’industrie. Sa maîtrise des technologies de réfrigération lui a ouvert l’agroalimentaire, la pharmacie et la pétrochimie.',
-  en: 'Through a global, multidisciplinary strategy, ALFEC works across many sectors, from buildings to industry. Its command of refrigeration technology has opened food processing, pharmaceuticals and petrochemicals to it.',
+  en: 'Through a global, multidisciplinary strategy, ALFEC works across many sectors, from buildings to industry. Its command of refrigeration technology has opened up the food-processing, pharmaceutical and petrochemical sectors.',
 };
 
 export const commitments: Bilingual<string[]> = {
@@ -157,7 +157,7 @@ export const commitments: Bilingual<string[]> = {
   ],
   en: [
     'ALFEC takes into account the social, environmental and economic issues raised by all of its activities.',
-    'Aware of today’s energy challenges and of the environmental problems that come with human development, ALFEC’s main objective is the sustainable development of the territories where it operates.',
+    'Aware of today’s energy challenges and of the environmental problems that come with human development, ALFEC’s main objective is the sustainable development of the regions where it operates.',
   ],
 };
 
@@ -168,7 +168,7 @@ export const approach: Bilingual<string[]> = {
   ],
   en: [
     'Businesses and institutions each operate in an environment of their own. It is on this fundamental observation that ALFEC builds tailored solutions.',
-    'Through a multidisciplinary approach spanning climate engineering, electrical work and controls, fire protection and refrigeration, ALFEC delivers optimal energy performance while respecting allocated budgets and completion deadlines.',
+    'Through a multidisciplinary approach spanning HVAC, electrical work and controls, fire protection and refrigeration, ALFEC delivers optimal energy performance while respecting allocated budgets and completion deadlines.',
   ],
 };
 

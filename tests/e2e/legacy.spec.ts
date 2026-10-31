@@ -39,5 +39,5 @@ test('the confirmation keeps the original wording in each language', async ({ pa
   await expect(page.getByText('Nous vous répondrons dès que possible.')).toBeVisible();
   await page.goto('/en/contact/thank-you/');
   await expect(page.locator('h1')).toHaveText('Your message has been sent.');
-  await expect(page.getByText('We will answer you as soon as possible.')).toBeVisible();
+  await expect(page.getByText('We will get back to you as soon as possible.')).toBeVisible();
 });

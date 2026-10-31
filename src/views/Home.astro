@@ -35,8 +35,8 @@ const copy = {
     fr: 'Climatisation, incendie, désenfumage, électricité, froid et génie industriel : ALFEC étudie, réalise et maintient vos installations, depuis Oran et partout en Algérie.',
     en: 'Air conditioning, fire protection, smoke control, electrical work, refrigeration and industrial engineering: ALFEC designs, installs and maintains your installations, from Oran and across Algeria.',
   },
-  references: { fr: 'Nos références', en: 'Our references' },
-  slidesLabel: { fr: 'Photos d’ouverture', en: 'Opening photos' },
+  references: { fr: 'Nos références', en: 'Our clients' },
+  slidesLabel: { fr: 'Photos d’ouverture', en: 'Featured photos' },
   photoOf: { fr: 'photo {n} sur {total}', en: 'photo {n} of {total}' },
   pause: { fr: 'Mettre le diaporama en pause', en: 'Pause the slideshow' },
   play: { fr: 'Relancer le diaporama', en: 'Play the slideshow' },
@@ -46,7 +46,7 @@ const copy = {
   tradesTitleEnd: { fr: 'Une solution coordonnée.', en: 'One coordinated solution.' },
   tradesLead: {
     fr: 'Née dans le génie climatique, ALFEC mobilise aujourd’hui ses équipes spécialisées pour répondre aux besoins techniques des bâtiments et de l’industrie.',
-    en: 'Born in climate engineering, ALFEC now brings its specialist teams to the technical needs of buildings and industry.',
+    en: 'Rooted in HVAC, ALFEC now brings its specialist teams to the technical needs of buildings and industry.',
   },
   cycleKicker: { fr: 'Notre accompagnement', en: 'How we work' },
   cycleTitle: { fr: 'De l’étude', en: 'From design' },
@@ -69,7 +69,7 @@ const copy = {
   ] as { n: number; label: Bilingual }[],
   refsKicker: { fr: 'Réalisations', en: 'Projects' },
   refsTitle: { fr: 'Nos', en: 'Our' },
-  refsTitleEnd: { fr: 'références.', en: 'references.' },
+  refsTitleEnd: { fr: 'références.', en: 'clients.' },
   refsLead: {
     fr: 'Quelques installations réalisées et entretenues par nos équipes.',
     en: 'Some of the installations our teams have delivered and maintain.',
@@ -159,8 +159,8 @@ const arrow = '<path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor"
         }
         <span class="count tnum" aria-hidden="true"><b data-slide-no>01</b> / {pad(slides.length)}</span>
         <button class="playpause" type="button" aria-label={tx(copy.pause, lang)} data-playpause data-pause={tx(copy.pause, lang)} data-play={tx(copy.play, lang)}>
-          <svg class="i-pause" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M8 5v14M16 5v14" fill="none" stroke="currentColor" stroke-width="2.4" /></svg>
-          <svg class="i-play" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5Z" fill="currentColor" /></svg>
+          <svg class="i-pause" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M8 5v14M16 5v14" fill="none" stroke="currentColor" stroke-width="2.6" /></svg>
+          <svg class="i-play" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5Z" fill="currentColor" /></svg>
         </button>
       </div>
     </div>
@@ -570,20 +570,30 @@ const arrow = '<path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor"
     color: var(--white);
   }
 
+  /* Discreet: a small glyph in the counter's grey, on a full 44 px hit area. The negative
+     margins pull the glyph flush with the content edge without shrinking that area. */
   .playpause {
     display: grid;
     place-items: center;
     width: 44px;
     height: 44px;
-    border: 1px solid rgb(255 255 255 / 0.3);
-    background: rgb(5 22 41 / 0.4);
-    color: var(--white);
+    margin: 0 -15px 0 -10px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--text-2);
     cursor: pointer;
-    transition: border-color 0.2s var(--ease-out);
+    transition:
+      color 0.2s var(--ease-out),
+      scale 0.15s var(--ease-out);
   }
 
   .playpause:hover {
-    border-color: var(--white);
+    color: var(--white);
+  }
+
+  .playpause:active {
+    scale: 0.96;
   }
 
   .playpause .i-play,
@@ -923,6 +933,12 @@ const arrow = '<path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor"
     .segs {
       grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
       align-items: center;
+    }
+
+    /* Only the lines remain on phones: the glyph sits level with them. */
+    .playpause {
+      align-self: start;
+      margin-top: -21px;
     }
 
     .seg-name,

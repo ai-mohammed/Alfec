@@ -33,7 +33,7 @@ export const trades: Trade[] = [
         'Nous vous offrons en outre des solutions performantes pour le chauffage central et la ventilation mécanique, à même de répondre efficacement à toutes vos exigences techniques.',
       ],
       en: [
-        'As a leader in climate engineering, ALFEC provides quality work and a personalised service across a range of air-conditioning systems. All our equipment uses environmentally friendly refrigerant gases.',
+        'As a leader in HVAC, ALFEC provides quality work and a personalised service across a range of air-conditioning systems. All our equipment uses environmentally friendly refrigerant gases.',
         'We also offer high-performance solutions for central heating and mechanical ventilation, able to meet all of your technical requirements.',
       ],
     },

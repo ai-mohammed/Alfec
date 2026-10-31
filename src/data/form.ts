@@ -63,7 +63,7 @@ export const labels = {
   tel: { fr: 'Téléphone', en: 'Phone' },
   ville: { fr: 'Ville', en: 'City' },
   pays: { fr: 'Pays', en: 'Country' },
-  metier: { fr: 'Métier concerné', en: 'Trade concerned' },
+  metier: { fr: 'Métier concerné', en: 'Relevant trade' },
   metierAny: { fr: 'Plusieurs métiers ou je ne sais pas', en: 'Several trades, or not sure' },
   activite: { fr: 'Secteur d’activité', en: 'Sector' },
   activiteAutre: { fr: 'Précisez le secteur', en: 'Please specify the sector' },
@@ -92,7 +92,7 @@ export const errors = {
   tooShort: { fr: 'Votre message est trop court : quelques lignes suffisent.', en: 'Your message is too short: a few lines will do.' },
   tooLong: { fr: 'Ce texte est trop long.', en: 'This text is too long.' },
   fileType: { fr: 'Ce type de fichier n’est pas accepté. Formats acceptés : PDF, JPG, PNG, DOCX, XLSX.', en: 'This file type is not accepted. Accepted formats: PDF, JPG, PNG, DOCX, XLSX.' },
-  fileSize: { fr: 'Le fichier dépasse 10 Mo. Envoyez une version plus légère, ou envoyez-la par e-mail.', en: 'The file is larger than 10 MB. Send a lighter version, or send it by e-mail.' },
+  fileSize: { fr: 'Le fichier dépasse 10 Mo. Envoyez une version plus légère, ou envoyez-la par e-mail.', en: 'The file is larger than 10 MB. Send a smaller file, or send it by e-mail.' },
   summary: { fr: 'Certains champs sont à corriger avant l’envoi :', en: 'Some fields need correcting before sending:' },
   server: {
     fr: 'Votre demande n’a pas pu être envoyée. Réessayez dans quelques minutes, ou écrivez-nous à contact@alfec.net.',
@@ -104,6 +104,6 @@ export const errors = {
   },
   network: {
     fr: 'La connexion a échoué. Vérifiez votre accès à Internet et réessayez.',
-    en: 'The connection failed. Check your internet access and try again.',
+    en: 'The connection failed. Check your internet connection and try again.',
   },
 } satisfies Record<string, Bilingual>;
